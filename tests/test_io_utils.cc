@@ -24,7 +24,7 @@ ListLayer(const NetParameter& net)
 static void 
 ListLayerWeights(const NetParameter& net) 
 {
-  int i, j;
+  int i;
   BlobProto blob;
   ConvolutionParameter conv_param;
   int k_size, num_output;
@@ -94,6 +94,7 @@ test_LoadFromBinaryFile(const char *fpath)
   return true;
 }
 
+#if 0
 int 
 main(int argc, char *argv[]) 
 {
@@ -107,3 +108,4 @@ main(int argc, char *argv[])
   //test_LoadFromTextFile(argv[1]);
   test_LoadFromBinaryFile(argv[2]);
 }
+#endif
