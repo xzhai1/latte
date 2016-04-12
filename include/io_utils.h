@@ -1,9 +1,15 @@
 #ifndef IO_UTILS_H                                                            
 #define IO_UTILS_H  
 
-#include <google/protobuf/message.h>
+#include "Halide.h"
+#include <google/protobuf/message.h> /* Message */
+
+#include "caffe.pb.h"
 
 #define PROTO_BIN_READ_LIMIT 600000000 /* 600MB */
+
+using namespace Halide; /* Image */
+using namespace caffe; /* Blobproto */
 
 using google::protobuf::Message;
 
@@ -26,7 +32,7 @@ bool LoadFromTextFile(const char *fpath, Message *msg);
  * @param fpath Path to .prototxt file
  * @param msg   The generic type for Caffe.NetParameter
  *
- * @return 
+ * @return true on success
  */
 bool LoadFromBinaryFile(const char *fpath, Message *msg);
 

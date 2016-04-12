@@ -20,19 +20,14 @@ INCLUDES = -I ./include -I ./tools
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-
-# Halide stuff
-#LDFLAGS=-L ./bin -l Halide -lpthread -ldl
-#EXTRA_SCRIPTS=`libpng-config --cflags --ldflags`
-# leave it empty for now
-LDFLAGS = 
+BIN_PATH = ./bin
+LFLAGS = -L $(BIN_PATH)
+export LD_LIBRARY_PATH = $(BIN_PATH)
 
 # define any libraries to link into executable:
 #   if I want to link in libraries (libx.so or libx.a) I use the -llibname 
 #   option, something like (this will link in libmylib.so and libm.so:
-#LIBS = -lmylib -lm
-# leave it empty for now
-LIBS = 
+LIBS = -l Halide -l dl
 
 # From Wikipedia:
 # 	"pkg-config is computer program that provides a unified interface for 
@@ -42,7 +37,7 @@ LIBS =
 # For example, the following command produces:
 # 	-pthread -I/usr/local/include  -pthread -L/usr/local/lib -lprotobuf
 # 	-lpthread	
-EXTRA_SCRIPTS = `pkg-config --cflags --libs protobuf`
+EXTRA_SCRIPTS = `pkg-config --cflags --libs protobuf libpng`
  
 # define the C source files
 SRCS = $(wildcard ./src/*.cc) $(wildcard ./tests/*.cc) 

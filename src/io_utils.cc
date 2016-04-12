@@ -1,12 +1,12 @@
-#include <stdio.h> /* perror() */
-#include <fcntl.h> /* open() */
+#include <stdio.h>  /* perror() */
+#include <fcntl.h>  /* open() */
 #include <unistd.h> /* close() */
 #include <iostream> /* cerr */
-#include <fstream> /* endl */
+#include <fstream>  /* endl */
 
-#include <google/protobuf/text_format.h> /* Parse */
-#include <google/protobuf/io/coded_stream.h> /* CodedInputStream */
-#include <google/protobuf/io/zero_copy_stream_impl.h> /* FileInputStream */
+#include <google/protobuf/text_format.h>                /* Parse */
+#include <google/protobuf/io/coded_stream.h>            /* CodedInputStream */
+#include <google/protobuf/io/zero_copy_stream_impl.h>   /* FileInputStream */
 
 #include "io_utils.h"
 
@@ -73,5 +73,3 @@ LoadFromBinaryFile(const char *fpath, Message *msg)
   close(fd);
   return true;
 }
-
-
