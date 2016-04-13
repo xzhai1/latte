@@ -15,14 +15,12 @@ CC = g++
 CFLAGS  = --std=c++11 -g -fopenmp -Wall
 
 # define any directories containing header files other than /usr/include
-INCLUDES = -I ./include -I ./tools
+INCLUDES = -I ./include -I ../halide/include -I ../halide/tools
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-BIN_PATH = ./bin
-LFLAGS = -L $(BIN_PATH)
-export LD_LIBRARY_PATH = $(BIN_PATH)
+LFLAGS = -L ../halide/bin
 
 # define any libraries to link into executable:
 #   if I want to link in libraries (libx.so or libx.a) I use the -llibname 
