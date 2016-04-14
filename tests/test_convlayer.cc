@@ -38,6 +38,7 @@ test_conv(const char *img_path, const char *fpath)
   return true;
 }
 
+#if 0
 int 
 main(int argc, char *argv[]) 
 {
@@ -52,3 +53,4 @@ main(int argc, char *argv[])
   test_conv(argv[1], argv[2]);
   return 0;
 }
+#endif

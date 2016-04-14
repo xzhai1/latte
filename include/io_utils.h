@@ -29,7 +29,7 @@ bool LoadFromTextFile(const char *fpath, Message *msg);
  * @brief LoadFromBinaryFile Loads the trained model with weights from
  *                           .caffemodel which is binary encoded.
  *
- * @param fpath Path to .prototxt file
+ * @param fpath Path to .caffemodel file
  * @param msg   The generic type for Caffe.NetParameter
  *
  * @return true on success

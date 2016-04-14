@@ -15,7 +15,7 @@ using namespace google::protobuf;
 
 using google::protobuf::TextFormat;
 using google::protobuf::io::CodedInputStream;
-using google::protobuf::io::ZeroCopyInputStream;
+//using google::protobuf::io::ZeroCopyInputStream;
 using google::protobuf::io::FileInputStream;
 
 bool

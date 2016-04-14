@@ -9,8 +9,8 @@ using namespace std;
 Image<float>
 LoadKernelFromBlob(const BlobProto *blob, int k_size, int num_output)
 {
-  /* Our kernel is num_output of [k_size, k_size, chunk_size] slices stacked
-   * together. 
+  /* Our kernel is num_output of [k_size, k_size, prev_num_output] slices 
+   * stacked together. 
    * For example, the first convolution layer,
    *  prev_num_output = 3 
    *  k_size          = 3

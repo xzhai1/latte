@@ -94,7 +94,6 @@ test_LoadFromBinaryFile(const char *fpath)
   return true;
 }
 
-#if 0
 int 
 main(int argc, char *argv[]) 
 {
@@ -108,4 +107,3 @@ main(int argc, char *argv[])
   //test_LoadFromTextFile(argv[1]);
   test_LoadFromBinaryFile(argv[2]);
 }
-#endif

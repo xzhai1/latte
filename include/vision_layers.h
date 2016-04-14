@@ -12,9 +12,10 @@ class Convolution;
 //class Pooling;
 
 class Convolution : public Layer {
-  int num_output, pad = 1, kernel_size;
+  int num_output, pad = 0, kernel_size;
   Halide::Image<float> kernel;
   public:
+    /* TODO need to also give it bias. So best give it all the blobs */
     Convolution(std::string name, const caffe::ConvolutionParameter *param, 
                 const caffe::BlobProto *blob);
     Halide::Image<float> convolve(Halide::Image<float> input);
