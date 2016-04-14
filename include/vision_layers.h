@@ -31,7 +31,7 @@ public:
 
 
 class ReLU : public Layers {
-	int num_output, float negative_slope;
+	float negative_slope;
 public:
 	ReLU(std:string name, const caffe::ReLUParameter *param, 
 			 float negative_slope = 0.f);

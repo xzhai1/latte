@@ -50,7 +50,7 @@ Image<float> Convolution::convolve(Image<float> input) {
 ReLU::ReLU(string name, const ReLUParameter *param,
                  float negative_slope) {
   name = name;
-  num_output = param->num_output();
+  // Not sure if we need param to find negative_slope
   negative_slope = negative_slope;
 }
 
@@ -65,7 +65,7 @@ Image<float> ReLU::relu(Image<float> input) {
   rectified(x, y, z) = Halide::max(0, input(x, y, z)) + negative_slope *
                        Halide::min(0, input(x, y, z));
 
-  Image<float> output = rectified.realize(width, height, num_output);
+  Image<float> output = rectified.realize(width, height, channels);
   return output;
 }
 
