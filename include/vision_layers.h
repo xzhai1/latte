@@ -30,7 +30,7 @@ public:
 };
 
 
-class ReLU : public Layers {
+class ReLU : public Layer {
 	float negative_slope;
 public:
 	ReLU(std::string name, const caffe::ReLUParameter *param, 
