@@ -6,6 +6,7 @@
 namespace Latte {
 
 const std::string CONVOLUTION = "Convolution";
+const std::string POOLING     = "Pooling";
 
 class Layer {
   std::string name;

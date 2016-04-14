@@ -48,6 +48,24 @@ ListBinaryLayer(const NetParameter *net)
       cout << name << "\t\t\t" << type << "\t" 
            << num_output << "\t" << pad << "\t" << kernel_size 
            << "\t" << stride << endl;
+    } else if (type == POOLING) {
+      PoolingParameter pool_param = layer.pooling_param();
+      int kernel_size = 1;
+      if (pool_param.has_kernel_size()) {
+        kernel_size = pool_param.kernel_size();
+      }
+      int pad = 0;
+      int stride = 1;
+      if (pool_param.has_pad()) {
+        pad = pool_param.pad();
+      }
+      if (pool_param.has_stride()) {
+        stride = pool_param.stride();
+      }
+      cout << name << "\t\t\t" << type << "\t" 
+           << "---" << "\t" << pad << "\t" << kernel_size 
+           << "\t" << stride << endl;
+
     } else {
       cout << name << "\t\t\t" << type << endl;
     }
