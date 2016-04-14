@@ -42,7 +42,7 @@ Image<float> Convolution::convolve(Image<float> input) {
 
   Func clamped = BoundaryConditions::constant_exterior(input, 0.f);
   // Func clamped = BoundaryConditions::repeat_edge(input);
-  RDom r(start, kernel_size, start, kernel_size, 0, channels);
+  RDom r(0, kernel_size, 0, kernel_size, 0, channels);
   convolution(x, y, z) = sum(
       kernel(r.x, r.y, r.z + z*channels) * clamped(x * stride - pad+ r.x, 
                                                    y * stride - pad + r.y, r.z));
@@ -110,6 +110,7 @@ Image<float> Pooling::pool(Image<float> input) {
 
   /* TODO: Scheduling */
   Image<float> output = pooled.realize(width, height, channels);
+  return output;
 }
 
 /* Definitions for class Dropout */
