@@ -9,6 +9,20 @@ using namespace Halide;
 using namespace caffe;
 
 Image<float>
+LoadBiasFromBlob(const BlobProto *blob, int num_output)
+{
+  /* Bias is a "column" with num_output of bias values, each for a layer of
+   * the output */
+  Image<float> bias(1, 1, num_output);
+
+  for (int k = 0; k < num_output; k++) {
+    bias(0, 0, k) = blob->data(k);
+  }
+
+  return bias;
+}
+
+Image<float>
 LoadKernelFromBlob(const BlobProto *blob, int k_size, int num_output)
 {
   /* Our kernel is num_output of [k_size, k_size, prev_num_output] slices 

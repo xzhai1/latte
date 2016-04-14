@@ -25,9 +25,9 @@ main(int argc, char *argv[])
 
   NetParameter net_model;
 
-  test_LoadFromTextFile(train_val_path, &net_model);
+  //test_LoadFromTextFile(train_val_path, &net_model);
   test_LoadFromBinaryFile(trained_model_path, &net_model);
 
-  //test_convolution(image_path, &net_model);
+  test_convolution(image_path, &net_model);
   return 0;
 }
