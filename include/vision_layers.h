@@ -33,7 +33,7 @@ public:
 class ReLU : public Layers {
 	float negative_slope;
 public:
-	ReLU(std:string name, const caffe::ReLUParameter *param, 
+	ReLU(std::string name, const caffe::ReLUParameter *param, 
 			 float negative_slope = 0.f);
 	Halide::Image<float> relu(Halide::Image<float> input);
 };
