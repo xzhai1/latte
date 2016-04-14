@@ -2,108 +2,78 @@
 #include <fstream>
 #include "caffe.pb.h"
 
+#include "layers.h"
+#include "tests.h"
 #include "io_utils.h"
 #include "proto2img_utils.h"
 
 using namespace std;
 using namespace caffe;
+using namespace Halide;
+using namespace Latte;
 
 static void 
-ListLayer(const NetParameter& net) 
+ListTxtLayer(const NetParameter *net) 
 {
-  int i;
-
-  for (i = 0; i < net.layer_size(); i++) {
-    /* Get the layer */
-    const LayerParameter& layer = net.layer(i);
-    cout << layer.name() << endl;
-    cout << layer.type() << endl;
+  cout << "name" << "\t" << "type" << endl;
+  for (int i = 0; i < net->layer_size(); i++) {
+    const LayerParameter layer = net->layer(i);
+    cout << layer.name() << "\t" 
+         << layer.type() << endl;
   }
 }
 
 static void 
-ListLayerWeights(const NetParameter& net) 
+ListBinaryLayer(const NetParameter *net) 
 {
-  int i;
-  BlobProto blob;
-  ConvolutionParameter conv_param;
-  int k_size, num_output;
-  Image<float> kernel;
-
-  for (i = 0; i < net.layer_size(); i++) {
-    const LayerParameter& layer = net.layer(i);
-    cout << "Layer name: "<< layer.name() << endl;
-    cout << "Layer type: " << layer.type() << endl;
-    /* print out conv layer kernel size */
-    if (layer.has_convolution_param()) {
-      conv_param = layer.convolution_param();
-      /* Look at the proto, kernel_size, pad and stride are repeated... */
-      k_size = conv_param.kernel_size(0);
-      cout << "kernel size " << k_size << endl;
+  cout << "name" << "\t\t\t" << "type" << "\t" 
+       << "num_output" << "\t" << "pad" << "\t" << "kernel_size" 
+       << "\t" << "stride" << endl;
+  for (int i = 0; i < net->layer_size(); i++) {
+    const LayerParameter layer = net->layer(i);
+    string name = layer.name();
+    string type = layer.type();
+    if (type == CONVOLUTION) {
+      ConvolutionParameter conv_param = layer.convolution_param();
+      int kernel_size = conv_param.kernel_size(0);
+      int num_output = conv_param.num_output();
+      int pad = 0;
+      int stride = 1;
       if (conv_param.pad_size()) {
-        cout << "pad " << conv_param.pad(0) << endl;
+        pad = conv_param.pad(0);
       }
       if (conv_param.stride_size()) {
-        cout << "stride " << conv_param.stride(0) << endl;
+        stride = conv_param.stride(0);
       }
-      num_output = conv_param.num_output();
-      cout << "num output " << num_output << endl;
-      /* TODO the first one if the conv */
-      blob = layer.blobs(0);
-      kernel = LoadKernelFromBlob(&blob, k_size, num_output);
+      cout << name << "\t\t\t" << type << "\t" 
+           << num_output << "\t" << pad << "\t" << kernel_size 
+           << "\t" << stride << endl;
+    } else {
+      cout << name << "\t\t\t" << type << endl;
     }
-   
-#if 0
-    /* print out the parameters */
-    for (j = 0; j < layer.blobs_size(); j++) {
-      blob = layer.blobs(j);
-      cout << "blob data_size(): " << blob.data_size() << endl;
-      /* Say we just grab a data off it */
-      cout << "sample data: "<< blob.data(0) << endl; 
-    }
-#endif
-    cout << endl;
   }
 }
 
-static bool
-test_LoadFromTextFile(const char *fpath) 
+bool
+test_LoadFromTextFile(string fpath, NetParameter *net_model) 
 {
-  caffe::NetParameter net_model;
-
-  if (!LoadFromTextFile(fpath, &net_model)) {
+  cout << "Loading prototxt from " << fpath << endl;
+  if (!LoadFromTextFile(fpath, net_model)) {
     cerr << "test_LoadFromTextFile failed" << endl;
     return false;
   }
-
-  //ListLayer(net_model);
+  ListTxtLayer(net_model);
   return true;
 }
 
-static bool
-test_LoadFromBinaryFile(const char *fpath) 
+bool
+test_LoadFromBinaryFile(string fpath, NetParameter *net_model) 
 {
-  caffe::NetParameter net_model;
-
-  if (!LoadFromBinaryFile(fpath, &net_model)) {
+  cout << "Loading trained binary file from " << fpath << endl;
+  if (!LoadFromBinaryFile(fpath, net_model)) {
     cerr << "test_LoadFromBinaryFile failed" << endl;
     return false;
   }
-
-  ListLayerWeights(net_model);
+  ListBinaryLayer(net_model);
   return true;
-}
-
-int 
-main(int argc, char *argv[]) 
-{
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  if (argc != 3) {
-    cerr << "Usage:  " << argv[0] << " .prototxt .caffemodel" << endl;
-    return 1;
-  }
-
-  //test_LoadFromTextFile(argv[1]);
-  test_LoadFromBinaryFile(argv[2]);
 }

@@ -1,17 +1,10 @@
 #ifndef IO_UTILS_H                                                            
 #define IO_UTILS_H  
+#include <string>
 
-#include "Halide.h"
 #include <google/protobuf/message.h> /* Message */
 
-#include "caffe.pb.h"
-
 #define PROTO_BIN_READ_LIMIT 600000000 /* 600MB */
-
-using namespace Halide; /* Image */
-using namespace caffe; /* Blobproto */
-
-using google::protobuf::Message;
 
 /**
  * @brief LoadFromTextFile Loads the architecture of the net from 
@@ -22,7 +15,7 @@ using google::protobuf::Message;
  *
  * @return true on success 
  */
-bool LoadFromTextFile(const char *fpath, Message *msg);
+bool LoadFromTextFile(std::string fpath, google::protobuf::Message *msg);
 
 
 /**
@@ -34,6 +27,6 @@ bool LoadFromTextFile(const char *fpath, Message *msg);
  *
  * @return true on success
  */
-bool LoadFromBinaryFile(const char *fpath, Message *msg);
+bool LoadFromBinaryFile(std::string fpath, google::protobuf::Message *msg);
 
 #endif /* IO_UTILS_H */

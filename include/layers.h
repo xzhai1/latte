@@ -5,6 +5,8 @@
 
 namespace Latte {
 
+const std::string CONVOLUTION = "Convolution";
+
 class Layer {
   std::string name;
   public:
@@ -12,6 +14,6 @@ class Layer {
     ~Layer() {};
 };
 
-} /* namespace latte */
+} /* namespace Latte */
 
 #endif /* LAYERS_H */

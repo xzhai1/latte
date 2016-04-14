@@ -4,9 +4,6 @@
 #include "Halide.h"
 #include "caffe.pb.h"
 
-using namespace Halide; /* Image */
-using namespace caffe; /* Blobproto */
-
 /**
  * @brief LoadKernelFromBlob 
  *
@@ -16,9 +13,9 @@ using namespace caffe; /* Blobproto */
  * value at index (n, k, h, w) is physically located at index 
  * ((n * K + k) * H + h) * W + w.
  *
- * These blobs actually have no shape. So to create the actual kernels, we need
- * to look at the "z" dimension of the previous layer, size of the kernel of
- * current layer, and the "z" dimension of the current layer
+ * These blobs actually have no shape. So to create the actual kernels, we
+ * need to look at the "z" dimension of the previous layer, size of the kernel
+ * of current layer, and infer the "z" dimension of the current layer
  
  * @param blob
  * @param ksize
@@ -26,7 +23,7 @@ using namespace caffe; /* Blobproto */
  *
  * @return 
  */
-Image<float> LoadKernelFromBlob(const BlobProto *blob, 
-                                int k_size, int num_output);
+Halide::Image<float> LoadKernelFromBlob(const caffe::BlobProto *blob, 
+                                        int k_size, int num_output);
 
 #endif /* PROTO2IMG_UTILS_H */
