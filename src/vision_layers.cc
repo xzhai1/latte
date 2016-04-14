@@ -20,14 +20,18 @@ Convolution::Convolution(string name, const ConvolutionParameter *param,
   /* Set name and parameters */
   name = name;
   kernel_size = param->kernel_size(0);
-  stride = param->stride(0);
+  if (param->stride_size()) stride = param->stride(0);
+  else stride = 1;
   num_output = param->num_output();
   if (param->pad_size()) {
     pad = param->pad(0);
+  } else {
+    pad = 0;
   }
-
   if (param->has_bias_term()) {
     bias = LoadKernelFromBlob(bias_blob, 1, num_output);
+  } else {
+    bias = 0.f;
   }
   /* Fill in the kernel */
   kernel = LoadKernelFromBlob(kernel_blob, kernel_size, num_output);
@@ -36,8 +40,10 @@ Convolution::Convolution(string name, const ConvolutionParameter *param,
 Image<float> Convolution::convolve(Image<float> input) {
   Func convolution("convolution");
   Var x("x"), y("y"), z("z");  
-  int width = (input.width() - kernel_size + 2 * pad) / stride + 1;
-  int height = (input.height() - kernel_size + 2 * pad) / stride + 1;
+  //int width = (input.width() - kernel_size + 2 * pad) / stride + 1;
+  //int height = (input.height() - kernel_size + 2 * pad) / stride + 1;
+  int width = input.width();
+  int height = input.height();
   int channels = input.channels();
 
   Func clamped = BoundaryConditions::constant_exterior(input, 0.f);

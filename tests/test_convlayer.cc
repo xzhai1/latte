@@ -20,29 +20,15 @@ bool
 test_convolution(string image_path, NetParameter *net_model) 
 {
   /* Loads the image */
-  Image<float> input = load_image(img_path);
+  Image<float> input = load_image(image_path);
 
   /* Let's just play with the first conv layer */
-  LayerParameter layer = net_model.layer(3);
+  LayerParameter layer = net_model->layer(3);
   BlobProto kernel_blob = layer.blobs(0);
   BlobProto weight_blob = layer.blobs(1);
   ConvolutionParameter conv_param = layer.convolution_param();
   Convolution conv_layer = Convolution(layer.name(), &conv_param, &kernel_blob, &weight_blob);
   Image<float> output = conv_layer.convolve(input);
 
-  return true;
-}
-
-#if 0
-int 
-main(int argc, char *argv[]) 
-{
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  if (argc != 3) {
-    cerr << "Usage:  " << argv[0] 
-      << "test_image.png trained.caffemodel" << endl;
-    return 1;
-  }
   return true;
 }
