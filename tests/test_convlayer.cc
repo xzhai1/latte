@@ -30,9 +30,10 @@ test_conv(const char *img_path, const char *fpath)
 
   /* Let's just play with the first conv layer */
   LayerParameter layer = net_model.layer(3);
-  BlobProto blob = layer.blobs(0);
+  BlobProto kernel_blob = layer.blobs(0);
+  BlobProto weight_blob = layer.blobs(1);
   ConvolutionParameter conv_param = layer.convolution_param();
-  Convolution conv_layer = Convolution(layer.name(), &conv_param, &blob);
+  Convolution conv_layer = Convolution(layer.name(), &conv_param, &kernel_blob, &weight_blob);
   Image<float> output = conv_layer.convolve(input);
 
   return true;
