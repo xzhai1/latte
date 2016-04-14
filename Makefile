@@ -51,7 +51,7 @@ SRCS = $(wildcard ./src/*.cc) $(wildcard ./tests/*.cc)
 OBJS = $(SRCS:.cc=.o)
 
 # define the executable file 
-MAIN = test
+MAIN = run_test
 
 #
 # The following part of the makefile is generic; it can be used to 
@@ -65,8 +65,7 @@ all: $(MAIN)
 	@echo Project is compiled! 
 
 $(MAIN): $(OBJS) 
-	$(CC) $(CFLAGS) $(INCLUDES) -o $(MAIN) \
-		$(OBJS) $(LFLAGS) $(LIBS) $(EXTRA_SCRIPTS)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(OBJS) $(LFLAGS) $(LIBS) $(EXTRA_SCRIPTS)
 
 # this is a suffix replacement rule for building .o's from .c's
 # it uses automatic variables $<: the name of the prerequisite of
@@ -78,8 +77,11 @@ $(MAIN): $(OBJS)
 print-%:
 	@echo $* = $($*)
 
+#clean:
+#	$(RM) ./src/*.o  ./tests/*.o *~ 
+
 clean:
-	$(RM) ./src/*.o  ./tests/*.o *~ $(MAIN)
+	$(RM) $(OBJS) *~ 
 
 depend: $(SRCS)
 	makedepend $(INCLUDES) $^

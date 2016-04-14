@@ -59,10 +59,11 @@ Then go into the repo:
     
     cd latte
     
-You will need to download the caffemodel:
+You will need to download the whole CNN and the trained caffemodel:
 
     mkdir model
     wget http://dl.caffe.berkeleyvision.org/fcn-32s-pascalcontext.caffemodel
+    wget https://gist.githubusercontent.com/shelhamer/80667189b218ad570e82/raw/077494f215421b3d9383e1b1a3d75377344b1744/train_val.prototxt
     
 You can now finally build the project:
 
@@ -71,3 +72,7 @@ You can now finally build the project:
 and fingers crossed, it won't throw an error. Then you can run a test:
 
     LD_LIBRARY_PATH=../halide/bin/ ./test images/rgb.png model/fcn-32s-pascalcontext.caffemodel    
+
+or
+
+    LD_LIBRARY_PATH=../halide/bin/:/usr/local/bin ./test images/rgb.png model/fcn-32s-pascalcontext.caffemodel

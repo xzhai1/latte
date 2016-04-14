@@ -5,6 +5,8 @@
 #include "proto2img_utils.h"
 
 using namespace std;
+using namespace Halide;
+using namespace caffe;
 
 Image<float>
 LoadKernelFromBlob(const BlobProto *blob, int k_size, int num_output)

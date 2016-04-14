@@ -1,30 +1,24 @@
 #include <iostream>
 #include <fstream>
+#include <string>
 
 #include "caffe.pb.h"
 #include "halide_image_io.h"
 
+#include "layers.h"
+#include "tests.h"
 #include "io_utils.h"
 #include "vision_layers.h"
-//#include "proto2img_utils.h"
 
 using namespace std;
 using namespace caffe;
-
 using namespace Halide;
 using namespace Halide::Tools;
 using namespace Latte;
 
-static bool
-test_conv(const char *img_path, const char *fpath) 
+bool
+test_convolution(string image_path, NetParameter *net_model) 
 {
-  /* Loads the model */
-  NetParameter net_model;
-  if (!LoadFromBinaryFile(fpath, &net_model)) {
-    cerr << "LoadFromBinaryFile failed" << endl;
-    return false;
-  }
-
   /* Loads the image */
   Image<float> input = load_image(img_path);
 
@@ -50,8 +44,5 @@ main(int argc, char *argv[])
       << "test_image.png trained.caffemodel" << endl;
     return 1;
   }
-
-  test_conv(argv[1], argv[2]);
-  return 0;
+  return true;
 }
-#endif
