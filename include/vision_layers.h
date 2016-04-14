@@ -20,12 +20,16 @@ class Softmax;
 class Silence;
 
 class Convolution : public Layer {
-  int num_output, pad = 0, kernel_size;
+	int kernel_size;
+  int stride;
+  int pad;
+  int num_output;
+  Halide::Image<float> bias;
   Halide::Image<float> kernel;
 public:
   /* TODO need to also give it bias. So best give it all the blobs */
   Convolution(std::string name, const caffe::ConvolutionParameter *param, 
-              const caffe::BlobProto *blob);
+              const caffe::BlobProto *kernel_blob, , const caffe::BlobProto *bias_blob);
   Halide::Image<float> convolve(Halide::Image<float> input);
 };
 
@@ -33,48 +37,56 @@ public:
 class ReLU : public Layer {
 	float negative_slope;
 public:
-	ReLU(std::string name, const caffe::ReLUParameter *param, 
-			 float negative_slope = 0.f);
+	ReLU(std::string name, const caffe::ReLUParameter *param);
 	Halide::Image<float> relu(Halide::Image<float> input);
 };
 
 
-
-// class Pooling : public Layers {
-
-// };
-
-
-
-// class Dropout : public Layers {
-
-// };
+// It is not common to have zero paddings
+class Pooling : public Layer {
+	int kernel_size;
+	int stride;
+public:
+	Pooling(std::string name, const caffe::PoolingParameter *param);
+	Halide::Image<float> pool(Halide::Image<float> input);
+};
 
 
-// class Deconvolution : public Layers {
 
-// };
-
-// class Crop : public Layers {
+// class Dropout : public Layer {
 
 // };
 
-// class Split : public Layers {
+
+// class Deconvolution : public Layer {
 
 // };
 
-// class SoftmaxWithLoss : public Layers {
+// class Crop : public Layer {
 
 // };
 
-// class Softmax : public Layers {
+// class Split : public Layer {
 
 // };
 
-// class Silence : public Layers {
+// class SoftmaxWithLoss : public Layer {
+
+// };
+
+// class Softmax : public Layer {
+
+// };
+
+// class Silence : public Layer {
 
 // };
 
 } /* namespace latte */
 
 #endif /* VISION_LAYERS_H */
+
+
+
+
+
