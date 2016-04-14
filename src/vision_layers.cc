@@ -40,7 +40,7 @@ Image<float> Convolution::convolve(Image<float> input) {
   int height = (input.height() - kernel_size + 2 * pad) / stride + 1;
   int channels = input.channels();
 
-  Func clamped = BoundaryConditions::exterior_constant(input, 0.f);
+  Func clamped = BoundaryConditions::constant_exterior(input, 0.f);
   // Func clamped = BoundaryConditions::repeat_edge(input);
   RDom r(start, kernel_size, start, kernel_size, 0, channels);
   convolution(x, y, z) = sum(
@@ -95,12 +95,6 @@ Pooling::Pooling(string name, const PoolingParameter *param) {
     stride = param->stride();
   } else {
     stride = 1; // [default = 1]
-  }
-  // Set pad
-  if (param->has_pad()) {
-    pad = param->pad();
-  } else {
-    pad = 0; // [default = 0]
   }
 }
 

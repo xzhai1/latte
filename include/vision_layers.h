@@ -29,7 +29,7 @@ class Convolution : public Layer {
 public:
   /* TODO need to also give it bias. So best give it all the blobs */
   Convolution(std::string name, const caffe::ConvolutionParameter *param, 
-              const caffe::BlobProto *kernel_blob, , const caffe::BlobProto *bias_blob);
+              const caffe::BlobProto *kernel_blob, const caffe::BlobProto *bias_blob);
   Halide::Image<float> convolve(Halide::Image<float> input);
 };
 
