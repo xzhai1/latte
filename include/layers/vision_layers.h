@@ -20,11 +20,10 @@ class Convolution : public Layer {
   /* Default values */
   int  pad = 0;
   int  stride = 1;
-  Halide::Image<float> bias = Halide::Image<float>(1, 1, num_output);
 
   /* Filled in values */
   int  num_output, kernel_size;
-  Halide::Image<float> kernel;
+  Halide::Image<float> kernel, bias;
 
   public:
     /**
