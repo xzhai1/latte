@@ -60,7 +60,7 @@ Convolution::run(Image<float> input)
       //clamped(x + r.x, y + r.y, r.z));
 
   /* and add bias */
-  //convolution(x, y, z) += bias(0, 0, z);
+  convolution(x, y, z) += bias(0, 0, z);
     
   /* TODO define schedule */
   Image<float> output = convolution.realize(width, height, num_output);

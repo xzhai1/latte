@@ -134,7 +134,7 @@ test_net(string image_path, NetParameter *net_model)
     startTime = CycleTimer::currentSeconds();
     curr_output = ptr->run(prev_output);
     endTime = CycleTimer::currentSeconds();
-    cout << "time elapsed: " << (endTime - startTime) * 1000 << " ms" << endl;
+    cout << "\t time elapsed: " << (endTime - startTime) * 1000 << " ms" << endl;
     prev_output = curr_output;
   }
 
