@@ -120,7 +120,7 @@ Image<float>
 Deconvolution::deconvolve(Image<float> input) {
   Func deconvolution;
   Var x1L, y1L, x1R, y1R;
-  var w1, h1;
+  Var w1, h1;
   Var x2, y2, z;
   // Compute output dimension
   int width     = kernel_size + (input.width() - 1) * stride;
@@ -128,10 +128,10 @@ Deconvolution::deconvolve(Image<float> input) {
   int channels  = input.channels();
 
   // Compute reduction domain
-  x1L = (Halide::max(x2 - K + 1, 0) + S - 1) / S;
-  y1L = (Halide::max(y2 - K + 1, 0) + S - 1) / S;
-  x1R = x2 / S;
-  y1R = y2 / S;
+  x1L = (Halide::max(x2 - kernel_size + 1, 0) + stride - 1) / stride;
+  y1L = (Halide::max(y2 - kernel_size + 1, 0) + stride - 1) / stride;
+  x1R = x2 / stride;
+  y1R = y2 / stride;
   w1  = x1R - x1L + 1;
   h1  = y1R - y1L + 1;
   RDom r(0, w1, 0, h1, 0, channels);
