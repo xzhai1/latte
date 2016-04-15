@@ -38,7 +38,7 @@ LoadKernelFromBlob(const BlobProto *blob, int k_size, int num_output)
 
   /* We want to center the kernel around 0. So a k_size = 3 will have the
    * kernel range from -1, to 1 */
-  int shifted = -(k_size - 1) / 2;
+  //int shifted = -(k_size - 1) / 2;
   Image<float> kernel(k_size, k_size, prev_num_output*num_output);
 
   int data_idx = 0;
@@ -57,6 +57,6 @@ LoadKernelFromBlob(const BlobProto *blob, int k_size, int num_output)
   }
 
   /* Center our kernel around 0 */
-  kernel.set_min(shifted, shifted, 0);
+  //kernel.set_min(shifted, shifted, 0);
   return kernel;
 }
