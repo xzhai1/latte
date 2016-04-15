@@ -8,7 +8,6 @@ namespace Latte {
 const std::string CONVOLUTION     = "Convolution";
 const std::string POOLING         = "Pooling";
 const std::string DECONVOLUTION   = "Deconvolution";
-
 const std::string ReLU            = "ReLU";
  
 const std::string CROP            = "Crop";
