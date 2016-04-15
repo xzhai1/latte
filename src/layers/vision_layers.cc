@@ -118,24 +118,32 @@ Deconvolution::Deconvolution(string layer_name,
 // WARNING: This implementation assumes no padding
 Image<float> 
 Deconvolution::deconvolve(Image<float> input) {
-  Func convolution;
-  Var x, y, z;
+  Func deconvolution;
+  Var x1L, y1L, x1R, y1R;
+  var w1, h1;
+  Var x2, y2, z;
   // Compute output dimension
   int width     = kernel_size + (input.width() - 1) * stride;
   int height    = kernel_size + (input.height() - 1) * stride;
   int channels  = input.channels();
 
   // Compute reduction domain
-  
+  x1L = (Halide::max(x2 - K + 1, 0) + S - 1) / S;
+  y1L = (Halide::max(y2 - K + 1, 0) + S - 1) / S;
+  x1R = x2 / S;
+  y1R = y2 / S;
+  w1  = x1R - x1L + 1;
+  h1  = y1R - y1L + 1;
+  RDom r(0, w1, 0, h1, 0, channels);
 
+  // Compute deconvolution
+  deconvolution(x2, y2, z) = sum(
+      kernel(x2 - (x1L + r.x) * stride, y2 - (y1L + r.y) * stride, z*channels + r.z) *
+      input(x1L + r.x, y1L + r.y, r.z)) + bias(r.z);
 
-
-  RDom r(0, kernel_size, 0, kernel_size, 0, channels);
-  convolution(x, y, z) = sum(
-      kernel(r.x, r.y, r.z + z*channels) * 
-      clamped(x * stride - pad + r.x, y * stride - pad + r.y, r.z)) + 
-      bias(r.z);
-
+  /* TODO: define schedule */
+  Image<float> output = deconvolution.realize(width, height, num_output);
+  return output;
 }
 #endif
 
