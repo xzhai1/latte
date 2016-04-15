@@ -92,36 +92,37 @@ Pooling::pool(Image<float> input)
 
 /*****************************************************************************
  *****************************************************************************/
-#if 0
+#if 1
 Deconvolution::Deconvolution(string layer_name, 
                              const ConvolutionParameter *param,
                              const BlobProto *kernel_blob, 
                              const BlobProto *bias_blob) 
 {
-  /* Set name and parameters */
   name = layer_name;
   kernel_size = param->kernel_size(0);
-  if (param->stride_size()) stride = param->stride(0);
-  else stride = 1;
   num_output = param->num_output();
-  /* Fill in the bias */
-  if (param->has_bias_term()) {
-    bias = LoadKernelFromBlob(bias_blob, 1, num_output);
-  } else {
-    bias = 0.f;
-  }
-  /* Fill in the kernel */
-  kernel = LoadKernelFromBlob(kernel_blob, kernel_size, num_output);
+  if (param->stride_size()) 
+    /* stride is repeated field so we just need the first one. Assume no padding */
+    stride = param->stride(0);
+  if (param->has_bias_term())
+    bias = LoadBiasFromBlob(bias_blob, num_output);
+  kernel = LoadKernelFromBlob(weights, kernel_size, num_output);
 }
 
-// WARNING: This implementation only assumes upsampling with 2 * stride == kernel_size
+// WARNING: This implementation assumes no padding
 Image<float> 
 Deconvolution::deconvolve(Image<float> input) {
-  Func convolution("deconvolution");
-  Var x("x"), y("y"), z("z");
-  int width     = input.width() * stride;
-  int height    = input.height() * stride;
+  Func convolution;
+  Var x, y, z;
+  // Compute output dimension
+  int width     = kernel_size + (input.width() - 1) * stride;
+  int height    = kernel_size + (input.height() - 1) * stride;
   int channels  = input.channels();
+
+  // Compute reduction domain
+  
+
+
 
   RDom r(0, kernel_size, 0, kernel_size, 0, channels);
   convolution(x, y, z) = sum(

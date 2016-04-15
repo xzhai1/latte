@@ -83,7 +83,7 @@ class Pooling : public Layer {
     Halide::Image<float> pool(Halide::Image<float> input);
 };
 
-#if 0
+#if 1
 /**
  * @brief Deconvolution layer
  * TODO explain
