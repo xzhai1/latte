@@ -1,6 +1,6 @@
 #include "layers.h"
 
-namespace latte {
+namespace Latte {
 
 /* constructor */
 Layer::Layer(): name(""), type(""), next(NULL) {
@@ -17,7 +17,7 @@ void Layer::set_name(std::string layer_name) {
 	name = layer_name;
 }
 
-void Layer::set_type(std::string, layer_type) {
+void Layer::set_type(std::string layer_type) {
 	type = layer_type;
 }
 
@@ -34,7 +34,7 @@ std::string Layer::get_type() {
 	return type;
 }
 
-std::string Layer::get_next() {
+Layer *Layer::get_next() {
 	return next;
 }
 

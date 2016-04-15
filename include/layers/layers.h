@@ -22,15 +22,15 @@ const std::string SOFTMAXWITHLOSS = "SoftmaxWithLoss";
 const std::string SOFTMAX         = "Softmax";
 
 class Layer {
-	private:
-		std::string name;
-		std::string type;
-		Layer *next;
+  private:
+  	std::string name;
+  	std::string type;
+  	Layer *next;
 
-	protected:
-		/* mutators */
-		void set_name(std::string layer_name);
-		void set_type(std::string layer_type);
+  protected:
+  	/* mutators */
+  	void set_name(std::string layer_name);
+  	void set_type(std::string layer_type);
 
   public:
     /* constructor */
