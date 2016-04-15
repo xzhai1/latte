@@ -112,15 +112,14 @@ Deconvolution::Deconvolution(string layer_name,
     stride = param->stride(0);
   if (param->has_bias_term())
     bias = LoadBiasFromBlob(bias_blob, num_output);
-  kernel = LoadKernelFromBlob(weights, kernel_size, num_output);
+  kernel = LoadKernelFromBlob(kernel_blob, kernel_size, num_output);
 }
 
 // WARNING: This implementation assumes no padding
 Image<float> 
 Deconvolution::deconvolve(Image<float> input) {
   Func deconvolution;
-  Var x1L, y1L, x1R, y1R;
-  Var w1, h1;
+  Func x1L, y1L, x1R, y1R;
   Var x2, y2, z;
   // Compute output dimension
   int width     = kernel_size + (input.width() - 1) * stride;
@@ -128,22 +127,22 @@ Deconvolution::deconvolve(Image<float> input) {
   int channels  = input.channels();
 
   // Compute reduction domain
-  x1L = (Halide::max(x2 - kernel_size + 1, 0) + stride - 1) / stride;
-  y1L = (Halide::max(y2 - kernel_size + 1, 0) + stride - 1) / stride;
-  x1R = x2 / stride;
-  y1R = y2 / stride;
+  x1L(x2) = (Halide::max(x2 - kernel_size + 1, 0) + stride - 1) / stride;
+  y1L(y2) = (Halide::max(y2 - kernel_size + 1, 0) + stride - 1) / stride;
+  x1R(x2) = x2 / stride;
+  y1R(y2) = y2 / stride;
   w1  = x1R - x1L + 1;
   h1  = y1R - y1L + 1;
-  RDom r(0, w1, 0, h1, 0, channels);
+  RDom r(0, x1R(x2) - x1L(x2) + 1, 0, y1R(y2) - y1L(y2) + 1, 0, channels);
 
-  // Compute deconvolution
-  deconvolution(x2, y2, z) = sum(
-      kernel(x2 - (x1L + r.x) * stride, y2 - (y1L + r.y) * stride, z*channels + r.z) *
-      input(x1L + r.x, y1L + r.y, r.z)) + bias(r.z);
+  // // Compute deconvolution
+  // deconvolution(x2, y2, z) = sum(
+  //     kernel(x2 - (x1L + r.x) * stride, y2 - (y1L + r.y) * stride, z*channels + r.z) *
+  //     input(x1L + r.x, y1L + r.y, r.z)) + bias(r.z);
 
-  /* TODO: define schedule */
-  Image<float> output = deconvolution.realize(width, height, num_output);
-  return output;
+  // /* TODO: define schedule */
+  // Image<float> output = deconvolution.realize(width, height, num_output);
+  // return output;
 }
 #endif
 
