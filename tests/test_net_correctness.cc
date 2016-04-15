@@ -125,7 +125,7 @@ test_net(string image_path, NetParameter *net_model)
   Image<float> prev_output = input;
   Image<float> curr_output;
   for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
-    cout << "passing volume into [" << ptr->get_name() << "," << ptr-get_type() << endl;
+    cout << "passing volume into [" << ptr->get_name() << "," << ptr->get_type() << endl;
     curr_output = ptr->run(prev_output);
     prev_output = curr_output;
   }
