@@ -98,7 +98,8 @@ test_net(string image_path, NetParameter *net_model)
       prev_layer = curr_ptr;
     }
   }
-  curr_ptr->next = NULL;
+  // next pointer of the last layer is no need to be set to NULL
+  // because it is initialized to be NULL
   cout << "layers building done!" << endl;
 
   // Display layers information
