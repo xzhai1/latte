@@ -66,10 +66,10 @@ Convolution::run(Image<float> input)
   // convolution.trace_stores();
   convolution.parallel(z);
 
-  // Var x_outer, y_outer, x_inner, y_inner, tile_index;
-  // convolution.tile(x, y, x_outer, y_outer, x_inner, y_inner, 64, 64)
-  //            .fuse(x_outer, y_outer, tile_index)
-  //            .parallel(tile_index);
+  Var x_outer, y_outer, x_inner, y_inner, tile_index;
+  convolution.tile(x, y, x_outer, y_outer, x_inner, y_inner, 64, 64)
+             .fuse(x_outer, y_outer, tile_index)
+             .parallel(tile_index);
 
   // Var x_inner_outer, y_inner_outer, x_vectors, y_pairs;
   // convolution.tile(x_inner, y_inner, x_inner_outer, y_inner_outer, x_vectors, y_pairs, 4, 2)
