@@ -141,7 +141,7 @@ test_net(string image_path, NetParameter *net_model)
   // Save first channel as image
   Func get_slice;
   Var x, y, z;
-  get_slice(x, y, z) = output(x, y, z);
+  get_slice(x, y, z) = curr_output(x, y, z);
   Image<float> slice = get_slice.realize(output.width(), output.height(), 1);
   save_image(slice, "xxx.png");
 
