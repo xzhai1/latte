@@ -33,7 +33,7 @@ ListBinaryLayer(const NetParameter *net)
     const LayerParameter layer = net->layer(i);
     string name = layer.name();
     string type = layer.type();
-    if (type == CONVOLUTION) {
+    if (type == CONVOLUTION || type == DECONVOLUTION) {
       ConvolutionParameter conv_param = layer.convolution_param();
       int kernel_size = conv_param.kernel_size(0);
       int num_output = conv_param.num_output();

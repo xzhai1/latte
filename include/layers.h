@@ -5,8 +5,9 @@
 
 namespace Latte {
 
-const std::string CONVOLUTION = "Convolution";
-const std::string POOLING     = "Pooling";
+const std::string CONVOLUTION 	= "Convolution";
+const std::string POOLING     	= "Pooling";
+const std::string DECONVOLUTION = "Deconvolution";
 
 const int FILTERS_PER_ROW = 8;
 
