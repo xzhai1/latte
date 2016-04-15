@@ -58,7 +58,7 @@ Dropout::Dropout(string layer_name, const DropoutParameter *param)
 }
 
 Image<float> 
-Dropout::dropout(Image<float> input) 
+Dropout::run(Image<float> input) 
 {
   Func dropped;
   Var x, y, z;
@@ -86,7 +86,7 @@ Split::Split(string layer_name) {
 }
 
 Image<float> 
-Split::split(Image<float> input) 
+Split::run(Image<float> input) 
 {
   Func splitted;
   Var x, y, z;
@@ -111,7 +111,7 @@ Silence::Silence(string layer_name)
 }
 
 Image<float> 
-Silence::silence(Image<float> input) 
+Silence::run(Image<float> input) 
 {
   Func silenced;
   Var x, y, z;
