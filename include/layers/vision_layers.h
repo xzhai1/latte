@@ -104,33 +104,6 @@ class Deconvolution : public Layer {
 };
 #endif
 
-/**
- * @brief Crop layer
- * TODO  spatial crop
- */
-class Crop : public Layer {
-	int offset_x;
-	int offset_y;
-
-  public:
-    /**
-     * @brief Crop 
-     *
-     * @param layer_name Name given in the model
-     * @param param      Parsed CropParameter from the caffemodel
-     */
-    Crop(std::string name, const caffe::CropParameter *param);
-
-    /**
-     * @brief crop Performs cropping in x and y dimesion on both sides
-     *
-     * @param input Input from previous stage
-     *
-     * @return Input to next stage
-     */
-    Halide::Image<float> crop(Halide::Image<float> input);
-};
-
 } /* namespace latte */
 
 #endif /* VISION_LAYERS_H */

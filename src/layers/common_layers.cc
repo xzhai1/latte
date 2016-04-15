@@ -16,6 +16,38 @@ using namespace caffe;
 using namespace Halide;
 using namespace Halide::Tools;
 
+Crop::Crop(string layer_name, const CropParameter *param)
+{
+  name = layer_name;
+  if (param->offset_size() == 1) {
+    offset_x = param->offset(0);
+    offset_y = param->offset(0);
+  } else {
+    // axis in caffe: (N,C,H,W)
+    offset_x = param->offset(1);
+    offset_y = param->offset(0);
+  }
+}
+
+Image<float>
+Crop::crop(Image<float> input)
+{
+  Func cropped;
+  Var x, y, z;
+  int width    = input.width() - 2*offset_x;
+  int height   = input.height() - 2*offset_y;
+  int channels = input.channels();
+
+  cropped(x, y, z) = input(x + offset_x, y + offset_y, z);
+
+  /* TODO: define schedule */
+  Image<float> output = cropped.realize(width, height, channels);
+
+  return output;
+}
+
+/*****************************************************************************
+ *****************************************************************************/
 Dropout::Dropout(string layer_name, const DropoutParameter *param) 
 {
   name = layer_name;
