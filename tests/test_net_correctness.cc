@@ -6,6 +6,7 @@
 #include "halide_image_io.h"
 
 #include "io_utils.h"
+#include "CycleTimer.h"
 
 #include "layers.h" 
 #include "vision_layers.h"
@@ -61,26 +62,29 @@ test_net(string image_path, NetParameter *net_model)
       curr_ptr = conv_layer;
       hit = true;
       cout << "finish processing convolution" << endl;
-    } else if (type == DECONVOLUTION) {
-      cout << "hit deconv" << endl;
-      ConvolutionParameter deconv_param = layer.convolution_param();
-      BlobProto weight_blob = layer.blobs(0);
-      Deconvolution *deconv_layer;
-/*    // Question: why is there no second blob
-      if (deconv_param.has_bias_term()) {
-        cout << "has bias term" << endl;
-        BlobProto bias_blob = layer.blobs(1);
-	cout << "before constructor" << endl;
-        deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, &bias_blob);
-      } else {
-        deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, NULL);
-      }
-*/
-      deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, NULL);
-      curr_ptr = deconv_layer;
-      hit = true;
-      cout << "finish processing deconv" << endl;
-    } else if (type == RELU) {
+    } 
+
+    // else if (type == DECONVOLUTION) {
+    //   cout << "hit deconv" << endl;
+    //   ConvolutionParameter deconv_param = layer.convolution_param();
+    //   BlobProto weight_blob = layer.blobs(0);
+    //   Deconvolution *deconv_layer;
+    //   // // Question: why is there no second blob
+    //   // if (deconv_param.has_bias_term()) {
+    //   //   cout << "has bias term" << endl;
+    //   //   BlobProto bias_blob = layer.blobs(1);
+	   //   //   cout << "before constructor" << endl;
+    //   //   deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, &bias_blob);
+    //   // } else {
+    //   //   deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, NULL);
+    //   // }
+
+    //   deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, NULL);
+    //   curr_ptr = deconv_layer;
+    //   hit = true;
+    //   cout << "finish processing deconv" << endl;
+    // } 
+    else if (type == RELU) {
       ReLUParameter relu_param = layer.relu_param();
       ReLU *relu_layer = new ReLU(name, &relu_param);
       curr_ptr = relu_layer;
@@ -120,15 +124,26 @@ test_net(string image_path, NetParameter *net_model)
   }
 
   // Run layers
+  double startTime, endTime;
   cout << endl << endl;
-  cout << "run layers (test)" << endl;
+  cout << "Run layers (test foward pass without parallelism)" << endl;
   Image<float> prev_output = input;
   Image<float> curr_output;
   for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
-    cout << "passing volume into [" << ptr->get_name() << "," << ptr->get_type() << endl;
+    cout << "passing volume into [" << ptr->get_name() << "," << ptr->get_type() << "]" << endl;
+    startTime = CycleTimer::currentSeconds();
     curr_output = ptr->run(prev_output);
+    endTime = CycleTimer::currentSeconds();
+    cout << "time elapsed: " << (endTime - startTime) * 1000 << " ms" << endl;
     prev_output = curr_output;
   }
+
+  // Save first channel as image
+  Func get_slice;
+  Var x, y, z;
+  get_slice(x, y, z) = output(x, y, z);
+  Image<float> slice = get_slice.realize(output.width(), output.height(), 1);
+  save_image(slice, "xxx.png");
 
   return true;
 }
