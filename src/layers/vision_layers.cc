@@ -33,7 +33,7 @@ Convolution::Convolution(string layer_name,
 
   /* Default 0 bias */
   bias = Image<float>(1, 1, num_output);
-  if (param->has_bias_term())
+  if (bias_blob)
     bias = LoadBiasFromBlob(bias_blob, num_output);
 
   kernel = LoadKernelFromBlob(weights, kernel_size, num_output);
