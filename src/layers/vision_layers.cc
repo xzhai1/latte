@@ -63,7 +63,7 @@ Convolution::run(Image<float> input)
   convolution(x, y, z) += bias(0, 0, z);
     
   /* TODO define schedule */
-  convolution.parallel(z);
+  // convolution.parallel(z);
 
   Var x_outer, y_outer, x_inner, y_inner, tile_index;
   convolution.tile(x, y, x_outer, y_outer, x_inner, y_inner, 64, 64)
