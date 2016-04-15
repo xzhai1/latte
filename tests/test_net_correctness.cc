@@ -40,9 +40,11 @@ test_net(string image_path, NetParameter *net_model)
     /* TODO we are ignoring a couple of types here */
     /* This is a going to be a big switch statement */
     if (type == CONVOLUTION) {
+      cout << "hit convolution" << endl;
       ConvolutionParameter conv_param = layer.convolution_param();
       BlobProto weight_blob = layer.blobs(0);
       Convolution *conv_layer;
+
       if (conv_param.has_bias_term()) {
         BlobProto bias_blob = layer.blobs(1);
         conv_layer = new Convolution(name, &conv_param, &weight_blob, &bias_blob);
@@ -58,18 +60,26 @@ test_net(string image_path, NetParameter *net_model)
       // }
       curr_ptr = conv_layer;
       hit = true;
+      cout << "finish processing convolution" << endl;
     } else if (type == DECONVOLUTION) {
+      cout << "hit deconv" << endl;
       ConvolutionParameter deconv_param = layer.convolution_param();
       BlobProto weight_blob = layer.blobs(0);
       Deconvolution *deconv_layer;
+/*    // Question: why is there no second blob
       if (deconv_param.has_bias_term()) {
+        cout << "has bias term" << endl;
         BlobProto bias_blob = layer.blobs(1);
+	cout << "before constructor" << endl;
         deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, &bias_blob);
       } else {
         deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, NULL);
       }
+*/
+      deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, NULL);
       curr_ptr = deconv_layer;
       hit = true;
+      cout << "finish processing deconv" << endl;
     } else if (type == RELU) {
       ReLUParameter relu_param = layer.relu_param();
       ReLU *relu_layer = new ReLU(name, &relu_param);

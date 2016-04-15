@@ -108,13 +108,22 @@ Deconvolution::Deconvolution(string layer_name,
 {
   set_name(layer_name);
   set_type("Deconvolution");
+
+  cout << "In constructor of deconv" << endl;
+  cout << "kernel" << endl;
+
   kernel_size = param->kernel_size(0);
+  cout << "num_output" << endl;
   num_output = param->num_output();
+  cout << "stride" << endl;
   if (param->stride_size()) 
     /* stride is repeated field so we just need the first one. Assume no padding */
     stride = param->stride(0);
-  if (param->has_bias_term())
+  cout << "bias" << endl;
+  bias = Image<float>(1, 1, num_output);
+  if (bias_blob)
     bias = LoadBiasFromBlob(bias_blob, num_output);
+  cout << "kernel" << endl;
   kernel = LoadKernelFromBlob(kernel_blob, kernel_size, num_output);
 }
 
