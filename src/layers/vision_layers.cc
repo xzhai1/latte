@@ -135,14 +135,14 @@ Deconvolution::deconvolve(Image<float> input) {
   // h1  = y1R - y1L + 1;
   RDom r(0, x1R(x2) - x1L(x2) + 1, 0, y1R(y2) - y1L(y2) + 1, 0, channels);
 
-  // // Compute deconvolution
-  // deconvolution(x2, y2, z) = sum(
-  //     kernel(x2 - (x1L + r.x) * stride, y2 - (y1L + r.y) * stride, z*channels + r.z) *
-  //     input(x1L + r.x, y1L + r.y, r.z)) + bias(r.z);
+  // Compute deconvolution
+  deconvolution(x2, y2, z) = sum(
+      kernel(x2 - (x1L(x2) + r.x) * stride, y2 - (y1L(y2) + r.y) * stride, z*channels + r.z) *
+      input(x1L(x2) + r.x, y1L(y2) + r.y, r.z)) + bias(r.z);
 
-  // /* TODO: define schedule */
-  // Image<float> output = deconvolution.realize(width, height, num_output);
-  // return output;
+  /* TODO: define schedule */
+  Image<float> output = deconvolution.realize(width, height, num_output);
+  return output;
 }
 #endif
 
