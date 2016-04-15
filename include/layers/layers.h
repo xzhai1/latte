@@ -34,9 +34,9 @@ class Layer {
 
   public:
     /* constructor */
-    Layer() {};
+    Layer();
     /* deconstructor */
-    ~Layer() {};
+    ~Layer();
     /* accessors */
     std::string get_name();
     std::string get_type();

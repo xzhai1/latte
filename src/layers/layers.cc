@@ -40,7 +40,7 @@ Layer *Layer::get_next() {
 
 /* virtual function */
 Halide::Image<float> Layer::run(Halide::Image<float> input) {
-	Halide::Image<float> output();
+	Halide::Image<float> output(1);
 	return output;
 }
 
