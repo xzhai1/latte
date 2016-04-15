@@ -64,7 +64,7 @@ Convolution::run(Image<float> input)
     
   /* TODO define schedule */
   // convolution.trace_stores();
-  // convolution.parallel(z);
+  convolution.parallel(z);
 
   // Var x_outer, y_outer, x_inner, y_inner, tile_index;
   // convolution.tile(x, y, x_outer, y_outer, x_inner, y_inner, 64, 64)
