@@ -15,7 +15,7 @@ CC = g++
 CFLAGS  = --std=c++11 -g -fopenmp -Wall
 
 # define any directories containing header files other than /usr/include
-INCLUDES = -I ./include -I ../halide/include -I ../halide/tools
+INCLUDES = -I ./include -I ./include/layers -I ../halide/include -I ../halide/tools
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
@@ -38,7 +38,7 @@ LIBS = -l Halide -l dl
 EXTRA_SCRIPTS = `pkg-config --cflags --libs protobuf libpng`
  
 # define the C source files
-SRCS = $(wildcard ./src/*.cc) $(wildcard ./tests/*.cc) 
+SRCS = $(wildcard ./src/*.cc) $(wildcard ./src/layers/*.cc) $(wildcard ./tests/*.cc) 
 
 # define the C object files 
 #
@@ -81,7 +81,7 @@ print-%:
 #	$(RM) ./src/*.o  ./tests/*.o *~ 
 
 clean:
-	$(RM) $(OBJS) *~ 
+	$(RM) $(OBJS) *~ $(MAIN)
 
 depend: $(SRCS)
 	makedepend $(INCLUDES) $^

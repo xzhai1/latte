@@ -1,8 +1,3 @@
-/*
- * Currently implementing feedforward
- *
- */
-
 #include <iostream>
 #include <algorithm>
 #include <stdlib.h>
@@ -68,33 +63,6 @@ Convolution::convolve(Image<float> input)
 
 /*****************************************************************************
  *****************************************************************************/
-ReLU::ReLU(string layer_name, const ReLUParameter *param) 
-{
-  name = layer_name;
-  if (param->has_negative_slope())
-    negative_slope = param->negative_slope();
-}
-
-Image<float> 
-ReLU::rectify(Image<float> input)
-{
-  Func rectified;
-  Var x, y, z;
-  int width    = input.width();
-  int height   = input.height();
-  int channels = input.channels();
-
-  /* If input is negative, we take only part of it */
-  rectified(x, y, z) = max(0, input(x, y, z)) + 
-                       negative_slope*min(0, input(x, y, z));
-
-  /* TODO: define schedule */
-  Image<float> output = rectified.realize(width, height, channels);
-  return output;
-}
-
-/*****************************************************************************
- *****************************************************************************/
 Pooling::Pooling(string layer_name, const PoolingParameter *param) 
 {
   name = layer_name;
@@ -119,36 +87,6 @@ Pooling::pool(Image<float> input)
 
   /* TODO: define schedule */
   Image<float> output = pooled.realize(width, height, channels);
-  return output;
-}
-
-/*****************************************************************************
- *****************************************************************************/
-Dropout::Dropout(string layer_name, const DropoutParameter *param) 
-{
-  name = layer_name;
-  if (param->has_dropout_ratio())
-    dropout_ratio = param->dropout_ratio();
-}
-
-Image<float> 
-Dropout::dropout(Image<float> input) 
-{
-  Func dropped;
-  Var x, y, z;
-  int width    = input.width();
-  int height   = input.height();
-  int channels = input.channels();
-
-  /* TODO only activate in training. Not used in inference */
-  // /* Train */
-  // dropped(x, y, z) = input(x, y, z) * ((float)rand() / RAND_MAX < dropout_ratio ? 0 : 1);
-  
-  dropped(x, y, z) = input(x, y, z);
-
-  /* TODO: define schedule */
-  Image<float> output = dropped.realize(width, height, channels);
-
   return output;
 }
 
@@ -223,107 +161,6 @@ Crop::crop(Image<float> input)
   /* TODO: define schedule */
   Image<float> output = cropped.realize(width, height, channels);
   
-  return output;
-}
-
-/*****************************************************************************
- *****************************************************************************/
-Split::Split(string layer_name) {
-  name = layer_name;
-}
-
-Image<float> 
-Split::split(Image<float> input) 
-{
-  Func splitted;
-  Var x, y, z;
-  int width    = input.width();
-  int height   = input.height();
-  int channels = input.channels();
-
-  splitted(x, y, z) = input(x, y, z);
-
-  /* TODO: define schedule */
-  Image<float> output = splitted.realize(width, height, channels);
-
-  return output;
-}
-
-/*****************************************************************************
- *****************************************************************************/
-SoftmaxWithLoss::SoftmaxWithLoss(string layer_name) 
-{
-  name = layer_name;
-}
-
-Image<float> 
-SoftmaxWithLoss::softmaxwithloss(Image<float> input) 
-{
-  Func loss;
-  Func prob;
-  Func normalizer;
-  Var x, y, z;
-  int width    = input.width();
-  int height   = input.height();
-  int channels = input.channels();
-
-  RDom r(0, width, 0, height, 0, channels);
-  prob(x, y, z) = exp(input(x, y, z));
-  normalizer(x, y, z) = Halide::sum(prob(x, y, z + r.x));
-  prob(x, y, z) = prob(x, y, z)/normalizer(x, y, z);
-  loss(x, y, z) = -Halide::sum(log(prob(x + r.x, y + r.y, z + r.z)));
-
-  /* TODO: define schedule */
-  Image<float> output = loss.realize(width, height, channels);
-  return output;
-}
-
-/*****************************************************************************
- *****************************************************************************/
-Softmax::Softmax(string layer_name) {
-  name = layer_name;
-}
-
-Image<float> 
-Softmax::softmax(Image<float> input) 
-{
-  Func prob("prob");
-  Func normalizer("normalizer");
-  Var x("x"), y("y"), z("z");
-  int width     = input.width();
-  int height    = input.height();
-  int channels  = input.channels();
-
-  RDom r(0, channels);
-  prob(x, y, z) = Halide::exp(input(x, y, z));
-  normalizer(x, y, z) = Halide::sum(prob(x, y, z + r.x));
-  prob(x, y, z) = prob(x, y, z)/normalizer(x, y, z);
-
-  /* TODO: define schedule */
-  Image<float> output = prob.realize(width, height, channels);
-  return output;
-}
-
-/*****************************************************************************
- *****************************************************************************/
-Silence::Silence(string layer_name) 
-{
-  name = layer_name;
-}
-
-Image<float> 
-Silence::silence(Image<float> input) 
-{
-  Func silenced;
-  Var x, y, z;
-  int width    = input.width();
-  int height   = input.height();
-  int channels = input.channels();
-
-  silenced(x, y, z) = input(x, y, z);
-
-  /* TODO: define schedule */
-  Image<float> output = silenced.realize(width, height, channels);
   return output;
 }
 

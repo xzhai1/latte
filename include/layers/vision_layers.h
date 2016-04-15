@@ -9,15 +9,9 @@
 namespace Latte {
 
 class Convolution;
-class ReLU;
 class Pooling;
-class Dropout;
 class Deconvolution;
 class Crop;
-class Split;
-class SoftmaxWithLoss;
-class Softmax;
-class Silence;
 
 /**
  * @brief Convolution Layer
@@ -61,33 +55,6 @@ class Convolution : public Layer {
 };
 
 /**
- * @brief Rectified Linear Unit 
- * TODO copy explaination from caffe
- */
-class ReLU : public Layer {
-	  float negative_slope = 0.f;
-
-  public:
-    /**
-     * @brief ReLU 
-     *
-     * @param layer_name Name given in the model
-     * @param param      Parsed ReLUParameter from the caffemodel
-     */
-    ReLU(std::string layer_name, const caffe::ReLUParameter *param);
-
-    /**
-     * @brief relu Performs linear rectification on the input
-     *
-     * @param input Input from previous stage
-     *
-     * @return Input for next stage
-     */
-    Halide::Image<float> rectify(Halide::Image<float> input);
-};
-
-
-/**
  * @brief Pooling layer
  *
  * TODO Brief explain what this does
@@ -114,32 +81,6 @@ class Pooling : public Layer {
      * @return Input for next stage
      */
     Halide::Image<float> pool(Halide::Image<float> input);
-};
-
-/**
- * @brief Dropout layer
- * TODO explain what this does
- */
-class Dropout : public Layer {
-    float dropout_ratio = 0.5f;
-
-  public:
-    /**
-     * @brief Dropout
-     *
-     * @param layer_name Name given in the model
-     * @param param      Parsed DropoutParameter from the caffemodel
-     */
-    Dropout(std::string layer_name, const caffe::DropoutParameter *param);
-
-    /**
-     * @brief dropout 
-     *
-     * @param input Input from previous stage
-     *
-     * @return Input to next stage
-     */
-    Halide::Image<float> dropout(Halide::Image<float> input);
 };
 
 #if 0
@@ -190,101 +131,6 @@ class Crop : public Layer {
     Halide::Image<float> crop(Halide::Image<float> input);
 };
 
-/**
- * @brief NOOP
- */
-class Split : public Layer {
-  public:
-    /**
-     * @brief Split 
-     *
-     * @param name
-     */
-    Split(std::string name);
-
-    /**
-     * @brief split 
-     *
-     * @param input
-     *
-     * @return 
-     */
-    Halide::Image<float> split(Halide::Image<float> input);
-};
-
-/**
- * @brief 
- */
-class SoftmaxWithLoss : public Layer {
-  public:
-    /**
-     * @brief SoftmaxWithLoss 
-     *
-     * @param name
-     */
-    SoftmaxWithLoss(std::string layer_name);
-    
-    /**
-     * @brief softmaxwithloss 
-     *
-     * @param input
-     *
-     * @return 
-     */
-    Halide::Image<float> softmaxwithloss(Halide::Image<float> input);
-};
-
-/**
- * @brief Softmax layer
- * TODO explain 
- */
-class Softmax : public Layer {
-  public:
-    /**
-     * @brief Softmax 
-     *
-     * @param name
-     */
-    Softmax(std::string name);
-
-    /**
-     * @brief softmax 
-     *
-     * @param input
-     *
-     * @return 
-     */
-    Halide::Image<float> softmax(Halide::Image<float> input);
-};
-
-/**
- * @brief Silence layer
- * TODO NOPS
- */
-class Silence : public Layer {
-  public:
-    /**
-     * @brief Silence 
-     *
-     * @param layer_name
-     */
-    Silence(std::string layer_name);
-
-    /**
-     * @brief silence NOOP
-     *
-     * @param input
-     *
-     * @return 
-     */
-    Halide::Image<float> silence(Halide::Image<float> input);
-};
-
 } /* namespace latte */
 
 #endif /* VISION_LAYERS_H */
-
-
-
-
-
