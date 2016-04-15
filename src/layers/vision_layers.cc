@@ -30,8 +30,12 @@ Convolution::Convolution(string layer_name,
     stride = param->stride(0);
   if (param->pad_size())
     pad = param->pad(0);
+
+  /* Default 0 bias */
+  bias = Image<float>(1, 1, num_output);
   if (param->has_bias_term())
     bias = LoadBiasFromBlob(bias_blob, num_output);
+
   kernel = LoadKernelFromBlob(weights, kernel_size, num_output);
 }
 
@@ -52,8 +56,10 @@ Convolution::convolve(Image<float> input)
   convolution(x, y, z) = sum(
       kernel(r.x, r.y, r.z + z*channels) * 
       clamped(x*stride - pad + r.x, y*stride - pad + r.y, r.z));
+      //clamped(x + r.x, y + r.y, r.z));
+
   /* and add bias */
-  convolution(x, y, z) += bias(0, 0, z);
+  //convolution(x, y, z) += bias(0, 0, z);
     
   /* TODO define schedule */
   Image<float> output = convolution.realize(width, height, num_output);
