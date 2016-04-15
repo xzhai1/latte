@@ -33,14 +33,12 @@ public:
   Halide::Image<float> convolve(Halide::Image<float> input);
 };
 
-
 class ReLU : public Layer {
 	float negative_slope;
 public:
 	ReLU(std::string name, const caffe::ReLUParameter *param);
 	Halide::Image<float> relu(Halide::Image<float> input);
 };
-
 
 // It is not common to have zero paddings
 class Pooling : public Layer {
@@ -51,36 +49,60 @@ public:
 	Halide::Image<float> pool(Halide::Image<float> input);
 };
 
+class Dropout : public Layer {
+	float dropout_ratio;
+public:
+	// WARNING: Only training phase needs dropout
+	Dropout(std::string name, const caffe::DropoutParameter *param);
+	Halide::Image<float> dropout(Halide::Image<float> input);
+};
 
+class Deconvolution : public Layer {
+	int kernel_size;
+  int stride;
+  int num_output;
+  Halide::Image<float> bias;
+  Halide::Image<float> kernel;
+public:
+	Deconvolution(std:string name, const caffe::ConvolutionParameter *param,
+								const caffe::BlobProto *kernel_blob, const caffe::BlobProto *bias_blob);
+	Halide::Image<float> deconvolve(Halide::Image<float> input);
+};
 
-// class Dropout : public Layer {
+class Crop : public Layer {
+	int offset_x;
+	int offset_y;
+public:
+	// WARNING: Assume spatial crop
+	Crop(std::string name, const caffe::CropParameter *param);
+	Halide::Image<float> crop(Halide::Image<float> input);
+};
 
-// };
+class Split : public Layer {
+	// WARNING: Only implementing feedforward, no ops
+public:
+	Split(std::string name);
+	Halide::Image<float> split(Halide::Image<float> input);
+};
 
+class SoftmaxWithLoss : public Layer {
+public:
+	SoftmaxWithLoss(std::string name);
+	Halide::Image<float> softmaxwithloss(Halide::Image<float> input);
+};
 
-// class Deconvolution : public Layer {
+class Softmax : public Layer {
+public:
+	Softmax(std::string name);
+	Halide::Image<float> softmax(Halide::Image<float> input);
+};
 
-// };
-
-// class Crop : public Layer {
-
-// };
-
-// class Split : public Layer {
-
-// };
-
-// class SoftmaxWithLoss : public Layer {
-
-// };
-
-// class Softmax : public Layer {
-
-// };
-
-// class Silence : public Layer {
-
-// };
+class Silence : public Layer {
+	// WARNING: Only implementing feedforward, no ops
+public:
+	Silence(std::string name);
+	Halide::Image<float> silence(Halide::Image<float> input);
+};
 
 } /* namespace latte */
 
