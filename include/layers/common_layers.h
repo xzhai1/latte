@@ -1,0 +1,88 @@
+#ifndef COMMON_LAYERS_H
+#define COMMON_LAYERS_H
+
+#include "Halide.h"
+#include "caffe.pb.h"
+
+#include "layers.h"
+
+namespace Latte {
+
+class Dropout;
+class Split;
+class Silence;
+
+/**
+ * @brief Dropout layer
+ * TODO explain what this does
+ */
+class Dropout : public Layer {
+    float dropout_ratio = 0.5f;
+
+  public:
+    /**
+     * @brief Dropout
+     *
+     * @param layer_name Name given in the model
+     * @param param      Parsed DropoutParameter from the caffemodel
+     */
+    Dropout(std::string layer_name, const caffe::DropoutParameter *param);
+
+    /**
+     * @brief dropout 
+     *
+     * @param input Input from previous stage
+     *
+     * @return Input to next stage
+     */
+    Halide::Image<float> dropout(Halide::Image<float> input);
+};
+
+/**
+ * @brief NOOP
+ */
+class Split : public Layer {
+  public:
+    /**
+     * @brief Split 
+     *
+     * @param name
+     */
+    Split(std::string name);
+
+    /**
+     * @brief split 
+     *
+     * @param input
+     *
+     * @return 
+     */
+    Halide::Image<float> split(Halide::Image<float> input);
+};
+
+/**
+ * @brief Silence layer
+ * TODO NOPS
+ */
+class Silence : public Layer {
+  public:
+    /**
+     * @brief Silence 
+     *
+     * @param layer_name
+     */
+    Silence(std::string layer_name);
+
+    /**
+     * @brief silence NOOP
+     *
+     * @param input
+     *
+     * @return 
+     */
+    Halide::Image<float> silence(Halide::Image<float> input);
+};
+
+} /* namespace latte */
+
+#endif /* COMMON_LAYERS_H */

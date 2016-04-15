@@ -27,7 +27,8 @@ test_convolution(string image_path, NetParameter *net_model)
   BlobProto kernel_blob = layer.blobs(0);
   BlobProto weight_blob = layer.blobs(1);
   ConvolutionParameter conv_param = layer.convolution_param();
-  Convolution conv_layer = Convolution(layer.name(), &conv_param, &kernel_blob, &weight_blob);
+  Convolution conv_layer = Convolution(layer.name(), &conv_param, 
+                                       &kernel_blob, &weight_blob);
   Image<float> output = conv_layer.convolve(input);
 
   /* TODO Grab first layer and try saving the image */
