@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "Halide.h"
+#include "halide_image_io.h"
 #include "caffe.pb.h"
 
 #include "vision_layers.h"
@@ -11,11 +12,12 @@ namespace Latte {
 using namespace std;
 using namespace caffe;
 using namespace Halide;
+using namespace Halide::Tools;
 
-Convolution::Convolution(string name, const ConvolutionParameter *param, 
+Convolution::Convolution(string l_name, const ConvolutionParameter *param, 
                          const BlobProto *weights, const BlobProto *bias_b) 
 {
-  name = name;
+  name = l_name;
   kernel_size = param->kernel_size(0);
   num_output = param->num_output();
   if (param->pad_size()) {
@@ -23,9 +25,38 @@ Convolution::Convolution(string name, const ConvolutionParameter *param,
   }
   kernel = LoadKernelFromBlob(weights, kernel_size, num_output);
   bias = LoadBiasFromBlob(bias_b, num_output);
+  initialized = true;
 }
 
-Image<float> Convolution::convolve(Image<float> input) {
+bool
+Convolution::export_filters()
+{  
+  /* TODO can't save without initialization */
+  //if (!initialized) {
+  //}
+  int input_channels = kernel.channels() / num_output;
+  for (int z = 0; z < kernel.channels(); z++) {
+    if (z % input_channels == 0)
+      cout << endl;
+    cout << "--------------------------------" << endl;
+    cout << "|" << kernel(0, 0, z) << "|" << kernel(1, 0, z) << "|" 
+         << kernel(2, 0, z) << "|" << endl;
+    cout << "|" << kernel(0, 1, z) << "|" << kernel(1, 1, z) << "|" 
+         << kernel(2, 1, z) << "|" << endl;
+    cout << "|" << kernel(0, 2, z) << "|" << kernel(1, 2, z) << "|" 
+         << kernel(2, 2, z) << "|" << endl;
+    cout << "--------------------------------" << endl;
+  }
+
+  return true;
+}
+
+Image<float>
+Convolution::convolve(Image<float> input) 
+{
+  /* TODO can't convolve without initialization */
+  //if (!initialized) {
+  //}
   Func convolution;
   Var x, y, z;  
   int width = input.width();

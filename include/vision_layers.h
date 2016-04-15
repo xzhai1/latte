@@ -12,11 +12,13 @@ class Convolution;
 //class Pooling;
 
 class Convolution : public Layer {
+  bool initialized = false;
   int num_output, pad = 0, kernel_size;
   Halide::Image<float> kernel, bias;
   public:
     Convolution(std::string name, const caffe::ConvolutionParameter *param, 
                 const caffe::BlobProto *weights, const caffe::BlobProto *bias);
+    bool export_filters();
     Halide::Image<float> convolve(Halide::Image<float> input);
 };
 
