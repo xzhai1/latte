@@ -131,8 +131,8 @@ Deconvolution::deconvolve(Image<float> input) {
   y1L(y2) = (Halide::max(y2 - kernel_size + 1, 0) + stride - 1) / stride;
   x1R(x2) = x2 / stride;
   y1R(y2) = y2 / stride;
-  w1  = x1R - x1L + 1;
-  h1  = y1R - y1L + 1;
+  // w1  = x1R - x1L + 1;
+  // h1  = y1R - y1L + 1;
   RDom r(0, x1R(x2) - x1L(x2) + 1, 0, y1R(y2) - y1L(y2) + 1, 0, channels);
 
   // // Compute deconvolution
