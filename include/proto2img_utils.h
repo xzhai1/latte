@@ -5,6 +5,17 @@
 #include "caffe.pb.h"
 
 /**
+ * @brief LoadBiasFromBlob 
+ * 
+ * @param blob
+ * @param num_output
+ *
+ * @return 
+ */
+Halide::Image<float> LoadBiasFromBlob(const caffe::BlobProto *blob, 
+                                      int num_output);
+
+/**
  * @brief LoadKernelFromBlob 
  *
  * The conventional blob dimensions for batches of image data are number N x

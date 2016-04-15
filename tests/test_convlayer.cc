@@ -30,5 +30,12 @@ test_convolution(string image_path, NetParameter *net_model)
   Convolution conv_layer = Convolution(layer.name(), &conv_param, &kernel_blob, &weight_blob);
   Image<float> output = conv_layer.convolve(input);
 
+  /* TODO Grab first layer and try saving the image */
+  Func get_slice;
+  Var x, y, z;
+  get_slice(x, y, z) = output(x, y, z);
+  Image<float> slice = get_slice.realize(output.width(), output.height(), 1);
+  save_image(slice, "xxx.png");
+
   return true;
 }

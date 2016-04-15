@@ -8,9 +8,11 @@ namespace Latte {
 const std::string CONVOLUTION = "Convolution";
 const std::string POOLING     = "Pooling";
 
+const int FILTERS_PER_ROW = 8;
+
 class Layer {
-  std::string name;
   public:
+    std::string name;
     Layer() {};
     ~Layer() {};
 };

@@ -71,8 +71,8 @@ You can now finally build the project:
 
 and fingers crossed, it won't throw an error. Then you can run a test:
 
-    LD_LIBRARY_PATH=../halide/bin/ ./test images/rgb.png model/fcn-32s-pascalcontext.caffemodel    
+    LD_LIBRARY_PATH=../halide/bin/ ./run_test images/rgb.png model/train_val.prototxt model/fcn-32s-pascalcontext.caffemodel    
 
 or
 
-    LD_LIBRARY_PATH=../halide/bin/:/usr/local/bin ./test images/rgb.png model/fcn-32s-pascalcontext.caffemodel
+    LD_LIBRARY_PATH=../halide/bin/:/usr/local/lib ./run_test images/rgb.png model/train_val.prototxt model/fcn-32s-pascalcontext.caffemodel
