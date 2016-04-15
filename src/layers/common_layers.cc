@@ -18,7 +18,8 @@ using namespace Halide::Tools;
 
 Crop::Crop(string layer_name, const CropParameter *param)
 {
-  name = layer_name;
+  set_name(layer_name);
+  set_type("Crop");
   if (param->offset_size() == 1) {
     offset_x = param->offset(0);
     offset_y = param->offset(0);
@@ -30,7 +31,7 @@ Crop::Crop(string layer_name, const CropParameter *param)
 }
 
 Image<float>
-Crop::crop(Image<float> input)
+Crop::run(Image<float> input)
 {
   Func cropped;
   Var x, y, z;
@@ -50,7 +51,8 @@ Crop::crop(Image<float> input)
  *****************************************************************************/
 Dropout::Dropout(string layer_name, const DropoutParameter *param) 
 {
-  name = layer_name;
+  set_name(layer_name);
+  set_type("Dropout");
   if (param->has_dropout_ratio())
     dropout_ratio = param->dropout_ratio();
 }
@@ -79,7 +81,8 @@ Dropout::dropout(Image<float> input)
 /*****************************************************************************
  *****************************************************************************/
 Split::Split(string layer_name) {
-  name = layer_name;
+  set_name(layer_name);
+  set_type("Split");
 }
 
 Image<float> 
@@ -103,7 +106,8 @@ Split::split(Image<float> input)
  *****************************************************************************/
 Silence::Silence(string layer_name) 
 {
-  name = layer_name;
+  set_name(layer_name);
+  set_type("Silence");
 }
 
 Image<float> 

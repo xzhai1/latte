@@ -38,7 +38,7 @@ class Softmax : public Layer {
      *
      * @return 
      */
-    Halide::Image<float> softmax(Halide::Image<float> input);
+    Halide::Image<float> run(Halide::Image<float> input);
 };
 
 /**
@@ -65,7 +65,7 @@ class SoftmaxWithLoss : public Layer {
      *
      * @return 
      */
-    Halide::Image<float> softmaxwithloss(Halide::Image<float> input);
+    Halide::Image<float> run(Halide::Image<float> input);
 };
 
 } /* namespace latte */

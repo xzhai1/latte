@@ -18,13 +18,14 @@ using namespace Halide::Tools;
 
 ReLU::ReLU(string layer_name, const ReLUParameter *param) 
 {
-  name = layer_name;
+  set_name(layer_name);
+  set_type("ReLU");
   if (param->has_negative_slope())
     negative_slope = param->negative_slope();
 }
 
 Image<float> 
-ReLU::rectify(Image<float> input)
+ReLU::run(Image<float> input)
 {
   Func rectified;
   Var x, y, z;

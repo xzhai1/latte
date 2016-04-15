@@ -45,7 +45,7 @@ class ReLU : public Layer {
      *
      * @return Input for next stage
      */
-    Halide::Image<float> rectify(Halide::Image<float> input);
+    Halide::Image<float> run(Halide::Image<float> input);
 };
 
 } /* namespace latte */

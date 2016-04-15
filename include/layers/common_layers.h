@@ -37,7 +37,7 @@ class Crop : public Layer {
      *
      * @return Input to next stage
      */
-    Halide::Image<float> crop(Halide::Image<float> input);
+    Halide::Image<float> run(Halide::Image<float> input);
 };
 
 /**
@@ -63,7 +63,7 @@ class Dropout : public Layer {
      *
      * @return Input to next stage
      */
-    Halide::Image<float> dropout(Halide::Image<float> input);
+    Halide::Image<float> run(Halide::Image<float> input);
 };
 
 /**
@@ -85,7 +85,7 @@ class Split : public Layer {
      *
      * @return 
      */
-    Halide::Image<float> split(Halide::Image<float> input);
+    Halide::Image<float> run(Halide::Image<float> input);
 };
 
 /**
@@ -108,7 +108,7 @@ class Silence : public Layer {
      *
      * @return 
      */
-    Halide::Image<float> silence(Halide::Image<float> input);
+    Halide::Image<float> run(Halide::Image<float> input);
 };
 
 } /* namespace latte */

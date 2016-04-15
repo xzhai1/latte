@@ -3,6 +3,9 @@
 
 #include <string>
 
+#include "Halide.h"
+#include "caffe.pb.h"
+
 namespace Latte {
 
 const std::string CONVOLUTION     = "Convolution";
@@ -19,11 +22,29 @@ const std::string SOFTMAXWITHLOSS = "SoftmaxWithLoss";
 const std::string SOFTMAX         = "Softmax";
 
 class Layer {
+	private:
+		std::string name;
+		std::string type;
+		Layer *next;
+
+	protected:
+		/* mutators */
+		void set_name(std::string layer_name);
+		void set_type(std::string layer_type);
+
   public:
-    std::string name;
-    Layer *next;
+    /* constructor */
     Layer() {};
+    /* deconstructor */
     ~Layer() {};
+    /* accessors */
+    std::string get_name();
+    std::string get_type();
+    Layer *get_next();
+    /* mutator */
+    void set_next(Layer *next_layer);
+    /* virtual functions */
+    virtual Halide::Image<float> run(Halide::Image<float> input);
 };
 
 } /* namespace Latte */

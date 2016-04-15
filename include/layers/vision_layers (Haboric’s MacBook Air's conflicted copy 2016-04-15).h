@@ -20,10 +20,11 @@ class Convolution : public Layer {
   /* Default values */
   int  pad = 0;
   int  stride = 1;
+  Halide::Image<float> bias = Halide::Image<float>(1, 1, num_output);
 
   /* Filled in values */
   int  num_output, kernel_size;
-  Halide::Image<float> kernel, bias;
+  Halide::Image<float> kernel;
 
   public:
     /**
@@ -50,7 +51,7 @@ class Convolution : public Layer {
      *
      * @return post convolution result
      */
-    Halide::Image<float> run(Halide::Image<float> input);
+    Halide::Image<float> convolve(Halide::Image<float> input);
 };
 
 /**
@@ -79,7 +80,7 @@ class Pooling : public Layer {
      *
      * @return Input for next stage
      */
-    Halide::Image<float> run(Halide::Image<float> input);
+    Halide::Image<float> pool(Halide::Image<float> input);
 };
 
 #if 1
@@ -99,7 +100,7 @@ class Deconvolution : public Layer {
                   const caffe::ConvolutionParameter *param,
                   const caffe::BlobProto *kernel_blob, 
                   const caffe::BlobProto *bias_blob);
-    Halide::Image<float> run(Halide::Image<float> input);
+    Halide::Image<float> deconvolve(Halide::Image<float> input);
 };
 #endif
 

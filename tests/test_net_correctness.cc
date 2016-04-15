@@ -27,7 +27,7 @@ test_net(string image_path, NetParameter *net_model)
 
   Layer *head = NULL;
   Layer *prev_layer = NULL;
-  Layer *next_ptr = NULL;
+  Layer *curr_ptr = NULL;
 
   cout << "name \taddr" << endl;
   /* Let's build the net */
@@ -36,44 +36,77 @@ test_net(string image_path, NetParameter *net_model)
     LayerParameter layer = net_model->layer(i);
     string name = layer.name();
     string type = layer.type();
+    bool hit = false;
     /* TODO we are ignoring a couple of types here */
     /* This is a going to be a big switch statement */
     if (type == CONVOLUTION) {
       ConvolutionParameter conv_param = layer.convolution_param();
       BlobProto weight_blob = layer.blobs(0);
-      Convolution *conv_layer = new Convolution(name, &conv_param, 
-                                                &weight_blob, NULL);
+      Convolution *conv_layer;
       if (conv_param.has_bias_term()) {
         BlobProto bias_blob = layer.blobs(1);
-        conv_layer = new Convolution(name, &conv_param, 
-                                                  &weight_blob, &bias_blob);
+        conv_layer = new Convolution(name, &conv_param, &weight_blob, &bias_blob);
+      } else {
+        conv_layer = new Convolution(name, &conv_param, &weight_blob, NULL);
       }
-      next_ptr = conv_layer;
-    }
-    else if (type == RELU) {
+      // Convolution *conv_layer = new Convolution(name, &conv_param, 
+      //                                           &weight_blob, NULL);
+      // if (conv_param.has_bias_term()) {
+      //   BlobProto bias_blob = layer.blobs(1);
+      //   conv_layer = new Convolution(name, &conv_param, 
+      //                                             &weight_blob, &bias_blob);
+      // }
+      curr_ptr = conv_layer;
+      hit = true;
+    } else if (type == DECONVOLUTION) {
+      ConvolutionParameter deconv_param = layer.convolution_param();
+      BlobProto weight_blob = layer.blobs(0);
+      Deconvolution *deconv_layer;
+      if (deconv_param.has_bias_term()) {
+        BlobProto bias_blob = layer.blobs(1);
+        deconv_layer = new Convolution(name, &deconv_param, &weight_blob, &bias_blob);
+      } else {
+        deconv_layer = new Convolution(name, &deconv_param, &weight_blob, NULL);
+      }
+      curr_ptr = deconv_layer;
+      hit = true;
+    } else if (type == RELU) {
       ReLUParameter relu_param = layer.relu_param();
       ReLU *relu_layer = new ReLU(name, &relu_param);
-      next_ptr = relu_layer;
+      curr_ptr = relu_layer;
+      hit = true;
     } else if (type == POOLING) {
       PoolingParameter pool_param = layer.pooling_param();
       Pooling *pool_layer = new Pooling(name, &pool_param);
-      next_ptr = pool_layer;
+      curr_ptr = pool_layer;
+      hit = true;
     } else if (type == DROPOUT) {
       DropoutParameter drop_param = layer.dropout_param();
       Dropout *dropout_layer = new Dropout(name, &drop_param);
-      next_ptr = dropout_layer;
+      curr_ptr = dropout_layer;
+      hit = true;
     }
 
-    cout << name << "\t" << next_ptr << endl;
-    if (!head)
-      head = next_ptr;
+    if (hit) {
+      cout << name << "\t" << curr_ptr << endl;
+      if (!head)
+        head = curr_ptr;
 
-    /* Update prev layer's next */
-    if (prev_layer)
-      prev_layer->next = next_ptr;
-    prev_layer = next_ptr;
-
+      /* Update prev layer's next */
+      if (prev_layer)
+        prev_layer->next = curr_ptr;
+      prev_layer = curr_ptr;
+    }
   }
+  curr_ptr->next = NULL;
   cout << "layers building done!" << endl;
+
+  // Display layers information
+  cout << "layers are:" << endl;
+  cout << "name" << "\t\t\t" << "type" << endl;
+  for (Layer *ptr = head; ptr != NULL; ptr = ptr->next) {
+    cout << ptr->get_name() << "\t\t\t" << ptr->get_type() << endl;
+  }
+
   return true;
 }

@@ -21,8 +21,7 @@ Convolution::Convolution(string layer_name,
                          const BlobProto *weights, 
                          const BlobProto *bias_blob) 
 {
-  set_name(layer_name);
-  set_type("Convolution");
+  name = layer_name;
   kernel_size = param->kernel_size(0);
   num_output = param->num_output();
   if (param->stride_size()) 
@@ -31,17 +30,13 @@ Convolution::Convolution(string layer_name,
     stride = param->stride(0);
   if (param->pad_size())
     pad = param->pad(0);
-
-  /* Default 0 bias */
-  bias = Image<float>(1, 1, num_output);
-  if (bias_blob)
+  if (param->has_bias_term())
     bias = LoadBiasFromBlob(bias_blob, num_output);
-
   kernel = LoadKernelFromBlob(weights, kernel_size, num_output);
 }
 
 Image<float>
-Convolution::run(Image<float> input) 
+Convolution::convolve(Image<float> input) 
 {
   Func convolution;
   Var x, y, z;  
@@ -57,10 +52,8 @@ Convolution::run(Image<float> input)
   convolution(x, y, z) = sum(
       kernel(r.x, r.y, r.z + z*channels) * 
       clamped(x*stride - pad + r.x, y*stride - pad + r.y, r.z));
-      //clamped(x + r.x, y + r.y, r.z));
-
   /* and add bias */
-  //convolution(x, y, z) += bias(0, 0, z);
+  convolution(x, y, z) += bias(0, 0, z);
     
   /* TODO define schedule */
   Image<float> output = convolution.realize(width, height, num_output);
@@ -72,8 +65,7 @@ Convolution::run(Image<float> input)
  *****************************************************************************/
 Pooling::Pooling(string layer_name, const PoolingParameter *param) 
 {
-  set_name(layer_name);
-  set_type("Pooling");
+  name = layer_name;
   if (param->has_kernel_size())
     kernel_size = param->kernel_size();
   if (param->has_stride())
@@ -81,7 +73,7 @@ Pooling::Pooling(string layer_name, const PoolingParameter *param)
 }
 
 Image<float>
-Pooling::run(Image<float> input) 
+Pooling::pool(Image<float> input) 
 {
   Func pooled;
   Var x, y, z;
@@ -106,46 +98,33 @@ Deconvolution::Deconvolution(string layer_name,
                              const BlobProto *kernel_blob, 
                              const BlobProto *bias_blob) 
 {
-  set_name(layer_name);
-  set_type("Deconvolution");
+  name = layer_name;
   kernel_size = param->kernel_size(0);
   num_output = param->num_output();
   if (param->stride_size()) 
-    /* stride is repeated field so we just need the first one. Assume no padding */
+    /* stride is repeated field so we just need the first one. Assume no padding
+     * in this case */
     stride = param->stride(0);
   if (param->has_bias_term())
     bias = LoadBiasFromBlob(bias_blob, num_output);
-  kernel = LoadKernelFromBlob(kernel_blob, kernel_size, num_output);
+  kernel = LoadKernelFromBlob(weights, kernel_size, num_output);
 }
 
 // WARNING: This implementation assumes no padding
 Image<float> 
-Deconvolution::run(Image<float> input) {
+Deconvolution::deconvolve(Image<float> input) {
   Func deconvolution;
-  Func x1L, y1L, x1R, y1R;
-  Var x2, y2, z;
-  // Compute output dimension
-  int width     = kernel_size + (input.width() - 1) * stride;
-  int height    = kernel_size + (input.height() - 1) * stride;
+  Var x, y, z;
+  int width     = input.width() * stride;
+  int height    = input.height() * stride;
   int channels  = input.channels();
 
-  // Compute reduction domain
-  x1L(x2) = (Halide::max(x2 - kernel_size + 1, 0) + stride - 1) / stride;
-  y1L(y2) = (Halide::max(y2 - kernel_size + 1, 0) + stride - 1) / stride;
-  x1R(x2) = x2 / stride;
-  y1R(y2) = y2 / stride;
-  // w1  = x1R - x1L + 1;
-  // h1  = y1R - y1L + 1;
-  RDom r(0, x1R(x2) - x1L(x2) + 1, 0, y1R(y2) - y1L(y2) + 1, 0, channels);
+  RDom r(0, kernel_size, 0, kernel_size, 0, channels);
+  convolution(x, y, z) = sum(
+      kernel(r.x, r.y, r.z + z*channels) * 
+      clamped(x * stride - pad + r.x, y * stride - pad + r.y, r.z)) + 
+      bias(r.z);
 
-  // Compute deconvolution
-  deconvolution(x2, y2, z) = sum(
-      kernel(x2 - (x1L(x2) + r.x) * stride, y2 - (y1L(y2) + r.y) * stride, z*channels + r.z) *
-      input(x1L(x2) + r.x, y1L(y2) + r.y, r.z)) + bias(r.z);
-
-  /* TODO: define schedule */
-  Image<float> output = deconvolution.realize(width, height, num_output);
-  return output;
 }
 #endif
 

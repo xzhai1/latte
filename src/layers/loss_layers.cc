@@ -17,11 +17,12 @@ using namespace Halide;
 using namespace Halide::Tools;
 
 Softmax::Softmax(string layer_name) {
-  name = layer_name;
+  set_name(layer_name);
+  set_type("Softmax");
 }
 
 Image<float> 
-Softmax::softmax(Image<float> input) 
+Softmax::run(Image<float> input) 
 {
   Func prob;
   Func normalizer;
@@ -45,11 +46,12 @@ Softmax::softmax(Image<float> input)
 
 SoftmaxWithLoss::SoftmaxWithLoss(string layer_name) 
 {
-  name = layer_name;
+  set_name(layer_name);
+  set_type("SoftmaxWithLoss");
 }
 
 Image<float> 
-SoftmaxWithLoss::softmaxwithloss(Image<float> input) 
+SoftmaxWithLoss::run(Image<float> input) 
 {
   Func loss;
   Func prob;
