@@ -126,15 +126,15 @@ test_net(string image_path, NetParameter *net_model)
   // Run layers
   double startTime, endTime;
   cout << endl << endl;
-  cout << "Run layers (test foward pass without parallelism)" << endl;
+  cout << "Run layers (test foward pass with parallelism version 1)" << endl;
   Image<float> prev_output = input;
   Image<float> curr_output;
   for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
-    cout << "passing volume into [" << ptr->get_name() << "," << ptr->get_type() << "]" << endl;
+    cout << "passing volume into [" << ptr->get_name() << "," << ptr->get_type() << "]  " << endl;
     startTime = CycleTimer::currentSeconds();
     curr_output = ptr->run(prev_output);
     endTime = CycleTimer::currentSeconds();
-    cout << "\t time elapsed: " << (endTime - startTime) * 1000 << " ms" << endl;
+    cout << "time elapsed: " << (endTime - startTime) * 1000 << " ms  " << endl;
     prev_output = curr_output;
   }
 
