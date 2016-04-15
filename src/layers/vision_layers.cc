@@ -43,8 +43,8 @@ Convolution::Convolution(string layer_name,
 Image<float>
 Convolution::run(Image<float> input) 
 {
-  Func convolution;
-  Var x, y, z;  
+  Func convolution("convolution");
+  Var x("x"), y("y"), z("z");  
   int width     = (input.width() - kernel_size + 2 * pad) / stride + 1;
   int height    = (input.height() - kernel_size + 2 * pad) / stride + 1;
   int channels  = input.channels();
@@ -63,6 +63,7 @@ Convolution::run(Image<float> input)
   convolution(x, y, z) += bias(0, 0, z);
     
   /* TODO define schedule */
+  convolution.trace_stores();
   // convolution.parallel(z);
 
   Var x_outer, y_outer, x_inner, y_inner, tile_index;
