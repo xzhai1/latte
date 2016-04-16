@@ -142,12 +142,16 @@ Net::Net(NetParameter *net_model)
       curr_layer = build_convlayer(&layer);
       hit = true;
       cout << "finish processing convolution" << endl;
-    } else if (type == DECONVOLUTION) {
+    } 
+    /*
+    else if (type == DECONVOLUTION) {
       cout << "hit deconv" << endl;
       curr_layer = build_deconvlayer(&layer);
       hit = true;
       cout << "finish processing deconv" << endl;
-    } else if (type == RELU) {
+    }
+    */
+    else if (type == RELU) {
       curr_layer = build_relulayer(&layer);
       hit = true;
     } else if (type == POOLING) {
@@ -186,18 +190,22 @@ Image<float>
 Net::run(Image<float> input)
 {
   /* TODO each layer is supposed to call the next layer's run */
+  double allStartTime, allEndTime, startTime, endTime;
   Image<float> prev_output = input;
   Image<float> curr_output;
+  allStartTime = CycleTimer::currentSeconds();
   for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
     cout << "passing volume into [" 
       << ptr->get_name() << "," << ptr->get_type() << "]  " << endl;
 
-    double startTime = CycleTimer::currentSeconds();
+    startTime = CycleTimer::currentSeconds();
     curr_output = ptr->run(prev_output);
-    double endTime = CycleTimer::currentSeconds();
+    endTime = CycleTimer::currentSeconds();
     cout << "time elapsed: " << (endTime - startTime) * 1000 << " ms  " << endl;
     prev_output = curr_output;
   }
+  allEndTime = CycleTimer::currentSeconds();
+  cout << "total time elapsed: " << (allEndTime - allStartTime) * 1000 << " ms  " << endl;
 
   return curr_output;
 }
