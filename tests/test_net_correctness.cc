@@ -52,38 +52,34 @@ test_net(string image_path, NetParameter *net_model)
       } else {
         conv_layer = new Convolution(name, &conv_param, &weight_blob, NULL);
       }
-      // Convolution *conv_layer = new Convolution(name, &conv_param, 
-      //                                           &weight_blob, NULL);
-      // if (conv_param.has_bias_term()) {
-      //   BlobProto bias_blob = layer.blobs(1);
-      //   conv_layer = new Convolution(name, &conv_param, 
-      //                                             &weight_blob, &bias_blob);
-      // }
       curr_ptr = conv_layer;
       hit = true;
       cout << "finish processing convolution" << endl;
     } 
 
-    // else if (type == DECONVOLUTION) {
-    //   cout << "hit deconv" << endl;
-    //   ConvolutionParameter deconv_param = layer.convolution_param();
-    //   BlobProto weight_blob = layer.blobs(0);
-    //   Deconvolution *deconv_layer;
-    //   // // Question: why is there no second blob
-    //   // if (deconv_param.has_bias_term()) {
-    //   //   cout << "has bias term" << endl;
-    //   //   BlobProto bias_blob = layer.blobs(1);
-	   //   //   cout << "before constructor" << endl;
-    //   //   deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, &bias_blob);
-    //   // } else {
-    //   //   deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, NULL);
-    //   // }
+    #if 0
+    else if (type == DECONVOLUTION) {
+      cout << "hit deconv" << endl;
+      ConvolutionParameter deconv_param = layer.convolution_param();
+      BlobProto weight_blob = layer.blobs(0);
+      Deconvolution *deconv_layer;
+      /* Question: why can't load the second blob? */
+      if (deconv_param.has_bias_term()) {
+        cout << "has bias term" << endl;
+        BlobProto bias_blob = layer.blobs(1);
+	       cout << "before constructor" << endl;
+        deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, &bias_blob);
+      } else {
+        deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, NULL);
+      }
 
-    //   deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, NULL);
-    //   curr_ptr = deconv_layer;
-    //   hit = true;
-    //   cout << "finish processing deconv" << endl;
-    // } 
+      deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, NULL);
+      curr_ptr = deconv_layer;
+      hit = true;
+      cout << "finish processing deconv" << endl;
+    } 
+    #endif
+
     else if (type == RELU) {
       ReLUParameter relu_param = layer.relu_param();
       ReLU *relu_layer = new ReLU(name, &relu_param);
@@ -112,23 +108,23 @@ test_net(string image_path, NetParameter *net_model)
       prev_layer = curr_ptr;
     }
   }
-  // next pointer of the last layer is no need to be set to NULL
-  // because it is initialized to be NULL
   cout << "layers building done!" << endl;
 
-  // Display layers information
+  /* Display layers information */
+  cout << endl;
   cout << "layers are:" << endl;
   cout << "name" << "\t\t\t" << "type" << endl;
   for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
     cout << ptr->get_name() << "\t\t\t" << ptr->get_type() << endl;
   }
 
-  // Run layers
-  double startTime, endTime;
+  /* Run layers */
+  double startTime, endTime, allSartTime, allEndTime;
   cout << endl << endl;
-  cout << "Run layers (test foward pass with parallelism version 1)" << endl;
+  cout << "run layers" << endl;
   Image<float> prev_output = input;
   Image<float> curr_output;
+  allSartTime = CycleTimer::currentSeconds();
   for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
     cout << "passing volume into [" << ptr->get_name() << "," << ptr->get_type() << "]  " << endl;
     startTime = CycleTimer::currentSeconds();
@@ -137,8 +133,10 @@ test_net(string image_path, NetParameter *net_model)
     cout << "time elapsed: " << (endTime - startTime) * 1000 << " ms  " << endl;
     prev_output = curr_output;
   }
+  allEndTime = CycleTimer::currentSeconds();
+  cout << "total time elapsed: " << (allEndTime - allStartTime) * 1000 << " ms  " << endl;
 
-  // Save first channel as image
+  /* Save first channel as image */
   Func get_slice;
   Var x, y, z;
   get_slice(x, y, z) = curr_output(x, y, z);
