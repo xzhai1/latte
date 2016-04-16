@@ -157,7 +157,6 @@ passing volume into [drop7,Dropout]
 	 time elapsed: 44.9542 ms  
 passing volume into [score59,Convolution]  
 	 time elapsed: 989.487 ms  
-__total time elapsed: NA__
 -------------------------------------------------
 
 ### CPU parallelism
