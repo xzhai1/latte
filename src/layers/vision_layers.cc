@@ -197,8 +197,8 @@ Deconvolution::run(Image<float> input) {
   // h1  = y1R - y1L + 1;
   cout << "create RDom s" << endl;
   RDom s(0, kernel_size, 0, kernel_size, 0, channels);
-  cout << "create RDom r" << endl;  
-  RDom r(0, x1R(x2) - x1L(x2) + 1, 0, y1R(y2) - y1L(y2) + 1, 0, channels);
+  // cout << "create RDom r" << endl;  
+  // RDom r(0, x1R(x2) - x1L(x2) + 1, 0, y1R(y2) - y1L(y2) + 1, 0, channels);
 
   // Compute deconvolution
   cout << "create deconv" << endl;
