@@ -27,11 +27,8 @@ test_deconvolution(NetParameter *net_model)
     for (int j = 0; j < height; j++) {
       for (int i = 0; i < width; i++) {
         infile >> input(i, j, k) >> ws;
-        cout << input(i, j, k);
       }
-      cout << endl;
     }
-    cout << "------------------------" << endl;
     infile.close();
   }
 
