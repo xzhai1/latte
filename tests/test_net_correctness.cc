@@ -136,12 +136,15 @@ test_net(string image_path, NetParameter *net_model)
   allEndTime = CycleTimer::currentSeconds();
   cout << "total time elapsed: " << (allEndTime - allStartTime) * 1000 << " ms  " << endl;
 
-  /* Save first channel as image */
-  Func get_slice;
-  Var x, y, z;
-  get_slice(x, y, z) = curr_output(x, y, z);
-  Image<float> slice = get_slice.realize(curr_output.width(), curr_output.height(), 1);
-  save_image(slice, "xxx.png");
+  /* Save all channels */
+  int num_output_layers = curr_output.channels();
+  for (int = 0; i < num_output_layers; i++) {
+    Func get_slice;
+    Var x, y, z;
+    get_slice(x, y, z) = curr_output(x, y, z + i);
+    Image<float> slice = get_slice.realize(curr_output.width(), curr_output.height(), 1);
+    save_image(slice, "channel_"to_string(i) + ".png")
+  }
 
   return true;
 }
