@@ -180,13 +180,15 @@ Deconvolution::Deconvolution(string layer_name,
 // WARNING: This implementation assumes no padding
 Image<float> 
 Deconvolution::run(Image<float> input) {
-  Func deconvolution;
-  Expr x1L, y1L, x1R, y1R;
-  Var x2, y2, z;
+  Func deconvolution("deconv");
+  Expr x1L("x1L"), y1L("y1L"), x1R("x1R"), y1R("y1R");
+  Var x2("x2"), y2("y2"), z("z");
   // Compute output dimension
   int width     = kernel_size + (input.width() - 1) * stride;
   int height    = kernel_size + (input.height() - 1) * stride;
   int channels  = input.channels();
+
+  deconvolution.trace_stores();
 
   // Compute reduction domain
   x1L = (Halide::max(x2 - kernel_size + 1, 0) + stride - 1) / stride;
