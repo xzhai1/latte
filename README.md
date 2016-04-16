@@ -78,6 +78,7 @@ or
     LD_LIBRARY_PATH=../halide/bin/:/usr/local/lib ./run_test images/rgb.png model/train_val.prototxt model/fcn-32s-pascalcontext.caffemodel
 
 ## Preliminary Results
+### Single core single thread  
 -------------------------------------------------
 Run layers (test foward pass without parallelism)  
 passing volume into [conv1_1,Convolution]  
@@ -156,4 +157,102 @@ passing volume into [drop7,Dropout]
 	 time elapsed: 44.9542 ms  
 passing volume into [score59,Convolution]  
 	 time elapsed: 989.487 ms  
+	 
+-------------------------------------------------
+
+### CPU parallelism
+-------------------------------------------------
+
+
+
+-------------------------------------------------
+
+### OpenCL
+-------------------------------------------------
+passing volume into [conv1_1,Convolution]  
+time elapsed: 1032.42 ms  
+passing volume into [relu1_1,ReLU]  
+time elapsed: 101.37 ms  
+passing volume into [conv1_2,Convolution]  
+time elapsed: 4389.71 ms  
+passing volume into [relu1_2,ReLU]  
+time elapsed: 100.841 ms  
+passing volume into [pool1,Pooling]  
+time elapsed: 96.5304 ms  
+passing volume into [conv2_1,Convolution]  
+time elapsed: 2228.97 ms  
+passing volume into [relu2_1,ReLU]  
+time elapsed: 71.9554 ms  
+passing volume into [conv2_2,Convolution]  
+time elapsed: 4255.55 ms  
+passing volume into [relu2_2,ReLU]  
+time elapsed: 72.2487 ms  
+passing volume into [pool2,Pooling]  
+time elapsed: 83.1646 ms  
+passing volume into [conv3_1,Convolution]  
+time elapsed: 2214.08 ms  
+passing volume into [relu3_1,ReLU]  
+time elapsed: 57.7185 ms  
+passing volume into [conv3_2,Convolution]  
+time elapsed: 4272.59 ms  
+passing volume into [relu3_2,ReLU]  
+time elapsed: 57.716 ms  
+passing volume into [conv3_3,Convolution]  
+time elapsed: 4279.81 ms  
+passing volume into [relu3_3,ReLU]  
+time elapsed: 58.4694 ms  
+passing volume into [pool3,Pooling]  
+time elapsed: 72.2867 ms  
+passing volume into [conv4_1,Convolution]  
+time elapsed: 2119.28 ms  
+passing volume into [relu4_1,ReLU]  
+time elapsed: 49.8859 ms  
+passing volume into [conv4_2,Convolution]  
+time elapsed: 4113.83 ms  
+passing volume into [relu4_2,ReLU]  
+time elapsed: 49.8044 ms  
+passing volume into [conv4_3,Convolution]  
+time elapsed: 4121.41 ms  
+passing volume into [relu4_3,ReLU]  
+time elapsed: 49.652 ms  
+passing volume into [pool4,Pooling]  
+time elapsed: 67.768 ms  
+passing volume into [conv5_1,Convolution]  
+time elapsed: 1117.64 ms  
+passing volume into [relu5_1,ReLU]  
+time elapsed: 45.4795 ms  
+passing volume into [conv5_2,Convolution]  
+time elapsed: 1117.36 ms  
+passing volume into [relu5_2,ReLU]  
+time elapsed: 45.9007 ms  
+passing volume into [conv5_3,Convolution]  
+time elapsed: 1118.67 ms  
+passing volume into [relu5_3,ReLU]  
+time elapsed: 45.7291 ms  
+passing volume into [pool5,Pooling]  
+time elapsed: 63.8651 ms  
+passing volume into [fc6,Convolution]  
+time elapsed: 7423.54 ms  
+passing volume into [relu6,ReLU]  
+time elapsed: 46.9669 ms  
+passing volume into [drop6,Dropout]  
+time elapsed: 47.2789 ms  
+passing volume into [fc7,Convolution]  
+time elapsed: 1136.28 ms  
+passing volume into [relu7,ReLU]  
+time elapsed: 46.6917 ms  
+passing volume into [drop7,Dropout]  
+time elapsed: 47.3623 ms  
+passing volume into [score59,Convolution]  
+time elapsed: 125.551 ms  
+<total time elapsed>: 46457.6 ms  
+
+
+-------------------------------------------------
+
+### CUDA
+-------------------------------------------------
+
+
+
 -------------------------------------------------
