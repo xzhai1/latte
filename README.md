@@ -68,6 +68,10 @@ You will need to download the whole CNN and the trained caffemodel:
 You can now finally build the project:
 
     make
+    
+Faster make can be done by
+
+    make -j8
 
 and fingers crossed, it won't throw an error. Then you can run a test:
 
