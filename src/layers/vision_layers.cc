@@ -7,7 +7,7 @@
 #include "caffe.pb.h"
 
 #include "vision_layers.h"
-#include "proto2img_utils.h" /* LoadKernelFromBlob */
+#include "proto2img_utils.h" 
 
 namespace Latte {
 
@@ -57,7 +57,6 @@ Convolution::run(Image<float> input)
   convolution(x, y, z) = sum(
       kernel(r.x, r.y, r.z + z*channels) * 
       clamped(x*stride - pad + r.x, y*stride - pad + r.y, r.z));
-      //clamped(x + r.x, y + r.y, r.z));
 
   /* and add bias */
   convolution(x, y, z) += bias(0, 0, z);
@@ -75,7 +74,6 @@ Convolution::run(Image<float> input)
   // convolution.tile(x_inner, y_inner, x_inner_outer, y_inner_outer, x_vectors, y_pairs, 4, 2)
   //            .vectorize(x_vectors)
   //            .unroll(y_pairs);
-
 
   Image<float> output = convolution.realize(width, height, num_output);
 
@@ -114,7 +112,6 @@ Pooling::run(Image<float> input)
 
 /*****************************************************************************
  *****************************************************************************/
-#if 1
 Deconvolution::Deconvolution(string layer_name, 
                              const ConvolutionParameter *param,
                              const BlobProto *kernel_blob, 
@@ -131,7 +128,8 @@ Deconvolution::Deconvolution(string layer_name,
   num_output = param->num_output();
   cout << "stride" << endl;
   if (param->stride_size()) 
-    /* stride is repeated field so we just need the first one. Assume no padding */
+    /* stride is repeated field so we just need the first one.
+     * Assume no padding */
     stride = param->stride(0);
   cout << "bias" << endl;
   bias = Image<float>(1, 1, num_output);
@@ -170,6 +168,5 @@ Deconvolution::run(Image<float> input) {
   Image<float> output = deconvolution.realize(width, height, num_output);
   return output;
 }
-#endif
 
 } /* namespace latte */

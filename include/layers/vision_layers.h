@@ -29,8 +29,8 @@ class Convolution : public Layer {
     /**
      * @brief Convolution Constructor for convolution layer.
      *
-     * Parse the relevant information from protobuf parameter and construct the
-     * convolution kernel and bias. The weights and bias data is a single 
+     * Parse the relevant information from protobuf parameter and construct 
+     * the convolution kernel and bias. The weights and bias data is a single 
      * array stored in row major order. 
      *
      * @param layer_name Name given in the model
@@ -44,7 +44,7 @@ class Convolution : public Layer {
                 const caffe::BlobProto *bias_blob);
 
     /**
-     * @brief convolve Perform convolution on image
+     * @brief run Perform convolution on image
      *
      * @param input Input image
      *
@@ -54,10 +54,8 @@ class Convolution : public Layer {
 };
 
 /**
- * @brief Pooling layer
- *
- * TODO Brief explain what this does
- * The model's default is Max pool with zero padding
+ * @brief Pooling layer reduces the image over a kernel using a function. In
+ * this case, max is taken over the kernel with zero padding.
  */
 class Pooling : public Layer {
     int kernel_size = 2;
@@ -82,7 +80,6 @@ class Pooling : public Layer {
     Halide::Image<float> run(Halide::Image<float> input);
 };
 
-#if 1
 /**
  * @brief Deconvolution layer
  * TODO explain
@@ -101,7 +98,6 @@ class Deconvolution : public Layer {
                   const caffe::BlobProto *bias_blob);
     Halide::Image<float> run(Halide::Image<float> input);
 };
-#endif
 
 } /* namespace latte */
 

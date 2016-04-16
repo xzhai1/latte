@@ -38,7 +38,7 @@ LIBS = -l Halide -l dl
 EXTRA_SCRIPTS = `pkg-config --cflags --libs protobuf libpng`
  
 # define the C source files
-SRCS = $(wildcard ./src/*.cc) $(wildcard ./src/layers/*.cc) $(wildcard ./tests/*.cc) 
+SRCS = $(wildcard ./src/*.cc) $(wildcard ./src/layers/*.cc) $(wildcard ./tests/*.cc)
 
 # define the C object files 
 #
