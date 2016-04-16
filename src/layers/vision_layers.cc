@@ -222,7 +222,7 @@ Deconvolution::run(Image<float> input)
   /* Compute output dimension */
   int width     = kernel_size + (input_width - 1) * stride;
   int height    = kernel_size + (input_height - 1) * stride;
-  Image<float> output(width, height, channels);
+  Image<float> output(width, height, num_output);
 
   /* For each input layer */
   for (int z = 0; z < input_depth; z++) {
