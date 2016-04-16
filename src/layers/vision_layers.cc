@@ -241,7 +241,7 @@ Deconvolution::run(Image<float> input)
 
 
   /* Recode */
-  cout << "::: Compute channels [start] :::" << end;
+  cout << "::: Compute channels [start] :::" << endl;
 #pragma omp parallel for
   for (int z = 0; z < num_output; z++) {
     cout << "start computing channel " << z << flush << endl;
@@ -265,7 +265,7 @@ Deconvolution::run(Image<float> input)
     }
     cout << "finish computing channel " << z << endl;
   }
-  cout << "::: Compute channels [end] :::" << end;
+  cout << "::: Compute channels [end] :::" << endl;
 
   // /* This version is not right */
   // /* For each input layer */
