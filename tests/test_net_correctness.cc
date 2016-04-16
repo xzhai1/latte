@@ -32,7 +32,6 @@ test_net(string image_path, NetParameter *net_model)
 
   network.print_net();
   Image<float> final_image = network.run(input);
-
   /* Save first channel as image */
   Func get_slice;
   Var x, y, z;

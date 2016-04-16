@@ -81,20 +81,25 @@ Convolution::run(Image<float> input)
   Image<float> output = convolution.realize(width, height, num_output);
 
   /* OpenCL */
+  /*
   Image<float> output(width, height, num_output);
   convolution.gpu_tile(x, y, z, 4, 4, 32);
   Target target = get_host_target();
   target.set_feature(Target::OpenCL);
   convolution.compile_jit(target);
   convolution.realize(output);
+  */
+
 
   /* CUDA */
+  /*
   Image<float> output(width, height, num_output);
   convolution.gpu_tile(x, y, z, 4, 4, 32);
   Target target = get_host_target();
   target.set_feature(Target::CUDA);
   convolution.compile_jit(target);
   convolution.realize(output);
+  */
 
   return output;
 }
