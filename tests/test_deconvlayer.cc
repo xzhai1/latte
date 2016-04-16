@@ -17,7 +17,7 @@ using namespace Halide::Tools;
 using namespace Latte;
 
 bool
-test_deconvolution(string image_path, NetParameter *net_model) 
+test_deconvolution(NetParameter *net_model) 
 {
   /* Loads data */
   int width = 24, height = 40, channel = 60;
