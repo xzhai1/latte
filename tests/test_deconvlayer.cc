@@ -4,6 +4,7 @@
 
 #include "caffe.pb.h"
 #include "halide_image_io.h"
+#include "CycleTimer.h"
 
 #include "layers.h"
 #include "tests.h"
@@ -38,7 +39,11 @@ test_deconvolution(NetParameter *net_model)
   ConvolutionParameter deconv_param = layer.convolution_param();
   Deconvolution deconv_layer = Deconvolution(layer.name(), &deconv_param, 
                                             &kernel_blob, NULL);
+  double startTime, endTime;
+  startTime = CycleTimer::currentSeconds();
   Image<float> output = deconv_layer.run(input);
+  endTime = CycleTimer::currentSeconds();
+  cout << "time elapsed: " << (endTime - startTime) * 1000 << " ms  " << endl;
 
   for (int k = 0; k < output.channels(); k++) {
     ofstream outfile("./outputs/deconv_channel" + to_string(k) + ".txt");
