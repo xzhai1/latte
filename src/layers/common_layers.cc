@@ -72,7 +72,19 @@ Dropout::run(Image<float> input)
   
   dropped(x, y, z) = input(x, y, z);
 
-  /* TODO: define schedule */
+  /* CPU parallelism */
+  dropped.parallel(z);
+
+  Var x_outer, y_outer, x_inner, y_inner, tile_index;
+  dropped.tile(x, y, x_outer, y_outer, x_inner, y_inner, 8, 8)
+         .fuse(x_outer, y_outer, tile_index)
+         .parallel(tile_index);
+
+  Var x_inner_outer, y_inner_outer, x_vectors, y_pairs;
+  dropped.tile(x_inner, y_inner, x_inner_outer, y_inner_outer, x_vectors, y_pairs, 4, 2)
+         .vectorize(x_vectors)
+         .unroll(y_pairs);
+  
   Image<float> output = dropped.realize(width, height, channels);
 
   return output;
