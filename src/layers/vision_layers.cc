@@ -158,22 +158,23 @@ Deconvolution::Deconvolution(string layer_name,
   set_name(layer_name);
   set_type("Deconvolution");
 
-  cout << "In constructor of deconv" << endl;
-  cout << "kernel" << endl;
+  // cout << "In constructor of deconv" << endl;
+  // cout << "kernel" << endl;
 
   kernel_size = param->kernel_size(0);
-  cout << "num_output" << endl;
+  
   num_output = param->num_output();
-  cout << "stride" << endl;
+  // cout << "num_output = " << num_output << endl;
+  // cout << "stride" << endl;
   if (param->stride_size()) 
     /* stride is repeated field so we just need the first one.
      * Assume no padding */
     stride = param->stride(0);
-  cout << "bias" << endl;
+  // cout << "bias" << endl;
   bias = Image<float>(1, 1, num_output);
   if (bias_blob)
     bias = LoadBiasFromBlob(bias_blob, num_output);
-  cout << "kernel" << endl;
+  // cout << "kernel" << endl;
   kernel = LoadKernelFromBlob(kernel_blob, kernel_size, num_output);
 }
 
@@ -219,10 +220,21 @@ Deconvolution::run(Image<float> input)
   int input_height = input.height();
   int input_depth  = input.channels();
 
+  cout << "input_width  = " << input_width << endl;
+  cout << "input_height = " << input_height << endl;
+  cout << "input_depth  = " << input_depth << endl;
+
   /* Compute output dimension */
   int width     = kernel_size + (input_width - 1) * stride;
   int height    = kernel_size + (input_height - 1) * stride;
   Image<float> output(width, height, num_output);
+
+  cout << "output_width  = " << width << endl;
+  cout << "output_height = " << height << endl;
+  cout << "output_depth  = " << num_output << endl;
+
+  cout << "kernel_size   = " << kernel_size << endl;
+  cout << "stride        = " << stride << endl;
 
   /* For each input layer */
   for (int z = 0; z < input_depth; z++) {
@@ -239,7 +251,7 @@ Deconvolution::run(Image<float> input)
           for (int j_k = 0; j_k < kernel_size; j_k++) {
             for (int i_k = 0; i_k < kernel_size; i_k++) {
               output(i_out + i_k, j_out + j_k, z_k) += 
-                input_val * kernel(i_k, j_k, z_k);
+                input_val * kernel(i_k, j_k, z_k + z*num_output);
             } /* i_k */
           } /* j_k */
         } /* z_k */
