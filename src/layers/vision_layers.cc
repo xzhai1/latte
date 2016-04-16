@@ -228,16 +228,16 @@ Deconvolution::run(Image<float> input)
   /* For each output layer */
   for (int z = 0; z < channels; z++) {
     /* Loop over all input pixels, step by stride */
-    for (int i = 0; i < input_height; i += stride) {
-      for (int j = 0; j < input_width; j += stride) {
+    for (int i = 0; i < input_height; i++) {
+      for (int j = 0; j < input_width; j++) {
 
-        float input_val = input(i, j, z);
+     	int i_out = i*stride;
+    	int j_out = j*stride;
+       	float input_val = input(i, j, z);
         
         /* dot with kernel and accumulate values into output */
         for (int j_k = 0; j_k < kernel_size; j_k++) {
           for (int i_k = 0; i_k < kernel_size; i_k++) {
-            int i_out = i/stride;
-            int j_out = j/stride;
             output(i_out + i_k, j_out + j_k, z) += 
               input_val * kernel(i_k, j_k, z);
           } /* j_k */
