@@ -4,7 +4,7 @@
 #include "caffe.pb.h"
 #include "Halide.h"
 
-#include "layers.h"
+#include "layers/layers.h"
 
 namespace Latte {
 

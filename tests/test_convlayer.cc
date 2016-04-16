@@ -5,10 +5,11 @@
 #include "caffe.pb.h"
 #include "halide_image_io.h"
 
-#include "layers.h"
-#include "tests.h"
+#include "layers/layers.h"
+#include "layers/vision_layers.h"
 #include "io_utils.h"
-#include "vision_layers.h"
+
+#include "tests.h"
 
 using namespace std;
 using namespace caffe;
