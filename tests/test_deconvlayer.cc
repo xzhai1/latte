@@ -46,7 +46,6 @@ test_deconvolution(NetParameter *net_model)
   endTime = CycleTimer::currentSeconds();
   cout << "time elapsed: " << (endTime - startTime) * 1000 << " ms  " << endl;
 
-  cout << "number of output deconv channels" << output.channels() << endl;
 
   for (int k = 0; k < output.channels(); k++) {
     ofstream outfile("./outputs/deconv_channel" + to_string(k) + ".txt");

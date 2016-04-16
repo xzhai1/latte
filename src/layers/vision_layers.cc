@@ -239,6 +239,7 @@ Deconvolution::run(Image<float> input)
 
 
   /* Recode */
+#pragma omp parallel for
   for (int z = 0; z < num_output; z++) {
     cout << "Producing channel " << z << endl;
     for (int j = 0; j < input_height; j++) {
