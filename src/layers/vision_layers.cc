@@ -222,30 +222,32 @@ Deconvolution::run(Image<float> input)
   /* Compute output dimension */
   int width     = kernel_size + (input_width - 1) * stride;
   int height    = kernel_size + (input_height - 1) * stride;
-  int channels  = input_depth;
   Image<float> output(width, height, channels);
 
-  /* For each output layer */
-  for (int z = 0; z < channels; z++) {
+  /* For each input layer */
+  for (int z = 0; z < input_depth; z++) {
     /* Loop over all input pixels, step by stride */
-    for (int i = 0; i < input_height; i++) {
-      for (int j = 0; j < input_width; j++) {
+    for (int j = 0; j < input_height; j++) {
+      for (int i = 0; i < input_width; i++) {
 
-     	int i_out = i*stride;
-    	int j_out = j*stride;
+       	int i_out = i*stride;
+      	int j_out = j*stride;
        	float input_val = input(i, j, z);
         
         /* dot with kernel and accumulate values into output */
-        for (int j_k = 0; j_k < kernel_size; j_k++) {
-          for (int i_k = 0; i_k < kernel_size; i_k++) {
-            output(i_out + i_k, j_out + j_k, z) += 
-              input_val * kernel(i_k, j_k, z);
+        for (int z_k = 0; z_k < num_output; z_k++) {
+          for (int j_k = 0; j_k < kernel_size; j_k++) {
+            for (int i_k = 0; i_k < kernel_size; i_k++) {
+              output(i_out + i_k, j_out + j_k, z_k) += 
+                input_val * kernel(i_k, j_k, z_k);
+            } /* i_k */
           } /* j_k */
-        } /* j_k */
+        } /* z_k */
+        
        
       } /* j */
     } /* i */
-  } /* each output layer */
+  } /* each input layer */
   
   return output;
 }
