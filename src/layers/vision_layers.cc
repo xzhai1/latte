@@ -221,6 +221,7 @@ Deconvolution::run(Image<float> input)
   int input_height = input.height();
   int input_depth  = input.channels();
 
+  cout << "::: Deconv General Info [start] :::" << endl;
   cout << "input_width  = " << input_width << endl;
   cout << "input_height = " << input_height << endl;
   cout << "input_depth  = " << input_depth << endl;
@@ -236,28 +237,35 @@ Deconvolution::run(Image<float> input)
 
   cout << "kernel_size   = " << kernel_size << endl;
   cout << "stride        = " << stride << endl;
+  cout << "::: Deconv General Info [end] :::" << endl;
 
 
   /* Recode */
+  cout << "::: Compute channels [start] :::" << end;
 #pragma omp parallel for
   for (int z = 0; z < num_output; z++) {
-    cout << "Producing channel " << z << endl;
+    cout << "start computing channel " << z << flush << endl;
     for (int j = 0; j < input_height; j++) {
-      for (int i = 0; i < input_width; i++) {
-        int j_out = j * stride;
-        int i_out = i * stride;
-        for (int j_k = 0; j_k < kernel_size; j_k++) {
-          for (int i_k = 0; i_k < kernel_size; i_k++) {
-            for (int z_k = 0; z_k < input_depth; z_k++) {
-              output(i_out + i_k, j_out + j_k, z) += 
-              input(i, j, z_k) * kernel(i_k, j_k, z * num_output + z_k);
+      for (int j_f = 0; j_f < stride; j_f++) {
+        for (int i = 0; i < input_width; i++) {
+          for (int i_f = 0; i_f < stride; i_f++) {
+            int j_out = j * stride + j_f;
+            int i_out = i * stride + i_f;
+            for (int j_k = 0; j_k < kernel_size; j_k++) {
+              for (int i_k = 0; i_k < kernel_size; i_k++) {
+                for (int z_k = 0; z_k < input_depth; z_k++) {
+                  output(i_out + i_k, j_out + j_k, z) += 
+                  input(i, j, z_k) * kernel(i_k, j_k, z * num_output + z_k);
+                }
+              }
             }
           }
         }
       }
     }
+    cout << "finish computing channel " << z << endl;
   }
-  cout << "Finish producing channels" << endl;
+  cout << "::: Compute channels [end] :::" << end;
 
   // /* This version is not right */
   // /* For each input layer */
