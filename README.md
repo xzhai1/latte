@@ -410,7 +410,7 @@ __total time elapsed: 50744.7 ms__
 -------------------------------------------------
 
 ### First convolved result
-For RGB image
+For RGB image  
 ![alt text] (https://github.com/xzhai1/latte/blob/master/images/rgb.png)
-the visualization of scaled feature maps from last conv layer is
+the visualization of scaled feature maps from last conv layer is  
 ![alt text] (https://github.com/xzhai1/latte/blob/master/outputs/result.png)
