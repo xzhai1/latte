@@ -177,6 +177,7 @@ Deconvolution::Deconvolution(string layer_name,
   kernel = LoadKernelFromBlob(kernel_blob, kernel_size, num_output);
 }
 
+#if 0
 // WARNING: This implementation assumes no padding
 Image<float> 
 Deconvolution::run(Image<float> input) {
@@ -207,6 +208,45 @@ Deconvolution::run(Image<float> input) {
   cout << "realize" << endl;
   /* TODO: define schedule */
   Image<float> output = deconvolution.realize(width, height, num_output);
+  return output;
+}
+#endif
+
+Image<float>
+Deconvolution::run(Image<float> input)
+{
+  int input_width  = input.width();
+  int input_height = input.height();
+  int input_depth  = input.channels();
+
+  /* Compute output dimension */
+  int width     = kernel_size + (input_width - 1) * stride;
+  int height    = kernel_size + (input_height - 1) * stride;
+  int channels  = input_depth;
+  Image<float> output(width, height, channels);
+
+  /* For each output layer */
+  for (int z = 0; z < channels; z++) {
+    /* Loop over all input pixels, step by stride */
+    for (int i = 0; i < input_height; i += stride) {
+      for (int j = 0; j < input_width; j += stride) {
+
+        float input_val = input(i, j, z);
+        
+        /* dot with kernel and accumulate values into output */
+        for (int j_k = 0; j_k < kernel_size; j_k++) {
+          for (int i_k = 0; i_k < kernel_size; i_k++) {
+            int i_out = i/stride;
+            int j_out = j/stride;
+            output(i_out + i_k, j_out + j_k, z) += 
+              input_val * kernel(i_k, j_k, z);
+          } /* j_k */
+        } /* j_k */
+       
+      } /* j */
+    } /* i */
+  } /* each output layer */
+  
   return output;
 }
 
