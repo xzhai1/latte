@@ -38,6 +38,18 @@ ReLU::run(Image<float> input)
                        negative_slope*min(0, input(x, y, z));
 
   /* TODO: define schedule */
+  rectified.parallel(z);
+
+  Var x_outer, y_outer, x_inner, y_inner, tile_index;
+  rectified.tile(x, y, x_outer, y_outer, x_inner, y_inner, 8, 8)
+           .fuse(x_outer, y_outer, tile_index)
+           .parallel(tile_index);
+
+  Var x_inner_outer, y_inner_outer, x_vectors, y_pairs;
+  rectified.tile(x_inner, y_inner, x_inner_outer, y_inner_outer, x_vectors, y_pairs, 4, 2)
+           .vectorize(x_vectors)
+           .unroll(y_pairs);
+
   Image<float> output = rectified.realize(width, height, channels);
   return output;
 }
