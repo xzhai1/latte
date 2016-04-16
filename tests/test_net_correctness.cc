@@ -40,6 +40,5 @@ test_net(string image_path, NetParameter *net_model)
   Image<float> slice = get_slice.realize(
       final_image.width(), final_image.height(), 1);
   save_image(slice, "xxx.png");
-
   return true;
 }

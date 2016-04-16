@@ -60,22 +60,41 @@ Convolution::run(Image<float> input)
 
   /* and add bias */
   convolution(x, y, z) += bias(0, 0, z);
-    
-  /* TODO define schedule */
-  // convolution.trace_stores();
-  // convolution.parallel(z);
+  
+  /*
+   * Different schedulings
+   */
 
-  // Var x_outer, y_outer, x_inner, y_inner, tile_index;
-  // convolution.tile(x, y, x_outer, y_outer, x_inner, y_inner, 64, 64)
-  //            .fuse(x_outer, y_outer, tile_index)
-  //            .parallel(tile_index);
+  /* CPU parallelism */
+  convolution.parallel(z);
 
-  // Var x_inner_outer, y_inner_outer, x_vectors, y_pairs;
-  // convolution.tile(x_inner, y_inner, x_inner_outer, y_inner_outer, x_vectors, y_pairs, 4, 2)
-  //            .vectorize(x_vectors)
-  //            .unroll(y_pairs);
+  Var x_outer, y_outer, x_inner, y_inner, tile_index;
+  convolution.tile(x, y, x_outer, y_outer, x_inner, y_inner, 8, 8)
+             .fuse(x_outer, y_outer, tile_index)
+             .parallel(tile_index);
+
+  Var x_inner_outer, y_inner_outer, x_vectors, y_pairs;
+  convolution.tile(x_inner, y_inner, x_inner_outer, y_inner_outer, x_vectors, y_pairs, 4, 2)
+             .vectorize(x_vectors)
+             .unroll(y_pairs);
 
   Image<float> output = convolution.realize(width, height, num_output);
+
+  /* OpenCL */
+  Image<float> output(width, height, num_output);
+  convolution.gpu_tile(x, y, z, 4, 4, 32);
+  Target target = get_host_target();
+  target.set_feature(Target::OpenCL);
+  convolution.compile_jit(target);
+  convolution.realize(output);
+
+  /* CUDA */
+  Image<float> output(width, height, num_output);
+  convolution.gpu_tile(x, y, z, 4, 4, 32);
+  Target target = get_host_target();
+  target.set_feature(Target::CUDA);
+  convolution.compile_jit(target);
+  convolution.realize(output);
 
   return output;
 }
