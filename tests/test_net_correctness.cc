@@ -8,12 +8,13 @@
 #include "io_utils.h"
 #include "CycleTimer.h"
 
+#include "layers/layers.h" 
+#include "layers/vision_layers.h"
+#include "layers/activation_layers.h"
+#include "layers/common_layers.h"
+#include "layers/loss_layers.h"
+
 #include "net.h"
-#include "layers.h" 
-#include "vision_layers.h"
-#include "activation_layers.h"
-#include "common_layers.h"
-#include "loss_layers.h"
 
 using namespace std;
 using namespace caffe;

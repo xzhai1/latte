@@ -4,7 +4,7 @@
 #include "Halide.h"
 #include "caffe.pb.h"
 
-#include "layers.h"
+#include "layers/layers.h"
 
 /**
  * @brief

@@ -6,7 +6,7 @@
 #include "halide_image_io.h"
 #include "caffe.pb.h"
 
-#include "vision_layers.h"
+#include "layers/vision_layers.h"
 #include "proto2img_utils.h" 
 
 namespace Latte {
