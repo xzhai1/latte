@@ -119,12 +119,12 @@ test_net(string image_path, NetParameter *net_model)
   }
 
   /* Run layers */
-  double startTime, endTime, allSartTime, allEndTime;
+  double startTime, endTime, allStartTime, allEndTime;
   cout << endl << endl;
   cout << "run layers" << endl;
   Image<float> prev_output = input;
   Image<float> curr_output;
-  allSartTime = CycleTimer::currentSeconds();
+  allStartTime = CycleTimer::currentSeconds();
   for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
     cout << "passing volume into [" << ptr->get_name() << "," << ptr->get_type() << "]  " << endl;
     startTime = CycleTimer::currentSeconds();
@@ -138,12 +138,12 @@ test_net(string image_path, NetParameter *net_model)
 
   /* Save all channels */
   int num_output_layers = curr_output.channels();
-  for (int = 0; i < num_output_layers; i++) {
+  for (int i = 0; i < num_output_layers; i++) {
     Func get_slice;
     Var x, y, z;
     get_slice(x, y, z) = curr_output(x, y, z + i);
     Image<float> slice = get_slice.realize(curr_output.width(), curr_output.height(), 1);
-    save_image(slice, "channel_"to_string(i) + ".png")
+    save_image(slice, "./outputs/channel_" + to_string(i) + ".png");
   }
 
   return true;
