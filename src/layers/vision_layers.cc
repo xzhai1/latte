@@ -239,6 +239,16 @@ Deconvolution::run(Image<float> input)
   cout << "stride        = " << stride << endl;
   cout << "::: Deconv General Info [end] :::" << endl;
 
+  cout << "output deconv kernel" << endl;
+  for (int k = 0; k < num_output; k++) {
+    ofstream outfile("./outputs/deconv_kernel.txt");
+    for (int j = 0; j < kernel_size; j++) {
+      for (int i = 0; i < kernel_size; i++) {
+        outfile << kernel(i, j, k) << " ";
+      }
+      outfile << endl;
+    }
+  }
 
   /* Recode */
 //   cout << "::: Compute channels [start] :::" << endl;
@@ -267,32 +277,32 @@ Deconvolution::run(Image<float> input)
 //   }
 //   cout << "::: Compute channels [end] :::" << endl;
 
-  /* This version is not right */
-  /* For each input layer */
-  for (int z = 0; z < input_depth; z++) {
-    /* Loop over all input pixels, step by stride */
-    #pragma omp parallel for
-    for (int j = 0; j < input_height; j++) {
-      for (int i = 0; i < input_width; i++) {
+  // /* This version is not right */
+  // /* For each input layer */
+  // for (int z = 0; z < input_depth; z++) {
+  //   /* Loop over all input pixels, step by stride */
+  //   #pragma omp parallel for
+  //   for (int j = 0; j < input_height; j++) {
+  //     for (int i = 0; i < input_width; i++) {
 
-       	int i_out = i*stride;
-      	int j_out = j*stride;
-       	float input_val = input(i, j, z);
+  //      	int i_out = i*stride;
+  //     	int j_out = j*stride;
+  //      	float input_val = input(i, j, z);
         
-        /* dot with kernel and accumulate values into output */
-        for (int z_k = 0; z_k < num_output; z_k++) {
-          for (int j_k = 0; j_k < kernel_size; j_k++) {
-            for (int i_k = 0; i_k < kernel_size; i_k++) {
-              output(i_out + i_k, j_out + j_k, z_k) += 
-                input_val * kernel(i_k, j_k, z_k + z*num_output);
-            } /* i_k */
-          } /* j_k */
-        } /* z_k */
+  //       /* dot with kernel and accumulate values into output */
+  //       for (int z_k = 0; z_k < num_output; z_k++) {
+  //         for (int j_k = 0; j_k < kernel_size; j_k++) {
+  //           for (int i_k = 0; i_k < kernel_size; i_k++) {
+  //             output(i_out + i_k, j_out + j_k, z_k) += 
+  //               input_val * kernel(i_k, j_k, z_k + z*num_output);
+  //           } /* i_k */
+  //         } /* j_k */
+  //       } /* z_k */
         
        
-      } /* j */
-    } /* i */
-  } /* each input layer */
+  //     } /* j */
+  //   } /* i */
+  // } /* each input layer */
   
   return output;
 }
