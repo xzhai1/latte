@@ -127,7 +127,7 @@ Net::Net(NetParameter *net_model)
 
   cout << "name \taddr" << endl;
 
-  /* TODO we are treating here */
+  /* TODO we are cheating here */
   for (int i = 3; i < num_layers; i++) {
     LayerParameter layer = net_model->layer(i);
     string name = layer.name();
@@ -143,14 +143,14 @@ Net::Net(NetParameter *net_model)
       hit = true;
       cout << "finish processing convolution" << endl;
     } 
-    /*
+    
     else if (type == DECONVOLUTION) {
       cout << "hit deconv" << endl;
       curr_layer = build_deconvlayer(&layer);
       hit = true;
       cout << "finish processing deconv" << endl;
     }
-    */
+    
     else if (type == RELU) {
       curr_layer = build_relulayer(&layer);
       hit = true;

@@ -195,13 +195,16 @@ Deconvolution::run(Image<float> input) {
   y1R(y2) = y2 / stride;
   // w1  = x1R - x1L + 1;
   // h1  = y1R - y1L + 1;
+  cout << "create RDom" << endl;
   RDom r(0, x1R(x2) - x1L(x2) + 1, 0, y1R(y2) - y1L(y2) + 1, 0, channels);
 
   // Compute deconvolution
+  cout << "create deconv" << endl;
   deconvolution(x2, y2, z) = sum(
       kernel(x2 - (x1L(x2) + r.x) * stride, y2 - (y1L(y2) + r.y) * stride, z*channels + r.z) *
       input(x1L(x2) + r.x, y1L(y2) + r.y, r.z)) + bias(r.z);
 
+  cout << "realize" << endl;
   /* TODO: define schedule */
   Image<float> output = deconvolution.realize(width, height, num_output);
   return output;
