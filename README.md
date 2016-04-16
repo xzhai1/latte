@@ -408,3 +408,6 @@ __total time elapsed: 50744.7 ms__
 
 
 -------------------------------------------------
+
+### First convolved result
+![alt text] (https://github.com/xzhai1/latte/blob/master/outputs/result.png)
