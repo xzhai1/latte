@@ -179,11 +179,14 @@ Net::Net(NetParameter *net_model)
 void
 Net::print_net()
 {
+  cout << "--------------------------------------------" << endl;
   cout << "Network has the following layers" << endl;
+  cout << "--------------------------------------------" << endl;
   cout << "name" << "\t\t\t" << "type" << endl;
   for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
     cout << ptr->get_name() << "\t\t\t" << ptr->get_type() << endl;
   }
+  cout << "--------------------------------------------" << endl;
 }
 
 Image<float>
