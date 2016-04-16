@@ -73,7 +73,7 @@ Dropout::run(Image<float> input)
   dropped(x, y, z) = input(x, y, z);
 
   /* CPU parallelism */
-  dropped.parallel(z);
+  // dropped.parallel(z);
 
   Var x_outer, y_outer, x_inner, y_inner, tile_index;
   dropped.tile(x, y, x_outer, y_outer, x_inner, y_inner, 8, 8)

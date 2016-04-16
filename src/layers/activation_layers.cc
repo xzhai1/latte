@@ -38,7 +38,7 @@ ReLU::run(Image<float> input)
                        negative_slope*min(0, input(x, y, z));
 
   /* TODO: define schedule */
-  rectified.parallel(z);
+  // rectified.parallel(z);
 
   Var x_outer, y_outer, x_inner, y_inner, tile_index;
   rectified.tile(x, y, x_outer, y_outer, x_inner, y_inner, 8, 8)
