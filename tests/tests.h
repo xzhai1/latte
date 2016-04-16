@@ -17,6 +17,9 @@ bool test_LoadFromBinaryFile(std::string fpath, caffe::NetParameter *net_model);
 /* test_convlayer.cc */
 bool test_convolution(std::string image_path, caffe::NetParameter *net_model);
 
+/* test_deconvlayer.cc */
+bool test_deconvolution(caffe::NetParameter *net_model);
+
 /* test_net.cc */
 bool test_net(std::string image_path, caffe::NetParameter *net_model);
 
