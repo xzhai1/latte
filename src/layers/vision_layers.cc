@@ -129,7 +129,7 @@ Pooling::run(Image<float> input)
   RDom r(0, kernel_size, 0, kernel_size);
   pooled(x, y, z) = maximum(input(x*stride + r.x, y*stride + r.y, z));
 
-  /* TODO: define schedule */
+  /* CPU parallelism */
   pooled.parallel(z);
 
   Var x_outer, y_outer, x_inner, y_inner, tile_index;
