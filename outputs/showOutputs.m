@@ -10,12 +10,12 @@ for i = 1:size(fileNames,1)
 end
 
 % Compute width and height
-width = 8;
+width = 10;
 height = ceil(size(X, 3) / width);
 
 figure
 for i = 1:size(X,3)
-    subplot(width,height,i);
+    subplot(height, width, i);
     axis off;
     imagesc(X(:,:,i));
     set(gca,'xtick',[],'ytick',[])
