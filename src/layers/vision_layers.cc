@@ -90,7 +90,7 @@ Convolution::run(Image<float> input)
 
   /* CUDA */
   Image<float> output(width, height, num_output);
-  convolution.gpu_tile(x,y,z,4,4,32);
+  convolution.gpu_tile(x, y, z, 4, 4, 32);
   Target target = get_host_target();
   target.set_feature(Target::CUDA);
   convolution.compile_jit(target);
