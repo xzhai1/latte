@@ -245,7 +245,7 @@ Deconvolution::run(Image<float> input)
     ofstream outfile("./outputs/deconv_kernel" + to_string(k) + ".txt");
     for (int j = 0; j < kernel_size; j++) {
       for (int i = 0; i < kernel_size; i++) {
-        outfile << kernel(i, j, k) << " ";
+        outfile << kernel(i, j, k*input_depth) << " ";
       }
       outfile << endl;
     }
