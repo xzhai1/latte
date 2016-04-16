@@ -6,7 +6,7 @@
 #include "halide_image_io.h"
 #include "caffe.pb.h"
 
-#include "vision_layers.h"
+#include "layers/vision_layers.h"
 #include "proto2img_utils.h" 
 
 namespace Latte {
@@ -179,6 +179,7 @@ Deconvolution::Deconvolution(string layer_name,
 }
 
 #if 0
+// We have not figured out how to use protobuf
 // WARNING: This implementation assumes no padding
 Image<float> 
 Deconvolution::run(Image<float> input) {
@@ -236,30 +237,52 @@ Deconvolution::run(Image<float> input)
   cout << "kernel_size   = " << kernel_size << endl;
   cout << "stride        = " << stride << endl;
 
-  /* For each input layer */
-  for (int z = 0; z < input_depth; z++) {
-    /* Loop over all input pixels, step by stride */
+
+  /* Recode */
+  for (int z = 0; z < num_output; z++) {
+    cout << "Producing channel " << z << endl;
     for (int j = 0; j < input_height; j++) {
       for (int i = 0; i < input_width; i++) {
+        int j_out = j * stride;
+        int i_out = i * stride;
+        for (int j_k = 0; j_k < kernel_size; j_k++) {
+          for (int i_k = 0; i_k < kernel_size; i_k++) {
+            for (int z_k = 0; z_k < input_depth; z_k++) {
+              output(i_out + i_k, j_out + j_k, z) += 
+              input(i, j, z_k) * kernel(i_k, j_k, z * num_output + z_k);
+            }
+          }
+        }
+      }
+    }
+  }
+  cout << "Finish producing channels" << endl;
 
-       	int i_out = i*stride;
-      	int j_out = j*stride;
-       	float input_val = input(i, j, z);
+  // /* This version is not right */
+  // /* For each input layer */
+  // for (int z = 0; z < input_depth; z++) {
+  //   /* Loop over all input pixels, step by stride */
+  //   for (int j = 0; j < input_height; j++) {
+  //     for (int i = 0; i < input_width; i++) {
+
+  //      	int i_out = i*stride;
+  //     	int j_out = j*stride;
+  //      	float input_val = input(i, j, z);
         
-        /* dot with kernel and accumulate values into output */
-        for (int z_k = 0; z_k < num_output; z_k++) {
-          for (int j_k = 0; j_k < kernel_size; j_k++) {
-            for (int i_k = 0; i_k < kernel_size; i_k++) {
-              output(i_out + i_k, j_out + j_k, z_k) += 
-                input_val * kernel(i_k, j_k, z_k + z*num_output);
-            } /* i_k */
-          } /* j_k */
-        } /* z_k */
+  //       /* dot with kernel and accumulate values into output */
+  //       for (int z_k = 0; z_k < num_output; z_k++) {
+  //         for (int j_k = 0; j_k < kernel_size; j_k++) {
+  //           for (int i_k = 0; i_k < kernel_size; i_k++) {
+  //             output(i_out + i_k, j_out + j_k, z_k) += 
+  //               input_val * kernel(i_k, j_k, z_k + z*num_output);
+  //           } /* i_k */
+  //         } /* j_k */
+  //       } /* z_k */
         
        
-      } /* j */
-    } /* i */
-  } /* each input layer */
+  //     } /* j */
+  //   } /* i */
+  // } /* each input layer */
   
   return output;
 }

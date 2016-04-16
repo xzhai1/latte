@@ -15,7 +15,7 @@ CC = g++
 CFLAGS  = --std=c++11 -g -fopenmp -Wall
 
 # define any directories containing header files other than /usr/include
-INCLUDES = -I ./include -I ./include/layers -I ../halide/include -I ../halide/tools
+INCLUDES = -I ./include -I ../halide/include -I ../halide/tools `pkg-config --cflags-only-I protobuf`
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
@@ -35,7 +35,7 @@ LIBS = -l Halide -l dl
 # For example, the following command produces:
 # 	-pthread -I/usr/local/include  -pthread -L/usr/local/lib -lprotobuf
 # 	-lpthread	
-EXTRA_SCRIPTS = `pkg-config --cflags --libs protobuf libpng`
+EXTRA_SCRIPTS = `pkg-config --libs protobuf libpng`
  
 # define the C source files
 SRCS = $(wildcard ./src/*.cc) $(wildcard ./src/layers/*.cc) $(wildcard ./tests/*.cc)

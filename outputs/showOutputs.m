@@ -1,6 +1,6 @@
 %% Script for display montage of outputs
 fileFolder = fullfile(pwd);
-dirOutput = dir(fullfile(fileFolder,'channel*.txt'));
+dirOutput = dir(fullfile(fileFolder,'deconv_channel*.txt'));
 fileNames = {dirOutput.name}';
 
 X = [];

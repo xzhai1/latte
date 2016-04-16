@@ -6,7 +6,7 @@
 #include "halide_image_io.h"
 #include "caffe.pb.h"
 
-#include "loss_layers.h"
+#include "layers/loss_layers.h"
 #include "proto2img_utils.h" /* LoadKernelFromBlob */
 
 namespace Latte {

@@ -2,7 +2,7 @@
 #include <fstream>
 #include "caffe.pb.h"
 
-#include "layers.h"
+#include "layers/layers.h"
 #include "tests.h"
 #include "io_utils.h"
 #include "proto2img_utils.h"
