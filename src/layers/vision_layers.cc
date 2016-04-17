@@ -231,6 +231,7 @@ Deconvolution::run(Image<float> input)
   int width     = kernel_size + (input_width - 1) * stride;
   int height    = kernel_size + (input_height - 1) * stride;
   Image<float> output(width, height, num_output);
+  Image<int> count(width, height, num_output);
 
   cout << "output_width  = " << width << endl;
   cout << "output_height = " << height << endl;
@@ -278,32 +279,42 @@ Deconvolution::run(Image<float> input)
 //   }
 //   cout << "::: Compute channels [end] :::" << endl;
 
-  // /* This version is not right */
-  // /* For each input layer */
-  // for (int z = 0; z < input_depth; z++) {
-  //   /* Loop over all input pixels, step by stride */
-  //   #pragma omp parallel for
-  //   for (int j = 0; j < input_height; j++) {
-  //     for (int i = 0; i < input_width; i++) {
+  /* This version is not right */
+  /* For each input layer */
+  for (int z = 0; z < input_depth; z++) {
+    /* Loop over all input pixels, step by stride */
+    #pragma omp parallel for
+    for (int j = 0; j < input_height; j++) {
+      for (int i = 0; i < input_width; i++) {
 
-  //      	int i_out = i*stride;
-  //     	int j_out = j*stride;
-  //      	float input_val = input(i, j, z);
+       	int i_out = i*stride;
+      	int j_out = j*stride;
+       	float input_val = input(i, j, z);
         
-  //       /* dot with kernel and accumulate values into output */
-  //       for (int z_k = 0; z_k < num_output; z_k++) {
-  //         for (int j_k = 0; j_k < kernel_size; j_k++) {
-  //           for (int i_k = 0; i_k < kernel_size; i_k++) {
-  //             output(i_out + i_k, j_out + j_k, z_k) += 
-  //               input_val * kernel(i_k, j_k, z_k + z*num_output);
-  //           } /* i_k */
-  //         } /* j_k */
-  //       } /* z_k */
+        /* dot with kernel and accumulate values into output */
+        for (int z_k = 0; z_k < num_output; z_k++) {
+          for (int j_k = 0; j_k < kernel_size; j_k++) {
+            for (int i_k = 0; i_k < kernel_size; i_k++) {
+              output(i_out + i_k, j_out + j_k, z_k) += 
+                input_val * kernel(i_k, j_k, z_k + z*num_output);
+              count(i_out + i_k, j_out + j_k, z_k)++;
+            } /* i_k */
+          } /* j_k */
+        } /* z_k */
         
        
-  //     } /* j */
-  //   } /* i */
-  // } /* each input layer */
+      } /* j */
+    } /* i */
+  } /* each input layer */
+
+  #pragma omp parallel for
+  for (int k = 0; k < num_output; k++) {
+    for (int j = 0; j < height; j++) {
+      for (int i = 0; i < width; i++) {
+        output(i, j, k) /= output(i, j, k) / cout(i, j, k);
+      }
+    }
+  }
   
   return output;
 }
