@@ -261,15 +261,15 @@ Deconvolution::run(Image<float> input)
     cout << "start computing channel " << z << flush << endl;
     for (int j = 0; j < height; j++) {
       for (int i = 0; i < width; i++) {
-        x1L = (max(i - kernel_size + 1, 0) + stride - 1) / stride;
-        y1L = (max(j - kernel_size + 1, 0) + stride - 1) / stride;
-        x1R = i / stride;
-        y1R = j / stride;
+        int x1L = (max(i - kernel_size + 1, 0) + stride - 1) / stride;
+        int y1L = (max(j - kernel_size + 1, 0) + stride - 1) / stride;
+        int x1R = i / stride;
+        int y1R = j / stride;
         for (int y1 = y1L; y1 < y1R + 1; y1++) {
           for (int x1 = x1L; x1 < x1R + 1; x1++) {
             for (int z1 = 0; z1 < input_depth; z1++) {
-              x2 = i - x1 * stride;
-              y2 = j - y1 * stride;
+              int x2 = i - x1 * stride;
+              int y2 = j - y1 * stride;
               output(i, j, z) += kernel(x2, y2, z1*num_output + z) * input(x1, y1, z1);
             }
           }
