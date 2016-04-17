@@ -31,9 +31,9 @@ Softmax::run(Image<float> input)
   int height    = input.height();
   int channels  = input.channels();
 
-  RDom r(0, channels);
+  RDom r(0, 1, 0, 1, 0, channels);
   prob(x, y, z) = exp(input(x, y, z));
-  normalizer(x, y, z) = sum(prob(x, y, z + r.x));
+  normalizer(x, y, z) = sum(prob(x, y, z + r.z));
   prob(x, y, z) = prob(x, y, z)/normalizer(x, y, z);
 
   /* TODO: define schedule */
