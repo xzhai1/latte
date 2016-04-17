@@ -116,6 +116,22 @@ build_dropoutlayer(LayerParameter *layer)
 }
 
 /**
+ * @brief build_softmaxlayer 
+ *
+ * @param layer
+ *
+ * @return 
+ */
+static Layer *
+build_dropoutlayer(LayerParameter *layer)
+{
+  DropoutParameter softmax_param = layer->softmax_param();
+  string name = layer->name();
+  Dropout *softmax_layer = new Softmax(name, &softmax_param);
+  return softmax_layer;
+}
+
+/**
  * @brief Net 
  *
  * @param net_model
@@ -160,6 +176,9 @@ Net::Net(NetParameter *net_model)
       hit = true;
     } else if (type == DROPOUT) {
       curr_layer = build_dropoutlayer(&layer);
+      hit = true;
+    } else if (type == SOFTMAX) {
+      curr_layer = build_softmaxlayer(&layer);
       hit = true;
     }
 
