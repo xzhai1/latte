@@ -242,6 +242,7 @@ Deconvolution::run(Image<float> input)
   cout << "::: Deconv General Info [end] :::" << endl;
 
   cout << "output deconv kernel" << endl;
+  #if 0
   for (int k = 0; k < num_output; k++) {
     ofstream outfile("./outputs/deconv_kernel" + to_string(k) + ".txt");
     for (int j = 0; j < kernel_size; j++) {
@@ -251,34 +252,64 @@ Deconvolution::run(Image<float> input)
       outfile << endl;
     }
   }
+  #endif
 
+
+  cout << "::: Compute channels [start] :::" << endl;
+  #pragma omp parallel for
+  for (int z = 0; z < num_output; z++) {
+    cout << "start computing channel " << z << flush << endl;
+    for (int j = 0; j < height; j++) {
+      for (int i = 0; i < width; i++) {
+        x1L = (max(i - kernel_size + 1, 0) + stride - 1) / stride;
+        y1L = (max(j - kernel_size + 1, 0) + stride - 1) / stride;
+        x1R = i / stride;
+        y1R = j / stride;
+        for (int y1 = y1L; y1 < y1R + 1; y1++) {
+          for (int x1 = x1L; x1 < x1R + 1; x1++) {
+            for (int z1 = 0; z1 < input_depth; z1++) {
+              x2 = i - x1 * stride;
+              y2 = j - y1 * stride;
+              output(i, j, z) += kernel(x2, y2, z1*num_output + z) * input(x1, y1, z1);
+            }
+          }
+        }
+      }
+    }
+    cout << "finish computing channel " << z << flush << endl;
+  }
+  cout << "::: Compute channels [end] :::" << endl;
+
+  #if 0
   /* Recode */
-//   cout << "::: Compute channels [start] :::" << endl;
-// #pragma omp parallel for
-//   for (int z = 0; z < num_output; z++) {
-//     cout << "start computing channel " << z << flush << endl;
-//     for (int j = 0; j < input_height; j++) {
-//       for (int j_f = 0; j_f < stride; j_f++) {
-//         for (int i = 0; i < input_width; i++) {
-//           for (int i_f = 0; i_f < stride; i_f++) {
-//             int j_out = j * stride + j_f;
-//             int i_out = i * stride + i_f;
-//             for (int j_k = 0; j_k < kernel_size; j_k++) {
-//               for (int i_k = 0; i_k < kernel_size; i_k++) {
-//                 for (int z_k = 0; z_k < input_depth; z_k++) {
-//                   output(i_out + i_k, j_out + j_k, z) += 
-//                   input(i, j, z_k) * kernel(i_k, j_k, z * num_output + z_k);
-//                 }
-//               }
-//             }
-//           }
-//         }
-//       }
-//     }
-//     cout << "finish computing channel " << z << endl;
-//   }
-//   cout << "::: Compute channels [end] :::" << endl;
+  cout << "::: Compute channels [start] :::" << endl;
+  #pragma omp parallel for
+  for (int z = 0; z < num_output; z++) {
+    cout << "start computing channel " << z << flush << endl;
+    for (int j = 0; j < input_height; j++) {
+      for (int j_f = 0; j_f < stride; j_f++) {
+        for (int i = 0; i < input_width; i++) {
+          for (int i_f = 0; i_f < stride; i_f++) {
+            int j_out = j * stride + j_f;
+            int i_out = i * stride + i_f;
+            for (int j_k = 0; j_k < kernel_size; j_k++) {
+              for (int i_k = 0; i_k < kernel_size; i_k++) {
+                for (int z_k = 0; z_k < input_depth; z_k++) {
+                  output(i_out + i_k, j_out + j_k, z) += 
+                  input(i, j, z_k) * kernel(i_k, j_k, z * num_output + z_k);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    cout << "finish computing channel " << z << endl;
+  }
+  cout << "::: Compute channels [end] :::" << endl;
+  #endif
 
+  #if 0
   /* This version is not right */
   /* For each input layer */
   for (int z = 0; z < input_depth; z++) {
@@ -315,6 +346,7 @@ Deconvolution::run(Image<float> input)
       }
     }
   }
+  #endif
   
   return output;
 }

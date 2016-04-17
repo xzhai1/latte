@@ -47,16 +47,16 @@ test_deconvolution(NetParameter *net_model)
   cout << "time elapsed: " << (endTime - startTime) * 1000 << " ms  " << endl;
 
 
-  // for (int k = 0; k < output.channels(); k++) {
-  //   ofstream outfile("./outputs/deconv_channel" + to_string(k) + ".txt");
-  //   for (int j = 0; j < output.height(); j++) {
-  //     for (int i = 0; i < output.width(); i++) {
-  //       outfile << input(i, j, k) << " ";
-  //     }
-  //     outfile << endl;
-  //   }
-  //   outfile.close();
-  // }
+  for (int k = 0; k < output.channels(); k++) {
+    ofstream outfile("./outputs/deconv_channel" + to_string(k) + ".txt");
+    for (int j = 0; j < output.height(); j++) {
+      for (int i = 0; i < output.width(); i++) {
+        outfile << input(i, j, k) << " ";
+      }
+      outfile << endl;
+    }
+    outfile.close();
+  }
 
   return true;
 }
