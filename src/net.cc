@@ -123,11 +123,10 @@ build_dropoutlayer(LayerParameter *layer)
  * @return 
  */
 static Layer *
-build_dropoutlayer(LayerParameter *layer)
+build_softmaxlayer(LayerParameter *layer)
 {
-  DropoutParameter softmax_param = layer->softmax_param();
   string name = layer->name();
-  Dropout *softmax_layer = new Softmax(name, &softmax_param);
+  Softmax *softmax_layer = new Softmax(name);
   return softmax_layer;
 }
 
