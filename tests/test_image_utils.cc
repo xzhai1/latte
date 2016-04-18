@@ -20,7 +20,8 @@ test_im2col(string image_path)
 
   int kernel_size = 3;
   int stride = 1;
-  Image<float> output = im2col(input, kernel_size, stride);
+  int pad = 1;
+  Image<float> output = im2col(input, kernel_size, pad, stride);
   cout << "output dimension" << endl;
   cout << output.width() << endl;
   cout << output.height() << endl;

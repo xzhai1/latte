@@ -5,7 +5,7 @@
 using namespace Halide;
 
 Image<float>
-im2col(Image<float> input, int kernel_size, int stride)
+im2col(Image<float> input, int kernel_size, int pad, int stride)
 {
   int input_width = input.width();
   int input_height = input.height();
@@ -13,8 +13,8 @@ im2col(Image<float> input, int kernel_size, int stride)
 
   /* x_steps = number of steps the kernel takes before reaching the last column 
    * y_steps = number of steps the kernel takes before reaching the last row */
-  int x_steps = (input_width - kernel_size)/stride + 1;
-  int y_steps = (input_height - kernel_size)/stride + 1;
+  int x_steps = (input_width  + 2*pad - kernel_size)/stride + 1;
+  int y_steps = (input_height + 2*pad - kernel_size)/stride + 1;
 
   /* Figure out the output dimension */
   int output_width = x_steps * y_steps;
@@ -28,8 +28,8 @@ im2col(Image<float> input, int kernel_size, int stride)
    * in the final matrix */
 
   /* Let's figure out the top left corner's coordinates */
-  Expr top_x = x % x_steps * stride;
-  Expr top_y = x / x_steps * stride; 
+  Expr top_x = x % x_steps * stride - pad;
+  Expr top_y = x / x_steps * stride - pad; 
 
   /* Then let's figure out where in the box are we */
   Expr del_x = y % kernel_size;
@@ -41,7 +41,9 @@ im2col(Image<float> input, int kernel_size, int stride)
   Expr input_y = top_y + del_y;
   Expr input_z = 0     + del_z;
 
-  output(x, y) = input(input_x, input_y, input_z);
+  /* Zero pad */
+  Func clamped = BoundaryConditions::constant_exterior(input, 0.f);
+  output(x, y) = clamped(input_x, input_y, input_z);
 
   /* TODO schedule */
 
