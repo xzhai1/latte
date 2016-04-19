@@ -133,6 +133,21 @@ Func Convolution::run(Func input, int input_width, int input_height, int input_c
   /* and add bias */
   storage(x, y, z) += bias(0, 0, z);
 
+  /* Schedule */
+  storage.store_root();
+
+  storage.parallel(z);
+
+  Var x_outer, y_outer, x_inner, y_inner, tile_index;
+  storage.tile(x, y, x_outer, y_outer, x_inner, y_inner, 8, 8)
+             .fuse(x_outer, y_outer, tile_index)
+             .parallel(tile_index);
+
+  Var x_inner_outer, y_inner_outer, x_vectors, y_pairs;
+  storage.tile(x_inner, y_inner, x_inner_outer, y_inner_outer, x_vectors, y_pairs, 4, 2)
+             .vectorize(x_vectors)
+             .unroll(y_pairs);
+
   return storage;
 }
 
