@@ -62,6 +62,9 @@ Func ReLU::run(Func input, int input_width, int input_height, int input_channels
   int output_height   = input_height;
   int output_channels = input_channels;
 
+  set_width(output_width);
+  set_height(output_height);
+  set_channels(output_channels);
 
   storage(x, y, z) = max(0, input(x, y, z)) + 
                        negative_slope*min(0, input(x, y, z));

@@ -101,7 +101,7 @@ class Deconvolution : public Layer {
                   const caffe::ConvolutionParameter *param,
                   const caffe::BlobProto *kernel_blob, 
                   const caffe::BlobProto *bias_blob);
-    // Halide::Image<float> run(Halide::Image<float> input);
+    Halide::Image<float> run(Halide::Image<float> input);
 };
 
 } /* namespace latte */

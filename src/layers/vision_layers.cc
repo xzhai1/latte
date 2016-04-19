@@ -109,8 +109,8 @@ Convolution::run(Image<float> input)
 
 Func Convolution::run(Func input, int input_width, int input_height, int input_channels) {
   /* Compute output dimension */
-  int output_width     = (input.width()  - kernel_size + 2 * pad) / stride + 1;
-  int output_height    = (input.height() - kernel_size + 2 * pad) / stride + 1;
+  int output_width     = (input_width  - kernel_size + 2 * pad) / stride + 1;
+  int output_height    = (input_height - kernel_size + 2 * pad) / stride + 1;
   int output_channels  = num_output;
 
   /* Set output dimension */
@@ -119,13 +119,13 @@ Func Convolution::run(Func input, int input_width, int input_height, int input_c
   set_channels(output_channels);
 
   /* Clamped at boundary */
-  Func clamped = BoundaryConditions::constant_exterior(input, 0.f);
+  Func clamped = BoundaryConditions::constant_exterior(input, 0.f, 0, input_width, 0, input_height);
 
   /* Reduce over kernel */
   Func convolution;
-  RDom r(0, kernel_size, 0, kernel_size, 0, channels);
+  RDom r(0, kernel_size, 0, kernel_size, 0, input_channels);
   storage(x, y, z) = sum(
-      kernel(r.x, r.y, r.z + z*channels) * 
+      kernel(r.x, r.y, r.z + z*input_channels) * 
       clamped(x*stride - pad + r.x, y*stride - pad + r.y, r.z));
 
   /* and add bias */

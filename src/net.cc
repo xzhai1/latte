@@ -230,6 +230,8 @@ Net::run(Image<float> input)
 
     startTime = CycleTimer::currentSeconds();
     curr_output = ptr->run(prev_output, input_width, input_height, input_channels);
+    curr_output.compile_jit();
+
     /* Get input dimension for next layer */
     input_width     = ptr->get_width();
     input_height    = ptr->get_height();
@@ -239,6 +241,7 @@ Net::run(Image<float> input)
     cout << "time elapsed: " << (endTime - startTime) * 1000 << " ms  " << endl;
     prev_output = curr_output;
   }
+  //current_output.compile_jit();
   Image<float> output = curr_output.realize(input_width, input_height, input_channels);
   allEndTime = CycleTimer::currentSeconds();
   cout << "total time elapsed: " << (allEndTime - allStartTime) * 1000 << " ms  " << endl;

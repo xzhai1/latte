@@ -94,16 +94,20 @@ Dropout::run(Image<float> input)
 }
 #endif
 
-Func Dropout::run(Func, int input_width, int input_height, int input_channels) {
+Func Dropout::run(Func input, int input_width, int input_height, int input_channels) {
   /* Set output dimension */
   int output_width    = input_width;
   int output_height   = input_height;
   int output_channels = input_channels;
 
+  set_width(output_width);
+  set_height(output_height);
+  set_channels(output_channels);
+
   /* Only for test */
   storage(x, y, z) = input(x, y, z);
 
-  return 
+  return storage; 
 }
 
 /*****************************************************************************

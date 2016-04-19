@@ -29,12 +29,12 @@ test_im2col(string image_path)
   cout << output.height() << endl;
   save_image(output, "im2col.png");
   #endif
-
+  #if 0
   Image<float> output2 = col2im(output1, kernel_size, pad, stride, input.width(), input.height(), input.channels());
   cout << "output2 dimension" << endl;
   cout << output2.width() << endl;
   cout << output2.height() << endl;
   save_image(output2, "col2im.png");
-
+  #endif
   return true;
 }
