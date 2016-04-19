@@ -64,6 +64,7 @@ You will need to download the whole CNN and the trained caffemodel:
     mkdir model
     wget http://dl.caffe.berkeleyvision.org/fcn-32s-pascalcontext.caffemodel
     wget https://gist.githubusercontent.com/shelhamer/80667189b218ad570e82/raw/077494f215421b3d9383e1b1a3d75377344b1744/train_val.prototxt
+    https://gist.githubusercontent.com/shelhamer/80667189b218ad570e82/raw/077494f215421b3d9383e1b1a3d75377344b1744/deploy.prototxt
     
 You can now finally build the project:
 
@@ -80,6 +81,60 @@ and fingers crossed, it won't throw an error. Then you can run a test:
 or
 
     LD_LIBRARY_PATH=../halide/bin/:/usr/local/lib ./run_test images/rgb.png model/train_val.prototxt model/fcn-32s-pascalcontext.caffemodel
+
+## Install Caffe for Benchmarking
+Installing caffe is not exactly a cup of caffe...
+
+First, dependencies:
+
+    sudo apt-get install libleveldb-dev libsnappy-dev libopencv-dev libhdf5-serial-dev libatlas-base-dev gfortran libgflags-dev libgoogle-glog-dev liblmdb-dev
+    sudo apt-get install --no-install-recommends libboost-all-dev
+    
+If you are comparing that list with caffe's official instructions, you will see we aren't installing ``libprotobuf-dev`` and  ``protobuf-compiler`` because we already build them from source.
+
+Next, clone the source code:
+
+    git clone https://github.com/BVLC/caffe.git
+    
+and copy the example config:
+
+    cp Makefile.config.example Makefile.config
+    
+Then modify ``Makefile.config``. For example, I am doing this on my laptop that has no GPU and I want the python layer build so I can quickly push an image through the net. I uncommented the following lines:
+
+    CPU_ONLY := 1
+    WITH_PYTHON_LAYER := 1
+    
+Build. My laptop has 4 logical cores, so:
+    
+    make all -j4
+    make test
+    make runtest
+
+I want to the python binding too:
+
+    make pycaffe
+
+Then install all the python dependencies if you want to use python:
+
+    cd python
+    for req in $(cat requirements.txt); do sudo pip install $req; done
+    
+I wondered why the official documentation used the shell script thing. I tried to use ``sudo pip install -r requirements.txt`` with no sucess.
+
+When that is done, you need to append the path of python directory to the ``PYTHONPATH``:
+
+    export PYTHONPATH=/path/to/caffe/python:$PYTHONPATH
+    
+Just so you know, ``/path/to/caffe/python`` contains the ``_caffe.so`` file in the ``caffe`` directory. 
+
+You also need to let the system know where your ``libcaffe.so`` is:
+
+    export LD_LIBRARY_PATH=/path/to/build/libcaffe.so:$LD_LIBRARY_PATH
+
+Now, you can clone the FCN repo:
+
+    git clone https://github.com/shelhamer/fcn.berkeleyvision.org.git
 
 ## Preliminary Results
 ### Single core single thread  
