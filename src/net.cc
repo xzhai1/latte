@@ -223,7 +223,7 @@ Net::run(Image<float> input)
   int input_width = input.width(); 
   int input_height = input.height();
   int input_channels = input.channels();
-  allStartTime = CycleTimer::currentSeconds();
+  //allStartTime = CycleTimer::currentSeconds();
   for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
     cout << "passing volume into [" 
       << ptr->get_name() << "," << ptr->get_type() << "]  " << endl;
@@ -242,6 +242,7 @@ Net::run(Image<float> input)
     prev_output = curr_output;
   }
   //current_output.compile_jit();
+  allStartTime = CycleTimer::currentSeconds();
   Image<float> output = curr_output.realize(input_width, input_height, input_channels);
   allEndTime = CycleTimer::currentSeconds();
   cout << "total time elapsed: " << (allEndTime - allStartTime) * 1000 << " ms  " << endl;
