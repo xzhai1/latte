@@ -121,6 +121,8 @@ Func Convolution::run(Func input, int input_width, int input_height, int input_c
   /* Clamped at boundary */
   Func clamped = BoundaryConditions::constant_exterior(input, 0.f, 0, input_width, 0, input_height);
 
+  //Func clamped = BoundaryConditions::constant_exterior(input, 0.f);
+
   /* Reduce over kernel */
   Func convolution;
   RDom r(0, kernel_size, 0, kernel_size, 0, input_channels);

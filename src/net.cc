@@ -218,7 +218,7 @@ Net::run(Image<float> input)
 {
   /* TODO each layer is supposed to call the next layer's run */
   double allStartTime, allEndTime, startTime, endTime;
-  Func prev_output;
+  Func prev_output(input);
   Func curr_output;
   int input_width = input.width(); 
   int input_height = input.height();
