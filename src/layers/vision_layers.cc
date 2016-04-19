@@ -124,7 +124,6 @@ Func Convolution::run(Func input, int input_width, int input_height, int input_c
   //Func clamped = BoundaryConditions::constant_exterior(input, 0.f);
 
   /* Reduce over kernel */
-  Func convolution;
   RDom r(0, kernel_size, 0, kernel_size, 0, input_channels);
   storage(x, y, z) = sum(
       kernel(r.x, r.y, r.z + z*input_channels) * 
@@ -141,14 +140,13 @@ Func Convolution::run(Func input, int input_width, int input_height, int input_c
   Var x_outer, y_outer, x_inner, y_inner, tile_index;
   storage.tile(x, y, x_outer, y_outer, x_inner, y_inner, 8, 8)
              .fuse(x_outer, y_outer, tile_index)
-             .parallel(tile_index)
-             .vectorize(x_inner, 8);
-#if 0
+             .parallel(tile_index);
+
   Var x_inner_outer, y_inner_outer, x_vectors, y_pairs;
   storage.tile(x_inner, y_inner, x_inner_outer, y_inner_outer, x_vectors, y_pairs, 4, 2)
              .vectorize(x_vectors)
              .unroll(y_pairs);
-#endif
+
   //storage.gpu_tile(x, y, z, 4, 4, 32);
   
   return storage;
@@ -424,6 +422,43 @@ Deconvolution::run(Image<float> input)
   #endif
   
   return output;
+}
+
+Func Deconvolution::run(Func input, int input_width, int input_height, int input_channels) {
+  /* Compute output dimension */
+  int output_width     = input_width * stride; /* Assume stride == upsampling factor */
+  int output_height    =input_height * stride;
+  int output_channels  = num_output;
+
+  /* Set output dimension */
+  set_width(output_width);
+  set_height(output_height);
+  set_channels(output_channels);
+
+  /* Clamped at boundary */
+  Func clamped = BoundaryConditions::constant_exterior(input, 0.f, 0, input_width, 0, input_height);
+
+  //Func clamped = BoundaryConditions::constant_exterior(input, 0.f);
+
+  /* Reduce over kernel */
+  RDom r(0, kernel_size, 0, kernel_size, 0, input_channels);
+  storage(x, y, z) = sum(
+      kernel(r.x, r.y, r.z + z*input_channels) * 
+      clamped(x / stride + r.x - kernel_size / 2, y / stride + r.y + kernel_size / 2, r.z));
+
+  storage.parallel(z);
+
+  Var x_outer, y_outer, x_inner, y_inner, tile_index;
+  storage.tile(x, y, x_outer, y_outer, x_inner, y_inner, 8, 8)
+             .fuse(x_outer, y_outer, tile_index)
+             .parallel(tile_index);
+             
+  Var x_inner_outer, y_inner_outer, x_vectors, y_pairs;
+  storage.tile(x_inner, y_inner, x_inner_outer, y_inner_outer, x_vectors, y_pairs, 4, 2)
+             .vectorize(x_vectors)
+             .unroll(y_pairs);
+
+  return storage;
 }
 
 } /* namespace latte */
