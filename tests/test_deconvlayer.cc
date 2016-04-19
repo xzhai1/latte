@@ -42,7 +42,22 @@ test_deconvolution(NetParameter *net_model)
                                             &kernel_blob, NULL);
   double startTime, endTime;
   startTime = CycleTimer::currentSeconds();
-  Image<float> output = deconv_layer.run(input);
+  
+  Func input_func(input);
+  Func output_func = deconv_layer.run(input_func,width,height, channel);
+
+  int output_width = deconv_layer.get_width();
+  int output_height = deconv_layer.get_height();
+  int output_channels = deconv_layer.get_channels();
+
+  Image<float> output(output_width, output_height, output_channels);
+
+  Target target = get_host_target();
+  target.set_feature(Target::CUDA);
+  output_func.compile_jit(target);
+  output_func.realize(output);
+
+
   endTime = CycleTimer::currentSeconds();
   cout << "time elapsed: " << (endTime - startTime) * 1000 << " ms  " << endl;
 

@@ -287,7 +287,7 @@ Deconvolution::run(Image<float> input) {
   return output;
 }
 #endif
-
+#if 0
 Image<float>
 Deconvolution::run(Image<float> input)
 {
@@ -423,6 +423,7 @@ Deconvolution::run(Image<float> input)
   
   return output;
 }
+#endif
 
 Func Deconvolution::run(Func input, int input_width, int input_height, int input_channels) {
   /* Compute output dimension */
@@ -445,7 +446,7 @@ Func Deconvolution::run(Func input, int input_width, int input_height, int input
   storage(x, y, z) = sum(
       kernel(r.x, r.y, r.z + z*input_channels) * 
       clamped(x / stride + r.x - kernel_size / 2, y / stride + r.y + kernel_size / 2, r.z));
-
+#if 0
   storage.parallel(z);
 
   Var x_outer, y_outer, x_inner, y_inner, tile_index;
@@ -457,6 +458,9 @@ Func Deconvolution::run(Func input, int input_width, int input_height, int input
   storage.tile(x_inner, y_inner, x_inner_outer, y_inner_outer, x_vectors, y_pairs, 4, 2)
              .vectorize(x_vectors)
              .unroll(y_pairs);
+#endif
+
+  storage.gpu_tile(x, y, z, 4, 4, 32);
 
   return storage;
 }
