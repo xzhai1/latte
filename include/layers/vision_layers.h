@@ -11,7 +11,6 @@ namespace Latte {
 class Convolution;
 class Pooling;
 class Deconvolution;
-class Crop;
 
 /**
  * @brief Convolution Layer
@@ -24,6 +23,8 @@ class Convolution : public Layer {
   /* Filled in values */
   int  num_output, kernel_size;
   Halide::Image<float> kernel, bias;
+
+  Halide::Func kernel_func, bias_func;
 
   public:
     /**
@@ -50,7 +51,9 @@ class Convolution : public Layer {
      *
      * @return post convolution result
      */
-    Halide::Image<float> run(Halide::Image<float> input);
+    // Halide::Image<float> run(Halide::Image<float> input);
+
+    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels);
 };
 
 /**
@@ -77,7 +80,9 @@ class Pooling : public Layer {
      *
      * @return Input for next stage
      */
-    Halide::Image<float> run(Halide::Image<float> input);
+    // Halide::Image<float> run(Halide::Image<float> input);
+
+    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels);
 };
 
 /**
@@ -96,7 +101,7 @@ class Deconvolution : public Layer {
                   const caffe::ConvolutionParameter *param,
                   const caffe::BlobProto *kernel_blob, 
                   const caffe::BlobProto *bias_blob);
-    Halide::Image<float> run(Halide::Image<float> input);
+    // Halide::Image<float> run(Halide::Image<float> input);
 };
 
 } /* namespace latte */

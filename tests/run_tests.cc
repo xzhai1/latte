@@ -30,9 +30,9 @@ main(int argc, char *argv[])
 
   // test_convolution(image_path, &net_model);
   // test_deconvolution(&net_model);
-  //test_net(image_path, &net_model);
+  test_net(image_path, &net_model);
   
-  test_im2col(image_path);
+  // test_im2col(image_path);
 
   return 0;
 }

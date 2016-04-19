@@ -41,11 +41,12 @@ Convolution::Convolution(string layer_name,
   kernel = LoadKernelFromBlob(weights, kernel_size, num_output);
 }
 
+#if 0
 Image<float>
 Convolution::run(Image<float> input) 
 {
-  Func convolution("convolution");
-  Var x("x"), y("y"), z("z");  
+  Func convolution;
+  Var x, y, z;
   int width     = (input.width() - kernel_size + 2 * pad) / stride + 1;
   int height    = (input.height() - kernel_size + 2 * pad) / stride + 1;
   int channels  = input.channels();
@@ -104,6 +105,34 @@ Convolution::run(Image<float> input)
 
   return output;
 }
+#endif
+
+Func Convolution::run(Func input, int input_width, int input_height, int input_channels) {
+  /* Compute output dimension */
+  int output_width     = (input.width()  - kernel_size + 2 * pad) / stride + 1;
+  int output_height    = (input.height() - kernel_size + 2 * pad) / stride + 1;
+  int output_channels  = num_output;
+
+  /* Set output dimension */
+  set_width(output_width);
+  set_height(output_height);
+  set_channels(output_channels);
+
+  /* Clamped at boundary */
+  Func clamped = BoundaryConditions::constant_exterior(input, 0.f);
+
+  /* Reduce over kernel */
+  Func convolution;
+  RDom r(0, kernel_size, 0, kernel_size, 0, channels);
+  storage(x, y, z) = sum(
+      kernel(r.x, r.y, r.z + z*channels) * 
+      clamped(x*stride - pad + r.x, y*stride - pad + r.y, r.z));
+
+  /* and add bias */
+  storage(x, y, z) += bias(0, 0, z);
+
+  return storage;
+}
 
 /*****************************************************************************
  *****************************************************************************/
@@ -117,6 +146,7 @@ Pooling::Pooling(string layer_name, const PoolingParameter *param)
     stride = param->stride();
 }
 
+#if 0
 Image<float>
 Pooling::run(Image<float> input) 
 {
@@ -147,6 +177,25 @@ Pooling::run(Image<float> input)
 
   Image<float> output = pooled.realize(width, height, channels);
   return output;
+}
+#endif
+
+Halide::Func Pooling::run(Halide::Func input, int input_width, int input_height, int input_channels) {
+  /* Compute output dimension */
+  int output_width    = (input_width - kernel_size) / stride + 1;
+  int output_height   = (input_height - kernel_size) / stride + 1;
+  int output_channels = input_channels;
+
+  /* Set output dimension */
+  set_width(output_width);
+  set_height(output_height);
+  set_channels(output_channels);
+
+  /* 2D reduction for each channel */
+  RDom r(0, kernel_size, 0, kernel_size);
+  storage(x, y, z) = maximum(input(x*stride + r.x, y*stride + r.y, z));
+
+  return storage;
 }
 
 /*****************************************************************************

@@ -56,4 +56,17 @@ ReLU::run(Image<float> input)
   return output;
 }
 
+Func ReLU::run(Func input, int input_width, int input_height, int input_channels) {
+  /* Set output dimension */
+  int output_width    = input_width;
+  int output_height   = input_height;
+  int output_channels = input_channels;
+
+
+  storage(x, y, z) = max(0, input(x, y, z)) + 
+                       negative_slope*min(0, input(x, y, z));
+
+  return storage;
+}
+
 } /* namespace latte */

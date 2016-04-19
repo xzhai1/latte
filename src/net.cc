@@ -159,14 +159,16 @@ Net::Net(NetParameter *net_model)
       hit = true;
       cout << "finish processing convolution" << endl;
     } 
-    
+
+    #if 0
     else if (type == DECONVOLUTION) {
       cout << "hit deconv" << endl;
       curr_layer = build_deconvlayer(&layer);
       hit = true;
       cout << "finish processing deconv" << endl;
     }
-    
+    #endif
+
     else if (type == RELU) {
       curr_layer = build_relulayer(&layer);
       hit = true;
@@ -176,11 +178,14 @@ Net::Net(NetParameter *net_model)
     } else if (type == DROPOUT) {
       curr_layer = build_dropoutlayer(&layer);
       hit = true;
-    } else if (type == SOFTMAX) {
+    } 
+    #if 0
+    else if (type == SOFTMAX) {
       curr_layer = build_softmaxlayer(&layer);
       hit = true;
     }
-
+    #endif
+  
     if (hit) {
       cout << name << "\t" << curr_layer << endl;
       /* On entry, update head */
@@ -213,23 +218,32 @@ Net::run(Image<float> input)
 {
   /* TODO each layer is supposed to call the next layer's run */
   double allStartTime, allEndTime, startTime, endTime;
-  Image<float> prev_output = input;
-  Image<float> curr_output;
+  Func prev_output;
+  Func curr_output;
+  int input_width = input.width(); 
+  int input_height = input.height();
+  int input_channels = input.channels();
   allStartTime = CycleTimer::currentSeconds();
   for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
     cout << "passing volume into [" 
       << ptr->get_name() << "," << ptr->get_type() << "]  " << endl;
 
     startTime = CycleTimer::currentSeconds();
-    curr_output = ptr->run(prev_output);
+    curr_output = ptr->run(prev_output, input_width, input_height, input_channels);
+    /* Get input dimension for next layer */
+    input_width     = ptr->get_width();
+    input_height    = ptr->get_height();
+    input_channels  = ptr->get_channels();
+
     endTime = CycleTimer::currentSeconds();
     cout << "time elapsed: " << (endTime - startTime) * 1000 << " ms  " << endl;
     prev_output = curr_output;
   }
+  Image<float> output = curr_output.realize(input_width, input_height, input_channels);
   allEndTime = CycleTimer::currentSeconds();
   cout << "total time elapsed: " << (allEndTime - allStartTime) * 1000 << " ms  " << endl;
 
-  return curr_output;
+  return output;
 }
 
 } /* namespace Latte */

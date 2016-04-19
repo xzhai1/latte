@@ -25,18 +25,29 @@ class Layer {
   private:
   	std::string name;
   	std::string type;
+    int width; 
+    int height; 
+    int channels;
   	Layer *next;
 
   protected:
   	void set_name(std::string layer_name) {name = layer_name;}
   	void set_type(std::string layer_type) {type = layer_type;}
-
+    void set_width(int w) {width = w;}
+    void set_height(int h) {height = h;}
+    void set_channels(int c) {channels = c;}
   public:
-    Layer() {name = ""; type = ""; next = NULL;}
+    Halide::Func storage;
+    Halide::Var x, y, z;
+
+    Layer(): name(""), type(""), next(NULL) {}
     ~Layer() {}
 
     std::string get_name() {return name;}
     std::string get_type() {return type;}
+    int get_width() {return width;}
+    int get_height() {return height;}
+    int get_channels() {return channels;}
 
     Layer *get_next() {return next;}
     void set_next(Layer *next_layer) {next = next_layer;}
@@ -54,7 +65,13 @@ class Layer {
      *
      * @return 
      */
+     
     virtual Halide::Image<float> run(Halide::Image<float> input) {
+      return input;
+    }
+    
+    virtual Halide::Func run(Halide::Func input, 
+      int input_width, int input_height, int input_channels) {
       return input;
     }
 };

@@ -63,7 +63,8 @@ class Dropout : public Layer {
      *
      * @return Input to next stage
      */
-    Halide::Image<float> run(Halide::Image<float> input);
+    // Halide::Image<float> run(Halide::Image<float> input);
+    Halide::Func run(Halide::Func, int input_width, int input_height, int input_channels);
 };
 
 /**
