@@ -141,7 +141,7 @@ Net::Net(NetParameter *net_model)
   Layer *curr_layer = NULL;
   int num_layers = net_model->layer_size();
 
-  cout << "name \taddr" << endl;
+  //cout << "name \taddr" << endl;
 
   /* TODO we are cheating here */
   for (int i = 3; i < num_layers; i++) {
@@ -154,10 +154,8 @@ Net::Net(NetParameter *net_model)
 
     /* TODO we are ignoring a couple of types here */
     if (type == CONVOLUTION) {
-      cout << "hit convolution" << endl;
       curr_layer = build_convlayer(&layer);
       hit = true;
-      cout << "finish processing convolution" << endl;
     } 
 
     #if 0
@@ -187,7 +185,7 @@ Net::Net(NetParameter *net_model)
     #endif
   
     if (hit) {
-      cout << name << "\t" << curr_layer << endl;
+      //cout << name << "\t" << curr_layer << endl;
       /* On entry, update head */
       if (!head)
         head = curr_layer;
@@ -216,8 +214,15 @@ Net::print_net()
 Image<float>
 Net::run(Image<float> input)
 {
+  /* Display input image dimension */
+  cout << "input dimension [W, H, C]:"
+       << input.width() << ", "
+       << input.height() << ", "
+       << input.channels()
+       << endl;
+
   /* TODO each layer is supposed to call the next layer's run */
-  double allStartTime, allEndTime, startTime, endTime;
+  double inferenceStartTime, inferenceEndTime, startTime, endTime;
   Func prev_output(input);
   Func curr_output;
   int input_width = input.width(); 
@@ -225,10 +230,10 @@ Net::run(Image<float> input)
   int input_channels = input.channels();
   //allStartTime = CycleTimer::currentSeconds();
   for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
-    cout << "passing volume into [" 
+    startTime = CycleTimer::currentSeconds();
+    cout << "Compiling ["
       << ptr->get_name() << "," << ptr->get_type() << "]  " << endl;
 
-    startTime = CycleTimer::currentSeconds();
     curr_output = ptr->run(prev_output, input_width, input_height, input_channels);
     curr_output.compile_jit();
 
@@ -241,11 +246,11 @@ Net::run(Image<float> input)
     cout << "time elapsed: " << (endTime - startTime) * 1000 << " ms  " << endl;
     prev_output = curr_output;
   }
-  //current_output.compile_jit();
-  allStartTime = CycleTimer::currentSeconds();
+  
+  inferenceStartTime = CycleTimer::currentSeconds();
   Image<float> output = curr_output.realize(input_width, input_height, input_channels);
-  allEndTime = CycleTimer::currentSeconds();
-  cout << "total time elapsed: " << (allEndTime - allStartTime) * 1000 << " ms  " << endl;
+  inferenceEndTime = CycleTimer::currentSeconds();
+  cout << "Inference time: " << (inferenceEndTime - inferenceStartTime) * 1000 << " ms  " << endl;
 
   return output;
 }

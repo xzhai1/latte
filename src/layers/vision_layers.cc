@@ -134,8 +134,8 @@ Func Convolution::run(Func input, int input_width, int input_height, int input_c
   storage(x, y, z) += bias(0, 0, z);
 
   /* Schedule */
-  storage.store_root();
-
+  //storage.store_root();
+  /* CPU parallel */
   storage.parallel(z);
 
   Var x_outer, y_outer, x_inner, y_inner, tile_index;
@@ -148,6 +148,8 @@ Func Convolution::run(Func input, int input_width, int input_height, int input_c
              .vectorize(x_vectors)
              .unroll(y_pairs);
 
+  //storage.gpu_tile(x, y, z, 4, 4, 32);
+  
   return storage;
 }
 
