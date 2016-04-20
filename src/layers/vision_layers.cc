@@ -343,6 +343,11 @@ Deconvolution::run(Image<float> input)
   cout << "::: Compute channels [end] :::" << endl;
   #endif
 
+  Func kernel_;
+  Var p, q, r;
+  kernel_(p, q, r) = kernel(kernel_size-1-p, kernel_size-1-q, r);
+  Image<float> flipped_kernel = kernel_.realize(kernel_size, kernel_size, num_output);
+
   //int kernel_dim = kernel_size * kernel_size * num_output;
   float curr_sum;
   /* Recode */
@@ -358,7 +363,7 @@ Deconvolution::run(Image<float> input)
             curr_sum = 0.f;
             for (int c = 0; c < input_depth; c++) {
               curr_sum += input(i, j, c) * 
-                          kernel(i_k, j_k, z_k+c*num_output);
+                          kernel_(i_k, j_k, z_k+c*num_output);
             }
             /* Accumulate sum */
             int col = i*stride + i_k;
