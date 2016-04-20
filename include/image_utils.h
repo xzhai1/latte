@@ -17,6 +17,7 @@
 Halide::Image<float> im2col(Halide::Image<float> input, 
                             int kernel_size, int pad, 
                             int stride);
+
 Halide::Image<float> col2im(Halide::Image<float> input);
 
 #endif /* IMAGE_UTILS_H */

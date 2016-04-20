@@ -363,7 +363,7 @@ Deconvolution::run(Image<float> input)
             curr_sum = 0.f;
             for (int c = 0; c < input_depth; c++) {
               curr_sum += input(i, j, c) * 
-                          kernel_(i_k, j_k, z_k+c*num_output);
+                          kernel(i_k, j_k, z_k+c*num_output);
             }
             /* Accumulate sum */
             int col = i*stride + i_k;
