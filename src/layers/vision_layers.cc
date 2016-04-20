@@ -344,6 +344,7 @@ Deconvolution::run(Image<float> input)
   #endif
 
   int kernel_dim = kernel_size * kernel_size * num_output;
+  float curr_sum;
   /* Recode */
   cout << "::: Compute channels [start] :::" << endl;
   #pragma omp parallel for
@@ -353,7 +354,7 @@ Deconvolution::run(Image<float> input)
         for (int j_k = 0; j_k < kernel_size; j_k++) {
           for (int i_k = 0; i_k < kernel_size; i_k++) {
             /* Compute current sum */
-            float curr_sum = 0.f;
+            curr_sum = 0.f;
             for (int c = 0; c < input_depth; c++) {
               curr_sum += input(i, j, c) * 
                           kernel(i_k, j_k, z_k+c*num_output);
