@@ -445,7 +445,7 @@ Func Deconvolution::run(Func input, int input_width, int input_height, int input
   RDom r(0, kernel_size, 0, kernel_size, 0, input_channels);
   storage(x, y, z) = sum(
       kernel(r.x, r.y, r.z + z*input_channels) * 
-      clamped(x / stride + r.x - kernel_size / 2, y / stride + r.y + kernel_size / 2, r.z));
+      clamped(x / stride + r.x - kernel_size / 2 , y / stride + r.y - kernel_size / 2 , r.z));
 #if 0
   storage.parallel(z);
 
@@ -460,7 +460,7 @@ Func Deconvolution::run(Func input, int input_width, int input_height, int input
              .unroll(y_pairs);
 #endif
 
-  storage.gpu_tile(x, y, z, 4, 4, 32);
+  storage.gpu_tile(x, y, z, 8, 8, 8);
 
   return storage;
 }
