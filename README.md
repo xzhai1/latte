@@ -33,6 +33,13 @@ To compile and install it, you can follow the instruction [here](https://github.
 	make check
 	sudo make install
 	sudo ldconfig
+
+Now, if you are doing this on a mahine with no root access, we will want to do the following:
+
+	./configure --prefix=$HOME/protobuf
+	make
+	make check
+	make install
 	
 ### Halide
 Check your ``g++`` version:
