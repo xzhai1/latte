@@ -287,7 +287,7 @@ Deconvolution::run(Image<float> input) {
   return output;
 }
 #endif
-#if 0
+
 Image<float>
 Deconvolution::run(Image<float> input)
 {
@@ -304,7 +304,6 @@ Deconvolution::run(Image<float> input)
   int width     = kernel_size + (input_width - 1) * stride;
   int height    = kernel_size + (input_height - 1) * stride;
   Image<float> output(width, height, num_output);
-  Image<int> count(width, height, num_output);
 
   cout << "output_width  = " << width << endl;
   cout << "output_height = " << height << endl;
@@ -315,19 +314,9 @@ Deconvolution::run(Image<float> input)
   cout << "::: Deconv General Info [end] :::" << endl;
 
   cout << "output deconv kernel" << endl;
+
+
   #if 0
-  for (int k = 0; k < num_output; k++) {
-    ofstream outfile("./outputs/deconv_kernel" + to_string(k) + ".txt");
-    for (int j = 0; j < kernel_size; j++) {
-      for (int i = 0; i < kernel_size; i++) {
-        outfile << kernel(i, j, k*input_depth) << " ";
-      }
-      outfile << endl;
-    }
-  }
-  #endif
-
-
   cout << "::: Compute channels [start] :::" << endl;
   #pragma omp parallel for
   for (int z = 0; z < num_output; z++) {
@@ -352,11 +341,34 @@ Deconvolution::run(Image<float> input)
     cout << "finish computing channel " << z << flush << endl;
   }
   cout << "::: Compute channels [end] :::" << endl;
+  #endif
 
-  #if 0
+  int kernel_dim = kernel_size * kernel_size * num_output;
   /* Recode */
   cout << "::: Compute channels [start] :::" << endl;
   #pragma omp parallel for
+  for (int j = 0; j < input_height; j++) {
+    for (int i = 0; i < input_width; i++) {
+      for (int z_k = 0; z_k < num_output; z_k++) {
+        for (int j_k = 0; j_k < kernel_size; j_k++) {
+          for (int i_k = 0; i_k < kernel_size; i_k++) {
+            /* Compute current sum */
+            float curr_sum = 0.f;
+            for (int c = 0; c < input_depth; c++) {
+              curr_sum += input(i, j, c) * 
+                          kernel(i_k, j_k, z_k+c*num_output);
+            }
+            /* Accumulate sum */
+            int col = i*stride + i_k;
+            int row = j*stride + j_k;
+            output(col, row, z_k) += curr_sum;
+          }
+        }
+      }
+    }
+  }
+
+  #if 0
   for (int z = 0; z < num_output; z++) {
     cout << "start computing channel " << z << flush << endl;
     for (int j = 0; j < input_height; j++) {
@@ -369,7 +381,8 @@ Deconvolution::run(Image<float> input)
               for (int i_k = 0; i_k < kernel_size; i_k++) {
                 for (int z_k = 0; z_k < input_depth; z_k++) {
                   output(i_out + i_k, j_out + j_k, z) += 
-                  input(i, j, z_k) * kernel(i_k, j_k, z * num_output + z_k);
+                    input(i, j, z_k) * 
+                    kernel(i_k, j_k, z * num_output + z_k);
                 }
               }
             }
@@ -382,48 +395,9 @@ Deconvolution::run(Image<float> input)
   cout << "::: Compute channels [end] :::" << endl;
   #endif
 
-  #if 0
-  /* This version is not right */
-  /* For each input layer */
-  for (int z = 0; z < input_depth; z++) {
-    /* Loop over all input pixels, step by stride */
-    #pragma omp parallel for
-    for (int j = 0; j < input_height; j++) {
-      for (int i = 0; i < input_width; i++) {
 
-       	int i_out = i*stride;
-      	int j_out = j*stride;
-       	float input_val = input(i, j, z);
-        
-        /* dot with kernel and accumulate values into output */
-        for (int z_k = 0; z_k < num_output; z_k++) {
-          for (int j_k = 0; j_k < kernel_size; j_k++) {
-            for (int i_k = 0; i_k < kernel_size; i_k++) {
-              output(i_out + i_k, j_out + j_k, z_k) += 
-                input_val * kernel(i_k, j_k, z_k + z*num_output);
-              count(i_out + i_k, j_out + j_k, z_k)++;
-            } /* i_k */
-          } /* j_k */
-        } /* z_k */
-        
-       
-      } /* j */
-    } /* i */
-  } /* each input layer */
-
-  #pragma omp parallel for
-  for (int k = 0; k < num_output; k++) {
-    for (int j = 0; j < height; j++) {
-      for (int i = 0; i < width; i++) {
-        output(i, j, k) /= output(i, j, k) / cout(i, j, k);
-      }
-    }
-  }
-  #endif
-  
   return output;
 }
-#endif
 
 Func Deconvolution::run(Func input, int input_width, int input_height, int input_channels) {
   /* Compute output dimension */
