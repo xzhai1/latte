@@ -37,7 +37,7 @@ test_net(string image_path, NetParameter *net_model)
   /* Save all channels */
   for (int k = 0; k < final_image.channels(); k++) {
     ofstream outfile;
-    outfile.open ("./outputs/softmax_channel" + to_string(k) + ".txt");
+    outfile.open ("./outputs/channel" + to_string(k) + ".txt");
     for (int j = 0; j < final_image.height(); j++) {
       for (int i = 0; i < final_image.width(); i++) {
         outfile << final_image(i, j, k) << " ";

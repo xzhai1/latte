@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "Halide.h"
 #include "caffe.pb.h"
 
 /**
@@ -22,5 +23,8 @@ bool test_deconvolution(caffe::NetParameter *net_model);
 
 /* test_net.cc */
 bool test_net(std::string image_path, caffe::NetParameter *net_model);
+
+/* test_img2col.cc */
+bool test_im2col(std::string fpath);
 
 #endif /* TESTS_H */

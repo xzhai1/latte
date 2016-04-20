@@ -141,7 +141,7 @@ Net::Net(NetParameter *net_model)
   Layer *curr_layer = NULL;
   int num_layers = net_model->layer_size();
 
-  cout << "name \taddr" << endl;
+  //cout << "name \taddr" << endl;
 
   /* TODO we are cheating here */
   for (int i = 3; i < num_layers; i++) {
@@ -154,19 +154,19 @@ Net::Net(NetParameter *net_model)
 
     /* TODO we are ignoring a couple of types here */
     if (type == CONVOLUTION) {
-      cout << "hit convolution" << endl;
       curr_layer = build_convlayer(&layer);
       hit = true;
-      cout << "finish processing convolution" << endl;
     } 
-    
+
+    #if 0
     else if (type == DECONVOLUTION) {
       cout << "hit deconv" << endl;
       curr_layer = build_deconvlayer(&layer);
       hit = true;
       cout << "finish processing deconv" << endl;
     }
-    
+    #endif
+
     else if (type == RELU) {
       curr_layer = build_relulayer(&layer);
       hit = true;
@@ -176,13 +176,16 @@ Net::Net(NetParameter *net_model)
     } else if (type == DROPOUT) {
       curr_layer = build_dropoutlayer(&layer);
       hit = true;
-    } else if (type == SOFTMAX) {
+    } 
+    #if 0
+    else if (type == SOFTMAX) {
       curr_layer = build_softmaxlayer(&layer);
       hit = true;
     }
-
+    #endif
+  
     if (hit) {
-      cout << name << "\t" << curr_layer << endl;
+      //cout << name << "\t" << curr_layer << endl;
       /* On entry, update head */
       if (!head)
         head = curr_layer;
@@ -211,25 +214,48 @@ Net::print_net()
 Image<float>
 Net::run(Image<float> input)
 {
+  /* Display input image dimension */
+  cout << "Input dimension [W, H, C]:"
+       << input.width() << ", "
+       << input.height() << ", "
+       << input.channels()
+       << endl;
+
   /* TODO each layer is supposed to call the next layer's run */
-  double allStartTime, allEndTime, startTime, endTime;
-  Image<float> prev_output = input;
-  Image<float> curr_output;
-  allStartTime = CycleTimer::currentSeconds();
+  double inferenceStartTime, inferenceEndTime, startTime, endTime;
+  Func prev_output(input);
+  Func curr_output;
+  int input_width = input.width(); 
+  int input_height = input.height();
+  int input_channels = input.channels();
+  //allStartTime = CycleTimer::currentSeconds();
   for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
-    cout << "passing volume into [" 
+    startTime = CycleTimer::currentSeconds();
+    cout << "Compiling ["
       << ptr->get_name() << "," << ptr->get_type() << "]  " << endl;
 
-    startTime = CycleTimer::currentSeconds();
-    curr_output = ptr->run(prev_output);
+    curr_output = ptr->run(prev_output, input_width, input_height, input_channels);
+    curr_output.compile_jit();
+
+    /* Get input dimension for next layer */
+    input_width     = ptr->get_width();
+    input_height    = ptr->get_height();
+    input_channels  = ptr->get_channels();
+
+    cout << "Dim(curr_output) = " << input_width << ", " << input_height << ", " << input_channels << endl;
+
     endTime = CycleTimer::currentSeconds();
-    cout << "time elapsed: " << (endTime - startTime) * 1000 << " ms  " << endl;
+    cout << "Compiling time: " << (endTime - startTime) * 1000 << " ms  " << endl;
     prev_output = curr_output;
   }
-  allEndTime = CycleTimer::currentSeconds();
-  cout << "total time elapsed: " << (allEndTime - allStartTime) * 1000 << " ms  " << endl;
+  
+  inferenceStartTime = CycleTimer::currentSeconds();
+  Image<float> output = curr_output.realize(input_width, input_height, input_channels);
+  inferenceEndTime = CycleTimer::currentSeconds();
+  cout << "Inference time: " 
+       << (inferenceEndTime - inferenceStartTime) * 1000 << " ms  " << endl;
 
-  return curr_output;
+  return output;
 }
 
 } /* namespace Latte */

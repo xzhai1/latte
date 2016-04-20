@@ -15,17 +15,17 @@ CC = g++
 CFLAGS  = --std=c++11 -g -fopenmp -Wall
 
 # define any directories containing header files other than /usr/include
-INCLUDES = -I ./include -I ../halide/include -I ../halide/tools `pkg-config --cflags-only-I protobuf`
+INCLUDES = -I./include -I../halide/include -I../halide/tools `pkg-config --cflags-only-I protobuf`
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-LFLAGS = -L ../halide/bin
+LFLAGS = -L../halide/bin
 
 # define any libraries to link into executable:
 #   if I want to link in libraries (libx.so or libx.a) I use the -llibname 
 #   option, something like (this will link in libmylib.so and libm.so:
-LIBS = -l Halide -l dl
+LIBS = -lHalide -ldl
 
 # From Wikipedia:
 # 	"pkg-config is computer program that provides a unified interface for 
