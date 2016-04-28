@@ -88,9 +88,27 @@ Faster make can be done by
 
     make -j8
 
-and fingers crossed, it won't throw an error. Then you can run a test. Since the libraries are loaded dynamically, you need to specify where to look for those libraries:
+and fingers crossed, it won't throw an error. Set one last environmental vairable:
 
-    LD_LIBRARY_PATH=../halide/bin/:~/protobuf/lib/ ./run_test images/rgb.png model/train_val.prototxt model/fcn-32s-pascalcontext.caffemodel    
+	export LD_LIBRARY_PATH=./halide/bin/:~/protobuf/lib/:${LD_LIBRARY_PATH}
+
+Then you can run a test by invoking:
+
+	./run_test.sh
+
+If you want to see what command line options are available to you:
+
+	./test -helpshort
+	test: 
+	 ./test --image_path            image.png
+	        --train_val_path        train_val.prototxt
+	        --trained_model_path    trained_model.caffemodel
+	        --test_all
+	        --test_loadfromtest
+	        --test_conv
+	        --test_deconv
+	        --test_net
+
 
 ## Install Caffe for Benchmarking
 Installing caffe is not exactly a cup of caffe...
