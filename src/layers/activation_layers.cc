@@ -68,6 +68,16 @@ Func ReLU::run(Func input, int input_width, int input_height, int input_channels
 
   storage(x, y, z) = max(0, input(x, y, z)) + 
                        negative_slope*min(0, input(x, y, z));
+#if 0
+  storage.parallel(z);
+
+  Var x_outer, y_outer, x_inner, y_inner, tile_index;
+  storage.tile(x, y, x_outer, y_outer, x_inner, y_inner, 8, 8)
+           .fuse(x_outer, y_outer, tile_index)
+           .parallel(tile_index);
+
+  storage.vectorize(x_inner, 8);
+#endif
 
   return storage;
 }

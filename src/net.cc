@@ -215,7 +215,7 @@ Image<float>
 Net::run(Image<float> input)
 {
   /* Display input image dimension */
-  cout << "input dimension [W, H, C]:"
+  cout << "Input dimension [W, H, C]:"
        << input.width() << ", "
        << input.height() << ", "
        << input.channels()
@@ -242,15 +242,18 @@ Net::run(Image<float> input)
     input_height    = ptr->get_height();
     input_channels  = ptr->get_channels();
 
+    cout << "Dim(curr_output) = " << input_width << ", " << input_height << ", " << input_channels << endl;
+
     endTime = CycleTimer::currentSeconds();
-    cout << "time elapsed: " << (endTime - startTime) * 1000 << " ms  " << endl;
+    cout << "Compiling time: " << (endTime - startTime) * 1000 << " ms  " << endl;
     prev_output = curr_output;
   }
   
   inferenceStartTime = CycleTimer::currentSeconds();
   Image<float> output = curr_output.realize(input_width, input_height, input_channels);
   inferenceEndTime = CycleTimer::currentSeconds();
-  cout << "Inference time: " << (inferenceEndTime - inferenceStartTime) * 1000 << " ms  " << endl;
+  cout << "Inference time: " 
+       << (inferenceEndTime - inferenceStartTime) * 1000 << " ms  " << endl;
 
   return output;
 }
