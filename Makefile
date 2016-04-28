@@ -12,20 +12,24 @@
 CC = g++
 
 # define any compile-time flags
-CFLAGS  = --std=c++11 -g -fopenmp -Wall
+CFLAGS = --std=c++11 -g -fopenmp -Wall
 
 # define any directories containing header files other than /usr/include
-INCLUDES = -I./include -I../halide/include -I../halide/tools `pkg-config --cflags-only-I protobuf`
+INCLUDES = -I./include \
+					 -I/home/15-418/Halide/include \
+					 -I/home/15-418/Halide/tools \
+					 -I/home/15-418/gflags-2.1.2/include \
+					 `pkg-config --cflags-only-I protobuf`
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-LFLAGS = -L../halide/bin
+LFLAGS = -L/home/15-418/Halide/bin -L/home/15-418/gflags-2.1.2/lib
 
 # define any libraries to link into executable:
 #   if I want to link in libraries (libx.so or libx.a) I use the -llibname 
 #   option, something like (this will link in libmylib.so and libm.so:
-LIBS = -lHalide -ldl
+LIBS = -lHalide -ldl -lgflags
 
 # From Wikipedia:
 # 	"pkg-config is computer program that provides a unified interface for 
@@ -51,14 +55,13 @@ SRCS = $(wildcard ./src/*.cc) $(wildcard ./src/layers/*.cc) $(wildcard ./tests/*
 OBJS = $(SRCS:.cc=.o)
 
 # define the executable file 
-MAIN = run_test
+MAIN = test
 
 #
 # The following part of the makefile is generic; it can be used to 
 # build any executable just by changing the definitions above and by
 # deleting dependencies appended to the file from 'make depend'
 #
-
 .PHONY: depend clean
 
 all: $(MAIN)
@@ -76,9 +79,6 @@ $(MAIN): $(OBJS)
 
 print-%:
 	@echo $* = $($*)
-
-#clean:
-#	$(RM) ./src/*.o  ./tests/*.o *~ 
 
 clean:
 	$(RM) $(OBJS) *~ $(MAIN)
