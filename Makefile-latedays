@@ -19,17 +19,20 @@ INCLUDES = -I./include \
 					 -I/home/15-418/Halide/include \
 					 -I/home/15-418/Halide/tools \
 					 -I/home/15-418/gflags-2.1.2/include \
+					 -I/home/15-418/glog-0.3.3/include \
 					 `pkg-config --cflags-only-I protobuf`
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-LFLAGS = -L/home/15-418/Halide/bin -L/home/15-418/gflags-2.1.2/lib
+LFLAGS = -L/home/15-418/Halide/bin \
+				 -L/home/15-418/gflags-2.1.2/lib \
+				 -L/home/15-418/glog-0.3.3/build/lib
 
 # define any libraries to link into executable:
 #   if I want to link in libraries (libx.so or libx.a) I use the -llibname 
 #   option, something like (this will link in libmylib.so and libm.so:
-LIBS = -lHalide -ldl -lgflags
+LIBS = -lHalide -ldl -lgflags -lglog
 
 # From Wikipedia:
 # 	"pkg-config is computer program that provides a unified interface for 
