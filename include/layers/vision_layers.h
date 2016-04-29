@@ -43,6 +43,17 @@ class Convolution : public Layer {
                 const caffe::ConvolutionParameter *param, 
                 const caffe::BlobProto *weights, 
                 const caffe::BlobProto *bias_blob);
+   
+    /**
+     * @brief SerialConv performs plain vanilla convolution with for loops.
+     *
+     * This serves as a correctness check for the Halide version
+     *
+     * @param input
+     *
+     * @return 
+     */
+    Halide::Image<float> SerialConv(Halide::Image<float> input);
 
     /**
      * @brief run Perform convolution on image

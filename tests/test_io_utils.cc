@@ -156,6 +156,6 @@ test_LoadFromBinaryFile(string fpath, NetParameter *net_model)
   } else {
     ListBinaryLayer(net_model);
   }
-  SaveLoadedKernel(net_model);
+  //SaveLoadedKernel(net_model);
   return true;
 }

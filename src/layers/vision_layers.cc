@@ -41,6 +41,39 @@ Convolution::Convolution(string layer_name,
   kernel = LoadKernelFromBlob(weights, kernel_size, num_output);
 }
 
+Image<float>
+Convolution::SerialConv(Image<float> input)
+{
+  int img_channels = input.channels();
+  int img_width    = input.width();
+  int img_height   = input.height();
+  
+  Image<float> output(img_width, img_height, num_output);
+
+  for (int f_idx = 0; f_idx < num_output; f_idx++) {
+    for (int y = 0; y < img_height; y++) {
+      for (int x = 0; x < img_width; x++) {
+        int partial_sum = 0;
+        for (int c = 0; c < img_channels; c++) {
+          for (int k_y = 0; k_y < kernel_size; k_y++) {
+            for (int k_x = 0; k_x < kernel_size; k_x++) {
+              /* Manually check for out of bound */
+              if (x + k_x > img_width || y + k_y > img_height)
+                partial_sum += 0;
+              else
+                partial_sum += kernel(k_x, k_y, f_idx*img_channels + c) * 
+                                input(x + k_x, y + k_y, c);
+            }
+          }
+        output(x, y, f_idx);
+        }
+      }
+    }
+  }
+
+  return input;
+}
+
 #if 0
 Image<float>
 Convolution::run(Image<float> input) 
@@ -107,7 +140,10 @@ Convolution::run(Image<float> input)
 }
 #endif
 
-Func Convolution::run(Func input, int input_width, int input_height, int input_channels) {
+Func 
+Convolution::run(
+    Func input, int input_width, int input_height, int input_channels) 
+{
   /* Compute output dimension */
   int output_width     = (input_width  - kernel_size + 2 * pad) / stride + 1;
   int output_height    = (input_height - kernel_size + 2 * pad) / stride + 1;
@@ -119,7 +155,8 @@ Func Convolution::run(Func input, int input_width, int input_height, int input_c
   set_channels(output_channels);
 
   /* Clamped at boundary */
-  Func clamped = BoundaryConditions::constant_exterior(input, 0.f, 0, input_width, 0, input_height);
+  Func clamped = BoundaryConditions::constant_exterior(
+      input, 0.f, 0, input_width, 0, input_height);
 
   //Func clamped = BoundaryConditions::constant_exterior(input, 0.f);
 
