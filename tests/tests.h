@@ -6,10 +6,7 @@
 #include "Halide.h"
 #include "caffe.pb.h"
 
-/**
- * @brief A collection of tests to we can run to validate each functionality
- */
-
+#define PIXEL_THRESHOLD 0.0001
 
 /* test_io_utils.cc */
 bool test_LoadFromTextFile(std::string fpath, caffe::NetParameter *net_model);

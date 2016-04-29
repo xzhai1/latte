@@ -44,34 +44,56 @@ Convolution::Convolution(string layer_name,
 Image<float>
 Convolution::SerialConv(Image<float> input)
 {
-  int img_channels = input.channels();
   int img_width    = input.width();
   int img_height   = input.height();
-  
-  Image<float> output(img_width, img_height, num_output);
+  int img_channels = input.channels();
 
+  int out_width    = get_width();
+  int out_height   = get_height();
+  int out_channels = get_channels();
+
+  /* Fill in the bias first */
+  /* TODO should we fill the padded area with the bias? */
+  Image<float> output(out_width, out_height, out_channels);
+  for (int zz = 0; zz < out_channels; zz++) {
+    float bias_val = bias(0, 0, zz);
+    for (int yy = 0; yy < out_height; yy++)
+      for (int xx = 0; xx < out_width; xx++)
+        output(xx, yy, zz) = bias_val;
+  }
+
+  /* For each filter */
   for (int f_idx = 0; f_idx < num_output; f_idx++) {
-    for (int y = 0; y < img_height; y++) {
-      for (int x = 0; x < img_width; x++) {
-        int partial_sum = 0;
+    /* slide the kernel around */
+    for (int y = 0; y < out_height; y += stride) {
+      for (int x = 0; x < out_width; x += stride) {
+        /* and reduce over its domain */
+        float partial_sum = 0;
         for (int c = 0; c < img_channels; c++) {
           for (int k_y = 0; k_y < kernel_size; k_y++) {
             for (int k_x = 0; k_x < kernel_size; k_x++) {
-              /* Manually check for out of bound */
-              if (x + k_x > img_width || y + k_y > img_height)
-                partial_sum += 0;
-              else
-                partial_sum += kernel(k_x, k_y, f_idx*img_channels + c) * 
-                                input(x + k_x, y + k_y, c);
+              int x_input = x + k_x - pad;
+              int y_input = y + k_y - pad;
+              float k_val = kernel(k_x, k_y, f_idx*img_channels + c);
+              float val_input = 0.f;
+              /* Check for out of bound */
+              if (x_input < 0 || x_input > img_width - 1||
+                  y_input < 0 || y_input > img_height -1)
+                val_input = 0.f;
+              else {
+                val_input = input(x_input, y_input, c);
+              }
+              partial_sum += k_val*val_input;
             }
           }
-        output(x, y, f_idx);
         }
+        /* Save to output position */
+        output(x, y, f_idx) += partial_sum;
       }
     }
   }
 
-  return input;
+  return output;
 }
 
 #if 0
@@ -158,13 +180,10 @@ Convolution::run(
   Func clamped = BoundaryConditions::constant_exterior(
       input, 0.f, 0, input_width, 0, input_height);
 
-  //Func clamped = BoundaryConditions::constant_exterior(input, 0.f);
-
   /* Reduce over kernel */
   RDom r(0, kernel_size, 0, kernel_size, 0, input_channels);
-  storage(x, y, z) = sum(
-      kernel(r.x, r.y, r.z + z*input_channels) * 
-      clamped(x*stride - pad + r.x, y*stride - pad + r.y, r.z));
+  storage(x, y, z) = sum(kernel(r.x, r.y, r.z + z*input_channels) * 
+                     clamped(x*stride - pad + r.x, y*stride - pad + r.y, r.z));
 
   /* and add bias */
   storage(x, y, z) += bias(0, 0, z);
@@ -180,7 +199,9 @@ Convolution::run(
              .parallel(tile_index);
 
   Var x_inner_outer, y_inner_outer, x_vectors, y_pairs;
-  storage.tile(x_inner, y_inner, x_inner_outer, y_inner_outer, x_vectors, y_pairs, 4, 2)
+  storage.tile(x_inner, y_inner, 
+               x_inner_outer, y_inner_outer, 
+               x_vectors, y_pairs, 4, 2)
              .vectorize(x_vectors)
              .unroll(y_pairs);
 

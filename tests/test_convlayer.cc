@@ -1,6 +1,8 @@
-#include <iostream>
+#include <stdlib.h> /* abs */
 #include <fstream>
 #include <string>
+
+#include <glog/logging.h>  /* Google's logging module */
 
 #include "caffe.pb.h"
 #include "halide_image_io.h"
@@ -8,9 +10,7 @@
 #include "layers/layers.h"
 #include "layers/vision_layers.h"
 #include "io_utils.h"
-
 #include "proto2img_utils.h"
-
 #include "tests.h"
 
 using namespace std;
@@ -19,28 +19,40 @@ using namespace Halide;
 using namespace Halide::Tools;
 using namespace Latte;
 
+/**
+ * @brief check_output Validates halide output and serial output pixel by pixel
+ *
+ * @param halide_output
+ * @param serial_output
+ * @param conv_layer
+ *
+ * @return 
+ */
 static bool
-check_output(Image<float> halide_output, Image<float> serial_output)
+check_output(const Image<float> halide_output, 
+             const Image<float> serial_output, 
+             const Convolution *conv_layer)
 {
-  int h_width    = halide_output.width();
-  int h_height   = halide_output.height();
-  int h_channels = halide_output.channels();
+  /* Output dimension */
+  int width    = conv_layer->get_width();
+  int height   = conv_layer->get_height();
+  int channels = conv_layer->get_channels();
 
-  int s_width    = serial_output.width();
-  int s_height   = serial_output.height();
-  int s_channels = serial_output.channels();
-
-  /* Check dimensions first */
-  if (h_width != s_width || h_height != s_height || h_channels != s_channels) {
-    cout << "Halide convolution output dimensions and "
-            "serial convolution dimensions do not agree" << endl;
-    cout << "Halide output [" 
-         << h_width << "x" << h_height << "x" << h_channels << "]";
-    cout << "Serial output [" 
-         << s_width << "x" << s_height << "x" << s_channels << "]";
-    return false;
+  for (int c = 0; c < channels; c++) {
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        float halide_val = halide_output(x, y, c);
+        float serial_val = serial_output(x, y, c);
+        if (abs(halide_val - serial_val) > PIXEL_THRESHOLD) {
+          LOG(ERROR) << "Value disagreement at (" 
+               << x << "," << y << "," << c << ")";
+          LOG(ERROR) << "halide_val = " << halide_val;
+          LOG(ERROR) << "serial_val = " << serial_val;
+          return false;
+        }
+      }
+    }
   }
-  /* TODO loop through the pixels and check */
   return true;
 }
 
@@ -50,32 +62,41 @@ test_convolution(string image_path, NetParameter *net_model)
   /* Loads the image */
   Image<float> input = load_image(image_path);
 
+  int layer_idx = 3;
+  LOG(INFO) << "Running convolution test with layer " << layer_idx;
+
   /* TODO Let's just play with the first conv layer */
-  LayerParameter layer = net_model->layer(3);
+  LayerParameter layer = net_model->layer(layer_idx);
   BlobProto kernel_blob = layer.blobs(0);
-  BlobProto weight_blob = layer.blobs(1);
+  BlobProto bias_blob = layer.blobs(1);
   ConvolutionParameter conv_param = layer.convolution_param();
   Convolution conv_layer = Convolution(layer.name(), &conv_param, 
-                                       &kernel_blob, &weight_blob);
-  
+                                       &kernel_blob, &bias_blob);
+ 
+  /* IMPT: need to run it before we have an output dimension */
+  Func storage = conv_layer.run(
+      (Func)input, input.width(), input.height(), input.channels());
+
   /* Realize the output because we want to compare */
   int width = conv_layer.get_width();
   int height = conv_layer.get_height();
   int channels = conv_layer.get_channels();
-  Image<float> halide_output = 
-    conv_layer.run(
-        (Func)input, input.width(), input.height(), input.channels()).
-        realize(width, height, channels);
+  Image<float> halide_output = storage.realize(width, height, channels);
   Image<float> serial_output = conv_layer.SerialConv(input);
-  check_output(halide_output, serial_output);
+  bool result = check_output(halide_output, serial_output, &conv_layer);
 
-#if 0
-  /* TODO Grab first layer and try saving the image */
-  Func get_slice;
+  /* Uncomment if you want to see the result */
+#ifdef DEBUG
+  Func get_halide_slice, get_serial_slice;
   Var x, y, z;
-  get_slice(x, y, z) = output(x, y, z);
-  Image<float> slice = get_slice.realize(output.width(), output.height(), 1);
-  save_image(slice, "xxx.png");
+  get_halide_slice(x, y, z) = halide_output(x, y, z);
+  get_serial_slice(x, y, z) = serial_output(x, y, z);
+
+  Image<float> halide_slice = get_halide_slice.realize(width, height, 1);
+  Image<float> serial_slice = get_serial_slice.realize(width, height, 1);
+
+  save_image(halide_slice, "halide_convolution_slice.png");
+  save_image(serial_slice, "serial_convolution_slice.png");
 #endif
-  return true;
+  return result; 
 }

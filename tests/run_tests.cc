@@ -1,16 +1,19 @@
-#include <sys/stat.h> /* stat */
-#include <iostream>   /* cerr, cout */
+#include <sys/stat.h>      /* stat */
 
 #include <gflags/gflags.h> /* Google's commandline parser */
-#include "caffe.pb.h"
+#include <glog/logging.h>  /* Google's logging module */
 
-#include "tests.h"
+#include "caffe.pb.h"
+#include "tests.h"         /* Collection of tests */
 
 using namespace std;
+using namespace google;
 using namespace gflags;
 using namespace caffe;
 
-string usage = "\n ./test --image_path \t\timage.png\n" 
+string usage = "\n ./test "
+                      "\t--stderrthreshold=LOGLEVEL\n"
+                      "\t--image_path \t\timage.png\n" 
                       "\t--train_val_path \ttrain_val.prototxt\n"
                       "\t--trained_model_path \ttrained_model.caffemodel\n"
                       "\t--test_all\n"
@@ -33,7 +36,7 @@ ValidatePath(const char *flagname, const string& path)
   struct stat buffer;   
   if (!stat(path.c_str(), &buffer))
     return true; 
-  cerr << "Invalid path name for " << flagname << endl;
+  LOG(INFO) << "Invalid path name for " << flagname;
   return false;
 }
 
@@ -63,15 +66,19 @@ main(int argc, char *argv[])
 {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
+  /* Initialize Google's logging library */
+  InitGoogleLogging(argv[0]);
+
   /* Register validator and help message */
   RegisterFlagValidator(&FLAGS_image_path, &ValidatePath);
   RegisterFlagValidator(&FLAGS_train_val_path, &ValidatePath);
   RegisterFlagValidator(&FLAGS_trained_model_path, &ValidatePath);
   SetUsageMessage(usage);
 
+  /* Parse commandline */
   ParseCommandLineFlags(&argc, &argv, true);
-  string image_path = FLAGS_image_path;
-  string train_val_path = FLAGS_train_val_path;
+  string image_path         = FLAGS_image_path;
+  string train_val_path     = FLAGS_train_val_path;
   string trained_model_path = FLAGS_trained_model_path;
 
   NetParameter net_model;
