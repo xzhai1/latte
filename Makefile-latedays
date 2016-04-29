@@ -12,14 +12,14 @@
 CC = g++
 
 # define any compile-time flags
-CFLAGS = --std=c++11 -g -fopenmp -Wall
+CFLAGS = --std=c++11 -g -fopenmp -Wall #-nostdinc++
 
 # define any directories containing header files other than /usr/include
 INCLUDES = -I./include \
 					 -I/home/15-418/Halide/include \
 					 -I/home/15-418/Halide/tools \
 					 -I/home/15-418/gflags-2.1.2/include \
-					 -I/home/15-418/glog-0.3.3/include \
+					 -I/home/15-418/glog-0.3.3/build/include \
 					 `pkg-config --cflags-only-I protobuf`
 
 # define library paths in addition to /usr/lib
