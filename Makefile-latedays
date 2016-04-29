@@ -32,7 +32,9 @@ LFLAGS = -L/home/15-418/Halide/bin \
 # define any libraries to link into executable:
 #   if I want to link in libraries (libx.so or libx.a) I use the -llibname 
 #   option, something like (this will link in libmylib.so and libm.so:
-LIBS = -lHalide -ldl -lgflags -lglog
+# On Latedays can't link both gflags and glog because glog already statically
+# links gflags
+LIBS = -lHalide -ldl -lglog
 
 # From Wikipedia:
 # 	"pkg-config is computer program that provides a unified interface for 
