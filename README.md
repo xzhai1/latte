@@ -47,6 +47,11 @@ If you installed it with the ``--prefix`` flag, you want to set the following en
 	
 This is so that ``pkg-config`` will know where to find ``protobuf``.
 
+### `gflags` and `glog`
+It is best that we don't reinvent the wheels and that is why we use the stuff smarter people built. [`gflags`](https://gflags.github.io/gflags/) is Google's command line module. [`glog`](https://github.com/google/glog) is Google's logging module. 
+
+	sudo apt-get instsall libgflags-dev libgoogle-glog-dev
+	
 ### Halide
 Check your ``g++`` version:
 
