@@ -86,7 +86,7 @@ test_convolution(string image_path, NetParameter *net_model)
   bool result = check_output(halide_output, serial_output, &conv_layer);
 
   /* Uncomment if you want to see the result */
-#ifdef DEBUG
+#if 0
   Func get_halide_slice, get_serial_slice;
   Var x, y, z;
   get_halide_slice(x, y, z) = halide_output(x, y, z);
