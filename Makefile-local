@@ -11,7 +11,7 @@
 # define the C compiler to use
 CC = g++
 
-# define any compile-time flags
+# define any compile-time flags. For local build on laptop, we use CPU_ONLY
 CFLAGS = --std=c++11 -g -fopenmp -Wall -DCPU_ONLY
 
 # define any directories containing header files other than /usr/include

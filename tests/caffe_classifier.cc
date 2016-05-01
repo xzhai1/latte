@@ -102,6 +102,7 @@ static std::vector<int> Argmax(const std::vector<float>& v, int N) {
 std::vector<Prediction> Classifier::Classify(const cv::Mat& img, int N) {
   std::vector<float> output = Predict(img);
 
+  /* For now, don't care about the prodictions yet */
   N = std::min<int>(labels_.size(), N);
   std::vector<int> maxN = Argmax(output, N);
   std::vector<Prediction> predictions;
@@ -152,6 +153,9 @@ std::vector<float> Classifier::Predict(const cv::Mat& img) {
   net_->Reshape();
 
   std::vector<cv::Mat> input_channels;
+
+  /* This is the python equivalent of net.blobs['data'].data[...] = in_, 
+   * i.e. setting network's input */
   WrapInputLayer(&input_channels);
 
   Preprocess(img, &input_channels);
@@ -186,6 +190,8 @@ void Classifier::WrapInputLayer(std::vector<cv::Mat>* input_channels) {
 void Classifier::Preprocess(const cv::Mat& img,
                             std::vector<cv::Mat>* input_channels) {
   /* Convert the input image to the input image format of the network. */
+
+  /* First stage: convert color */
   cv::Mat sample;
   if (img.channels() == 3 && num_channels_ == 1)
     cv::cvtColor(img, sample, cv::COLOR_BGR2GRAY);
@@ -198,24 +204,31 @@ void Classifier::Preprocess(const cv::Mat& img,
   else
     sample = img;
 
+  /* Second stage: resize intermediate */
   cv::Mat sample_resized;
   if (sample.size() != input_geometry_)
     cv::resize(sample, sample_resized, input_geometry_);
   else
     sample_resized = sample;
 
+  /* Third stage: convert to float */
   cv::Mat sample_float;
   if (num_channels_ == 3)
     sample_resized.convertTo(sample_float, CV_32FC3);
   else
     sample_resized.convertTo(sample_float, CV_32FC1);
 
+  /* Firth stage: subtract the mean, may not be necessary for our test */
+  cv::Mat sample_normalized = sample_float;
+#if 0
   cv::Mat sample_normalized;
   cv::subtract(sample_float, mean_, sample_normalized);
+#endif
 
   /* This operation will write the separate BGR planes directly to the
    * input layer of the network because it is wrapped by the cv::Mat
    * objects in input_channels. */
+  /* Divides a multi-channel array into several single-channel arrays. */
   cv::split(sample_normalized, *input_channels);
 
   CHECK(reinterpret_cast<float*>(input_channels->at(0).data)
