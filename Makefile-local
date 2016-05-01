@@ -12,23 +12,25 @@
 CC = g++
 
 # define any compile-time flags
-CFLAGS = --std=c++11 -g -fopenmp -Wall
+CFLAGS = --std=c++11 -g -fopenmp -Wall -DCPU_ONLY
 
 # define any directories containing header files other than /usr/include
 INCLUDES = -I./include \
 					 -I../halide/include \
 					 -I../halide/tools \
-					 `pkg-config --cflags-only-I protobuf`
+					 -I../caffe/include \
+					 -I../caffe/distribute/include/ \
+					 `pkg-config --cflags-only-I protobuf opencv`
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-LFLAGS = -L../halide/bin 
+LFLAGS = -L../halide/bin -L../caffe/build/lib
 
 # define any libraries to link into executable:
 #   if I want to link in libraries (libx.so or libx.a) I use the -llibname 
 #   option, something like (this will link in libmylib.so and libm.so:
-LIBS = -lHalide -ldl -lgflags -lglog
+LIBS = -lHalide -lcaffe -lboost_system -ldl -lgflags -lglog
 
 # From Wikipedia:
 # 	"pkg-config is computer program that provides a unified interface for 
@@ -38,7 +40,7 @@ LIBS = -lHalide -ldl -lgflags -lglog
 # For example, the following command produces:
 # 	-pthread -I/usr/local/include  -pthread -L/usr/local/lib -lprotobuf
 # 	-lpthread	
-EXTRA_SCRIPTS = `pkg-config --libs protobuf libpng`
+EXTRA_SCRIPTS = `pkg-config --libs protobuf libpng opencv`
  
 # define the C source files
 SRCS = $(wildcard ./src/*.cc) $(wildcard ./src/layers/*.cc) $(wildcard ./tests/*.cc)
