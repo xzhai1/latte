@@ -74,7 +74,8 @@ Convolution::SerialConv(Image<float> input)
             for (int k_x = 0; k_x < kernel_size; k_x++) {
               int x_input = x + k_x - pad;
               int y_input = y + k_y - pad;
-              float k_val = kernel(k_x, k_y, f_idx*img_channels + c);
+              //float k_val = kernel(k_x, k_y, f_idx*img_channels + c);
+              float k_val = kernel(k_x, k_y, c, f_idx);
               float val_input = 0.f;
               /* Check for out of bound */
               if (x_input < 0 || x_input > img_width - 1||
@@ -96,72 +97,6 @@ Convolution::SerialConv(Image<float> input)
   return output;
 }
 
-#if 0
-Image<float>
-Convolution::run(Image<float> input) 
-{
-  Func convolution;
-  Var x, y, z;
-  int width     = (input.width() - kernel_size + 2 * pad) / stride + 1;
-  int height    = (input.height() - kernel_size + 2 * pad) / stride + 1;
-  int channels  = input.channels();
-
-  /* Let Halide fill in the blank when we go off the reservation */
-  Func clamped = BoundaryConditions::constant_exterior(input, 0.f);
-
-  /* Reduce over kernel */
-  RDom r(0, kernel_size, 0, kernel_size, 0, channels);
-  convolution(x, y, z) = sum(
-      kernel(r.x, r.y, r.z + z*channels) * 
-      clamped(x*stride - pad + r.x, y*stride - pad + r.y, r.z));
-
-  /* and add bias */
-  convolution(x, y, z) += bias(0, 0, z);
-  
-  /*
-   * Different schedulings
-   */
-
-  /* CPU parallelism */
-  convolution.parallel(z);
-
-  Var x_outer, y_outer, x_inner, y_inner, tile_index;
-  convolution.tile(x, y, x_outer, y_outer, x_inner, y_inner, 8, 8)
-             .fuse(x_outer, y_outer, tile_index)
-             .parallel(tile_index);
-
-  Var x_inner_outer, y_inner_outer, x_vectors, y_pairs;
-  convolution.tile(x_inner, y_inner, x_inner_outer, y_inner_outer, x_vectors, y_pairs, 4, 2)
-             .vectorize(x_vectors)
-             .unroll(y_pairs);
-
-  Image<float> output = convolution.realize(width, height, num_output);
-
-  /* OpenCL */
-  /*
-  Image<float> output(width, height, num_output);
-  convolution.gpu_tile(x, y, z, 4, 4, 32);
-  Target target = get_host_target();
-  target.set_feature(Target::OpenCL);
-  convolution.compile_jit(target);
-  convolution.realize(output);
-  */
-
-
-  /* CUDA */
-  /*
-  Image<float> output(width, height, num_output);
-  convolution.gpu_tile(x, y, z, 4, 4, 32);
-  Target target = get_host_target();
-  target.set_feature(Target::CUDA);
-  convolution.compile_jit(target);
-  convolution.realize(output);
-  */
-
-  return output;
-}
-#endif
-
 Func 
 Convolution::run(
     Func input, int input_width, int input_height, int input_channels) 
@@ -182,7 +117,11 @@ Convolution::run(
 
   /* Reduce over kernel */
   RDom r(0, kernel_size, 0, kernel_size, 0, input_channels);
+#if 0
   storage(x, y, z) = sum(kernel(r.x, r.y, r.z + z*input_channels) * 
+                     clamped(x*stride - pad + r.x, y*stride - pad + r.y, r.z));
+#endif 
+  storage(x, y, z) = sum(kernel(r.x, r.y, r.z, z) * 
                      clamped(x*stride - pad + r.x, y*stride - pad + r.y, r.z));
 
   /* and add bias */
