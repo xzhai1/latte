@@ -190,8 +190,9 @@ Convolution::run(
              .vectorize(i_vectors)
              .unroll(j_pairs);
 
+
   /* GPU parallel */
-  //storage.gpu_tile(i, j, k, 4, 4, 32);
+  // storage.gpu_tile(i, j, k, 4, 4, 32);
   
   return storage;
 }
@@ -271,14 +272,18 @@ Halide::Func Pooling::run(
   /* 2D reduction for each channel */
   RDom r(0, kernel_size, 0, kernel_size);
   storage(i, j, k, l) = maximum(input(i * stride + r.x, j * stride + r.y, k, l));
-#if 0
+
+
   /* CPU parallel */
   Var i_outer, j_outer, i_inner, j_inner, tile_index;
   storage.tile(i, j, i_outer, j_outer, i_inner, j_inner, 8, 8)
          .fuse(i_outer, j_outer, tile_index)
          .parallel(tile_index);
   storage.vectorize(i_inner, 8);
-#endif
+
+
+  /* GPU parallel */
+  // storage.gpu_tile(i, j, k, 4, 4, 32);
   
   return storage;
 }

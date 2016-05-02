@@ -76,17 +76,20 @@ Func ReLU::run(
 
   storage(i, j, k, l) = max(0, input(i, j, k, l)) + 
                        negative_slope * min(0, input(i, j, k, l));
-#if 0
-  /* CPU parallel */
-  storage.parallel(z);
 
-  Var x_outer, y_outer, x_inner, y_inner, tile_index;
-  storage.tile(x, y, x_outer, y_outer, x_inner, y_inner, 8, 8)
-           .fuse(x_outer, y_outer, tile_index)
+  /* CPU parallel */
+  storage.parallel(k);
+
+  Var i_outer, j_outer, i_inner, j_inner, tile_index;
+  storage.tile(i, j, i_outer, j_outer, i_inner, j_inner, 8, 8)
+           .fuse(i_outer, j_outer, tile_index)
            .parallel(tile_index);
 
-  storage.vectorize(x_inner, 8);
-#endif
+  storage.vectorize(i_inner, 8);
+
+
+  /* GPU parallel */
+  // storage.gpu_tile(i, j, k, 4, 4, 32);
 
   return storage;
 }

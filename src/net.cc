@@ -158,15 +158,9 @@ Net::Net(NetParameter *net_model)
       hit = true;
     } 
     else if (type == DECONVOLUTION) {
-
-      #if 0
-      cout << "hit deconv" << endl;
+      break;
       curr_layer = build_deconvlayer(&layer);
       hit = true;
-      cout << "finish processing deconv" << endl;
-      #endif
-
-      break;
     }
 
     else if (type == RELU) {
@@ -199,6 +193,8 @@ Net::Net(NetParameter *net_model)
       if (prev_layer)
         prev_layer->set_next(curr_layer);
       prev_layer = curr_layer;
+
+      // if (type == DECONVOLUTION) break;
     }
   }
 }
@@ -243,6 +239,13 @@ Net::run(Image<float> input)
 
     curr_output = ptr->run(prev_output, input_width, input_height, input_channels, input_num);
     curr_output.compile_jit();
+
+    /*
+    Target target = get_host_target();
+    target.set_feature(Target::OpenCL);
+    curr_output.compile_jit(target);
+    */
+    
 
     /* Get input dimension for next layer */
     input_width     = ptr->get_width();
