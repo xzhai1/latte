@@ -16,39 +16,42 @@ using namespace caffe;
 using namespace Halide;
 using namespace Halide::Tools;
 
+/*************************** Crop Layer ***************************/
 Crop::Crop(string layer_name, const CropParameter *param)
 {
   set_name(layer_name);
   set_type("Crop");
   if (param->offset_size() == 1) {
-    offset_x = param->offset(0);
-    offset_y = param->offset(0);
+    offset_i = param->offset(0);
+    offset_j = param->offset(0);
   } else {
     // axis in caffe: (N,C,H,W)
-    offset_x = param->offset(1);
-    offset_y = param->offset(0);
+    offset_i = param->offset(1);
+    offset_j = param->offset(0);
   }
 }
 
-Image<float>
-Crop::run(Image<float> input)
+Func Crop::run(
+  Func input, int input_width, int input_height, int input_channels, int input_num)
 {
-  Func cropped;
-  Var x, y, z;
-  int width    = input.width() - 2*offset_x;
-  int height   = input.height() - 2*offset_y;
-  int channels = input.channels();
+  /* Output dimension */
+  int output_width    = input_width - 2 * offset_i;
+  int output_height   = input_height - 2 * offset_j;
+  int output_channels = input_channels;
+  int output_num      = input_num;
 
-  cropped(x, y, z) = input(x + offset_x, y + offset_y, z);
+  /* Set output dimension */
+  set_width(output_width);
+  set_height(output_height);
+  set_channels(output_channels);
+  set_num(output_num);
 
-  /* TODO: define schedule */
-  Image<float> output = cropped.realize(width, height, channels);
+  storage(i, j, k, l) = input(i + offset_i, j + offset_j, k, l);
 
-  return output;
+  return storage;
 }
 
-/*****************************************************************************
- *****************************************************************************/
+/*************************** Dropout Layer ***************************/
 Dropout::Dropout(string layer_name, const DropoutParameter *param) 
 {
   set_name(layer_name);
@@ -94,29 +97,37 @@ Dropout::run(Image<float> input)
 }
 #endif
 
-Func Dropout::run(Func input, int input_width, int input_height, int input_channels) {
-  /* Set output dimension */
+Func Dropout::run(
+  Func input, int input_width, int input_height, int input_channels, int input_num, bool eval) 
+{
+  /* Output dimension */
   int output_width    = input_width;
   int output_height   = input_height;
   int output_channels = input_channels;
+  int output_num      = input_num;
 
+  /* Set output dimension */
   set_width(output_width);
   set_height(output_height);
   set_channels(output_channels);
+  set_num(output_num);
 
-  /* Only for test */
-  storage(x, y, z) = input(x, y, z);
+  if (eval) { /* Test */
+    storage(i, j, k, l) = input(i, j, k, l);
+  } else {    /* Train */
+    storage(i, j, k, l) = input(i, j, k, l); /* Need random dropout */
+  }
 
   return storage; 
 }
 
-/*****************************************************************************
- *****************************************************************************/
+/*************************** Split Layer ***************************/
 Split::Split(string layer_name) {
   set_name(layer_name);
   set_type("Split");
 }
 
+#if 0
 Image<float> 
 Split::run(Image<float> input) 
 {
@@ -133,15 +144,40 @@ Split::run(Image<float> input)
 
   return output;
 }
+#endif
 
-/*****************************************************************************
- *****************************************************************************/
+Func Split::run(
+  Func input, int input_width, int input_height, int input_channels, int input_num, bool eval) 
+{
+  /* Output dimension */
+  int output_width    = input_width;
+  int output_height   = input_height;
+  int output_channels = input_channels;
+  int output_num      = input_num;
+
+  /* Set output dimension */
+  set_width(output_width);
+  set_height(output_height);
+  set_channels(output_channels);
+  set_num(output_num);
+
+  if (eval) { /* Test */
+    storage(i, j, k, l) = input(i, j, k, l);
+  } else {    /* Train */
+    storage(i, j, k, l) = input(i, j, k, l); /* Need to split when necessary */
+  }
+
+  return storage; 
+}
+
+/*************************** Silent Layer ***************************/
 Silence::Silence(string layer_name) 
 {
   set_name(layer_name);
   set_type("Silence");
 }
 
+#if 0
 Image<float> 
 Silence::run(Image<float> input) 
 {
@@ -156,6 +192,31 @@ Silence::run(Image<float> input)
   /* TODO: define schedule */
   Image<float> output = silenced.realize(width, height, channels);
   return output;
+}
+#endif
+
+Func Silence::run(
+  Func input, int input_width, int input_height, int input_channels, int input_num, bool eval) 
+{
+  /* Output dimension */
+  int output_width    = input_width;
+  int output_height   = input_height;
+  int output_channels = input_channels;
+  int output_num      = input_num;
+
+  /* Set output dimension */
+  set_width(output_width);
+  set_height(output_height);
+  set_channels(output_channels);
+  set_num(output_num);
+
+  if (eval) { /* Test */
+    storage(i, j, k, l) = input(i, j, k, l);
+  } else {    /* Train */
+    storage(i, j, k, l) = input(i, j, k, l); /* Need to do something when necessary */
+  }
+
+  return storage; 
 }
 
 } /* namespace latte */

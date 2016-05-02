@@ -16,6 +16,7 @@ using namespace caffe;
 using namespace Halide;
 using namespace Halide::Tools;
 
+/*************************** ReLU Layer ***************************/
 ReLU::ReLU(string layer_name, const ReLUParameter *param) 
 {
   set_name(layer_name);
@@ -24,6 +25,7 @@ ReLU::ReLU(string layer_name, const ReLUParameter *param)
     negative_slope = param->negative_slope();
 }
 
+#if 0
 Image<float> 
 ReLU::run(Image<float> input)
 {
@@ -55,20 +57,27 @@ ReLU::run(Image<float> input)
   Image<float> output = rectified.realize(width, height, channels);
   return output;
 }
+#endif
 
-Func ReLU::run(Func input, int input_width, int input_height, int input_channels) {
-  /* Set output dimension */
+Func ReLU::run(
+  Func input, int input_width, int input_height, int input_channels, int input_num) 
+{
+  /* Output dimension */
   int output_width    = input_width;
   int output_height   = input_height;
   int output_channels = input_channels;
+  int output_num      = input_num;
 
+  /* Set output dimension */
   set_width(output_width);
   set_height(output_height);
   set_channels(output_channels);
+  set_num(output_num);
 
-  storage(x, y, z) = max(0, input(x, y, z)) + 
-                       negative_slope*min(0, input(x, y, z));
+  storage(i, j, k, l) = max(0, input(i, j, k, l)) + 
+                       negative_slope * min(0, input(i, j, k, l));
 #if 0
+  /* CPU parallel */
   storage.parallel(z);
 
   Var x_outer, y_outer, x_inner, y_inner, tile_index;
@@ -81,5 +90,9 @@ Func ReLU::run(Func input, int input_width, int input_height, int input_channels
 
   return storage;
 }
+
+/*************************** Sigmoid Layer ***************************/
+
+/*************************** Tanh Layer ***************************/
 
 } /* namespace latte */

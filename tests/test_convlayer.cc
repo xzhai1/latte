@@ -118,7 +118,7 @@ test_convolution(string image_path, NetParameter *net_model)
  
   /* IMPT: need to run it before we have an output dimension */
   Func storage = conv_layer.run(
-      (Func)input, input.width(), input.height(), input.channels());
+      (Func)input, input.extent(0), input.extent(1), input.extent(2), input.extent(3));
 
   /* Realize the output because we want to compare */
   int width = conv_layer.get_width();

@@ -17,11 +17,11 @@ class Deconvolution;
  */
 class Convolution : public Layer {
   /* Default values */
-  int  pad = 0;
+  int  pad    = 0;
   int  stride = 1;
 
   /* Filled in values */
-  int  num_output, kernel_size;
+  int num_output, kernel_size;
   Halide::Image<float> kernel, bias;
 
   Halide::Func kernel_func, bias_func;
@@ -62,9 +62,7 @@ class Convolution : public Layer {
      *
      * @return post convolution result
      */
-    // Halide::Image<float> run(Halide::Image<float> input);
-
-    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels);
+    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num);
 };
 
 /**
@@ -85,15 +83,24 @@ class Pooling : public Layer {
     Pooling(std::string layer_name, const caffe::PoolingParameter *param);
 
     /**
+     * @brief SerialPool performs plain vanilla pooling with for loops.
+     *
+     * This serves as a correctness check for the Halide version
+     *
+     * @param input
+     *
+     * @return 
+     */
+    Halide::Image<float> SerialPool(Halide::Image<float> input);
+
+    /**
      * @brief pool Perform max pooling over kernel for each channel
      *
      * @param input Input from previous stage
      *
      * @return Input for next stage
      */
-    // Halide::Image<float> run(Halide::Image<float> input);
-
-    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels);
+    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num);
 };
 
 /**
@@ -113,7 +120,7 @@ class Deconvolution : public Layer {
                   const caffe::BlobProto *kernel_blob, 
                   const caffe::BlobProto *bias_blob);
     Halide::Image<float> run(Halide::Image<float> input);
-    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels);
+    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num);
 };
 
 } /* namespace latte */

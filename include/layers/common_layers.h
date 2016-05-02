@@ -18,8 +18,8 @@ class Silence;
  * TODO  spatial crop
  */
 class Crop : public Layer {
-  int offset_x;
-  int offset_y;
+  int offset_i;
+  int offset_j;
 
   public:
     /**
@@ -37,7 +37,8 @@ class Crop : public Layer {
      *
      * @return Input to next stage
      */
-    Halide::Image<float> run(Halide::Image<float> input);
+    // Halide::Image<float> run(Halide::Image<float> input);
+    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num);
 };
 
 /**
@@ -64,7 +65,7 @@ class Dropout : public Layer {
      * @return Input to next stage
      */
     // Halide::Image<float> run(Halide::Image<float> input);
-    Halide::Func run(Halide::Func, int input_width, int input_height, int input_channels);
+    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num, bool eval = true);
 };
 
 /**
@@ -86,7 +87,8 @@ class Split : public Layer {
      *
      * @return 
      */
-    Halide::Image<float> run(Halide::Image<float> input);
+    // Halide::Image<float> run(Halide::Image<float> input);
+     Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num, bool eval = true);
 };
 
 /**
@@ -109,7 +111,8 @@ class Silence : public Layer {
      *
      * @return 
      */
-    Halide::Image<float> run(Halide::Image<float> input);
+    // Halide::Image<float> run(Halide::Image<float> input);
+     Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num, bool eval = true);
 };
 
 } /* namespace latte */

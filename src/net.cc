@@ -144,7 +144,7 @@ Net::Net(NetParameter *net_model)
   //cout << "name \taddr" << endl;
 
   /* TODO we are cheating here */
-  for (int i = 3; i < num_layers; i++) {
+  for (int i = 0; i < num_layers; i++) {
     LayerParameter layer = net_model->layer(i);
     string name = layer.name();
     string type = layer.type();
@@ -157,15 +157,17 @@ Net::Net(NetParameter *net_model)
       curr_layer = build_convlayer(&layer);
       hit = true;
     } 
-
-    #if 0
     else if (type == DECONVOLUTION) {
+
+      #if 0
       cout << "hit deconv" << endl;
       curr_layer = build_deconvlayer(&layer);
       hit = true;
       cout << "finish processing deconv" << endl;
+      #endif
+
+      break;
     }
-    #endif
 
     else if (type == RELU) {
       curr_layer = build_relulayer(&layer);
@@ -173,10 +175,13 @@ Net::Net(NetParameter *net_model)
     } else if (type == POOLING) {
       curr_layer = build_poollayer(&layer);
       hit = true;
-    } else if (type == DROPOUT) {
+    } 
+    #if 0
+    else if (type == DROPOUT) {
       curr_layer = build_dropoutlayer(&layer);
       hit = true;
     } 
+    #endif
     #if 0
     else if (type == SOFTMAX) {
       curr_layer = build_softmaxlayer(&layer);
@@ -215,32 +220,35 @@ Image<float>
 Net::run(Image<float> input)
 {
   /* Display input image dimension */
-  cout << "Input dimension [W, H, C]:"
-       << input.width() << ", "
-       << input.height() << ", "
-       << input.channels()
+  cout << "Input dimension [W, H, C, N]:"
+       << input.extent(0) << ", "
+       << input.extent(1) << ", "
+       << input.extent(2) << ", "
+       << input.extent(3)
        << endl;
 
   /* TODO each layer is supposed to call the next layer's run */
   double inferenceStartTime, inferenceEndTime, startTime, endTime;
   Func prev_output(input);
   Func curr_output;
-  int input_width = input.width(); 
-  int input_height = input.height();
-  int input_channels = input.channels();
+  int input_width     = input.extent(0); 
+  int input_height    = input.extent(1);
+  int input_channels  = input.extent(2);
+  int input_num       = input.extent(3);
   //allStartTime = CycleTimer::currentSeconds();
   for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
     startTime = CycleTimer::currentSeconds();
     cout << "Compiling ["
       << ptr->get_name() << "," << ptr->get_type() << "]  " << endl;
 
-    curr_output = ptr->run(prev_output, input_width, input_height, input_channels);
+    curr_output = ptr->run(prev_output, input_width, input_height, input_channels, input_num);
     curr_output.compile_jit();
 
     /* Get input dimension for next layer */
     input_width     = ptr->get_width();
     input_height    = ptr->get_height();
     input_channels  = ptr->get_channels();
+    input_num       = ptr->get_num();
 
     cout << "Dim(curr_output) = " << input_width << ", " << input_height << ", " << input_channels << endl;
 
@@ -250,7 +258,7 @@ Net::run(Image<float> input)
   }
   
   inferenceStartTime = CycleTimer::currentSeconds();
-  Image<float> output = curr_output.realize(input_width, input_height, input_channels);
+  Image<float> output = curr_output.realize(input_width, input_height, input_channels, input_num);
   inferenceEndTime = CycleTimer::currentSeconds();
   cout << "Inference time: " 
        << (inferenceEndTime - inferenceStartTime) * 1000 << " ms  " << endl;

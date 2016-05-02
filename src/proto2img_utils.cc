@@ -9,36 +9,38 @@ using namespace Halide;
 using namespace caffe;
 
 Image<float>
-LoadBiasFromBlob(const BlobProto *blob, int num_output)
+LoadBiasFromBlob(const BlobProto *blob, int num)
 {
-  /* Bias is a "column" with num_output of bias values, each for a layer of
+  /* Bias is a "column" with num of bias values, each for a layer of
    * the output */
-  Image<float> bias(1, 1, num_output);
+  Image<float> bias(1, 1, 1, num);
 
-  for (int k = 0; k < num_output; k++) {
-    bias(0, 0, k) = blob->data(k);
+  for (int l = 0; l < num; l++) {
+    bias(0, 0, 0, l) = blob->data(l);
   }
 
   return bias;
 }
 
+/* Assume square kernel */
 Image<float>
-LoadKernelFromBlob(const BlobProto *blob, int k_size, int num_output)
+LoadKernelFromBlob(const BlobProto *blob, int kernel_size, int num)
 {
-  int prev_num_output = blob->data_size() / (k_size*k_size*num_output);
+  int channels = blob->data_size() / (kernel_size*kernel_size*num);
 
-  /* IMPT: blob->data is num x channels x height x width */
-  Image<float> kernel(k_size, k_size, prev_num_output, num_output);
+  /* INPUT FORMAT:  blob->data is num x channels x height x width 
+   * OUTPUT FORMAT: kernel is width x height x channels x num */
+  Image<float> kernel(kernel_size, kernel_size, channels, num);
 
   int data_idx = 0;
 
   /* For each filter */
-  for (int w = 0; w < num_output ; w++) {
+  for (int w = 0; w < num ; w++) {
     /* For each depth value */
-    for (int k = 0; k < prev_num_output; k++) {
+    for (int k = 0; k < channels; k++) {
       /* Fill in the value */
-      for (int j = 0; j < k_size; j++) {
-        for (int i = 0; i < k_size; i++) {
+      for (int j = 0; j < kernel_size; j++) {
+        for (int i = 0; i < kernel_size; i++) {
           kernel(i, j, k, w) = blob->data(data_idx);
           data_idx++;
         }
@@ -46,6 +48,5 @@ LoadKernelFromBlob(const BlobProto *blob, int k_size, int num_output)
     }
   }
 
-  /* Center our kernel around 0 */
   return kernel;
 }

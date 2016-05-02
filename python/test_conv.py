@@ -6,14 +6,14 @@
 # The caffe module needs to be on the Python path;
 #  we'll add it here explicitly.
 import sys
-caffe_root = '/home/xd/Projects/CMU/caffe/'  # this file should be run from {caffe_root}/examples (otherwise change this line)
-model_root = '/home/xd/Projects/CMU/fcn.berkeleyvision.org/'
+caffe_root = '/home/anbangh/private/caffe/'  # this file should be run from {caffe_root}/examples (otherwise change this line)
+model_root = '/home/anbangh/private/fcn.berkeleyvision.org/'
 sys.path.insert(0, caffe_root + 'python')
 
 import caffe
 # If you get "No module named _caffe", either you have not built pycaffe or you have the wrong path.
 import numpy as np
-get_ipython().magic(u'matplotlib inline')
+# get_ipython().magic(u'matplotlib inline')
 import matplotlib.pyplot as plt
 from PIL import Image
 
@@ -104,41 +104,41 @@ np.savetxt("caffe.csv", conv1_1_result.data[0, 0], delimiter=",")
 # In[213]:
 
 #filt_min, filt_max = conv1_1_result.data.min(), conv1_1_result.data.max()
-plt.figure()
+#plt.figure()
 #plt.imshow(conv1_1_result.data[0, 0], cmap='gray', vmin=filt_min, vmax=filt_max)
-plt.imshow(conv1_1_result.data[0, 0], cmap='gray')
-plt.axis('off')
-plt.savefig("test.png")
+#plt.imshow(conv1_1_result.data[0, 0], cmap='gray')
+#plt.axis('off')
+#plt.savefig("test.png")
 
 
 # In[217]:
 
-caffe_data = conv1_1_result.data[0, 0]
+#caffe_data = conv1_1_result.data[0, 0]
 
 
 # In[218]:
 
-halide_data = np.genfromtxt("../test.csv", delimiter=",")
+#halide_data = np.genfromtxt("../test.csv", delimiter=",")
 
 
 # In[219]:
 
-caffe_data.shape
+#caffe_data.shape
 
 
 # In[220]:
 
-halide_data.shape
+#halide_data.shape
 
 
 # In[223]:
 
-for x in range(734):
-    for y in range(734):
-        caffe_val = caffe_data[x, y]
-        halide_val = caffe_data[x, y]
-        if caffe_val != halide_val:
-            print x, y
+#for x in range(734):
+#    for y in range(734):
+#        caffe_val = caffe_data[x, y]
+#        halide_val = caffe_data[x, y]
+#        if caffe_val != halide_val:
+#            print x, y
 
 
 # In[ ]:
