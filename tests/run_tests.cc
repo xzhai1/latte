@@ -4,6 +4,7 @@
 #include <glog/logging.h>  /* Google's logging module */
 
 #include "caffe.pb.h"
+#include "caffe_classifier.h"
 #include "tests.h"         /* Collection of tests */
 
 using namespace std;
@@ -83,6 +84,12 @@ main(int argc, char *argv[])
 
   NetParameter net_model;
 
+  /* Make caffe classifier and run it */
+  Classifier caffe_classifier(train_val_path, trained_model_path, "", "");
+  cv::Mat img = cv::imread(image_path, -1);
+  CHECK(!img.empty()) << "Unable to decode image " << image_path;
+  std::vector<Prediction> predictions = caffe_classifier.Classify(img);
+ 
   if (FLAGS_test_all || FLAGS_test_loadfromtext)
     test_LoadFromTextFile(train_val_path, &net_model);
   
@@ -90,7 +97,7 @@ main(int argc, char *argv[])
   test_LoadFromBinaryFile(trained_model_path, &net_model);
 
   if (FLAGS_test_all || FLAGS_test_conv)
-    test_convolution(image_path, &net_model);
+    test_convolution(image_path, &net_model, &caffe_classifier);
 
   if (FLAGS_test_all || FLAGS_test_deconv)
     test_deconvolution(&net_model);

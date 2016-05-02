@@ -5,6 +5,7 @@
 #include <glog/logging.h>  /* Google's logging module */
 
 #include "caffe.pb.h"
+#include "caffe_classifier.h"
 #include "halide_image_io.h"
 
 #include "layers/layers.h"
@@ -28,12 +29,24 @@ using namespace Latte;
  *
  * @return 
  */
+/*
 static bool
 check_output(const Image<float> halide_output, 
              const Image<float> serial_output, 
+             const Classifier  *caffe_classifier,
              const Convolution *conv_layer)
 {
+*/
+static bool
+check_output(const Image<float> halide_output, 
+             const Classifier  *caffe_classifier,
+             const Convolution *conv_layer)
+{
+  boost::shared_ptr<Blob<float>> output_layer = 
+    caffe_classifier->net_->blobs()[3];
+
   /* Output dimension */
+  /* TODO check dimension */
   int width    = conv_layer->get_width();
   int height   = conv_layer->get_height();
   int channels = conv_layer->get_channels();
@@ -41,13 +54,15 @@ check_output(const Image<float> halide_output,
   for (int c = 0; c < channels; c++) {
     for (int y = 0; y < height; y++) {
       for (int x = 0; x < width; x++) {
+        /* TODO this is a hack */
+        float caffe_val = output_layer->data_at(0, c, y, x);
         float halide_val = halide_output(x, y, c);
-        float serial_val = serial_output(x, y, c);
-        if (abs(halide_val - serial_val) > PIXEL_THRESHOLD) {
+        //float serial_val = serial_output(x, y, c);
+        if (abs(halide_val - caffe_val) > PIXEL_THRESHOLD) {
           LOG(ERROR) << "Value disagreement at (" 
                << x << "," << y << "," << c << ")";
           LOG(ERROR) << "halide_val = " << halide_val;
-          LOG(ERROR) << "serial_val = " << serial_val;
+          LOG(ERROR) << "caffe_val = " << caffe_val;
           return false;
         }
       }
@@ -56,7 +71,7 @@ check_output(const Image<float> halide_output,
   return true;
 }
 
-
+#if 0
 /**
  * @brief save_data 
  *
@@ -88,9 +103,12 @@ save_data(const Image<float> halide_output,
 
   outputfile.close();
 }
+#endif
 
 bool
-test_convolution(string image_path, NetParameter *net_model) 
+test_convolution(string image_path, 
+                 NetParameter *net_model, 
+                 Classifier *caffe_classifier) 
 {
   /* Loads the image */
   Image<float> input = load_image(image_path);
@@ -125,10 +143,14 @@ test_convolution(string image_path, NetParameter *net_model)
   int height = conv_layer.get_height();
   int channels = conv_layer.get_channels();
   Image<float> halide_output = storage.realize(width, height, channels);
+#if 0 
   Image<float> serial_output = conv_layer.SerialConv(input);
-  bool result = true;
-  //bool result = check_output(halide_output, serial_output, &conv_layer);
-  save_data(halide_output, serial_output, &conv_layer);
+  bool result = check_output(halide_output, serial_output,
+                             caffe_classifier, &conv_layer);
+#endif
+  bool result = check_output(halide_output, caffe_classifier, &conv_layer);
+
+  //save_data(halide_output, serial_output, &conv_layer);
 
   /* Uncomment if you want to see the result */
 #if 0

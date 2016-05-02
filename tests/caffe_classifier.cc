@@ -9,38 +9,10 @@
 #include <utility>
 #include <vector>
 
+#include "caffe_classifier.h"
+
 using namespace caffe;  // NOLINT(build/namespaces)
 using std::string;
-
-/* Pair (label, confidence) representing a prediction. */
-typedef std::pair<string, float> Prediction;
-
-class Classifier {
- public:
-  Classifier(const string& model_file,
-             const string& trained_file,
-             const string& mean_file,
-             const string& label_file);
-
-  std::vector<Prediction> Classify(const cv::Mat& img, int N = 5);
-
- private:
-  void SetMean(const string& mean_file);
-
-  std::vector<float> Predict(const cv::Mat& img);
-
-  void WrapInputLayer(std::vector<cv::Mat>* input_channels);
-
-  void Preprocess(const cv::Mat& img,
-                  std::vector<cv::Mat>* input_channels);
-
- private:
-  shared_ptr<Net<float> > net_;
-  cv::Size input_geometry_;
-  int num_channels_;
-  cv::Mat mean_;
-  std::vector<string> labels_;
-};
 
 Classifier::Classifier(const string& model_file,
                        const string& trained_file,
@@ -65,6 +37,7 @@ Classifier::Classifier(const string& model_file,
     << "Input layer should have 1 or 3 channels.";
   input_geometry_ = cv::Size(input_layer->width(), input_layer->height());
 
+#if 0
   /* Load the binaryproto mean file. */
   SetMean(mean_file);
 
@@ -78,6 +51,7 @@ Classifier::Classifier(const string& model_file,
   Blob<float>* output_layer = net_->output_blobs()[0];
   CHECK_EQ(labels_.size(), output_layer->channels())
     << "Number of labels is different from the output layer dimension.";
+#endif
 }
 
 static bool PairCompare(const std::pair<float, int>& lhs,
@@ -102,7 +76,6 @@ static std::vector<int> Argmax(const std::vector<float>& v, int N) {
 std::vector<Prediction> Classifier::Classify(const cv::Mat& img, int N) {
   std::vector<float> output = Predict(img);
 
-  /* For now, don't care about the prodictions yet */
   N = std::min<int>(labels_.size(), N);
   std::vector<int> maxN = Argmax(output, N);
   std::vector<Prediction> predictions;
@@ -149,6 +122,9 @@ std::vector<float> Classifier::Predict(const cv::Mat& img) {
   Blob<float>* input_layer = net_->input_blobs()[0];
   input_layer->Reshape(1, num_channels_,
                        input_geometry_.height, input_geometry_.width);
+  //input_layer->Reshape(1, num_channels_,
+  //                     img.rows, img.cols);
+
   /* Forward dimension change to all layers. */
   net_->Reshape();
 
