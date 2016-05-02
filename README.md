@@ -173,4 +173,8 @@ Now, you can clone the FCN repo:
 For RGB image  
 ![alt text] (https://github.com/xzhai1/latte/blob/master/images/rgb.png)  
 the visualization of scaled feature maps from last conv layer is  
-![alt text] (https://github.com/xzhai1/latte/blob/master/images/result.png)  
+![alt text] (https://github.com/xzhai1/latte/blob/master/images/conv_result.png)  
+the visualization of scaled feature maps from deconv layer is  
+![alt text] (https://github.com/xzhai1/latte/blob/master/images/deconv_result.png)  
+segmentation result is  
+![alt text] (https://github.com/xzhai1/latte/blob/master/images/seg_result.png)  
