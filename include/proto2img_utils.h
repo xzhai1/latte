@@ -2,7 +2,7 @@
 #define PROTO2IMG_UTILS_H  
 
 #include "Halide.h"
-#include "caffe.pb.h"
+#include "caffe/proto/caffe.pb.h"
 
 /**
  * @brief LoadBiasFromBlob 

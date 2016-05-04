@@ -1,7 +1,7 @@
 #ifndef NET_H
 #define NET_H
 
-#include "caffe.pb.h"
+#include "caffe/proto/caffe.pb.h"
 #include "Halide.h"
 
 #include "layers/layers.h"

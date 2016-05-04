@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 
-#include "caffe.pb.h"
+#include "caffe/proto/caffe.pb.h"
 #include "halide_image_io.h"
 
 #include "io_utils.h"

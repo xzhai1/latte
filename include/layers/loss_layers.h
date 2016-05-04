@@ -2,7 +2,7 @@
 #define LOSS_LAYERS_H
 
 #include "Halide.h"
-#include "caffe.pb.h"
+#include "caffe/proto/caffe.pb.h"
 
 #include "layers/layers.h"
 

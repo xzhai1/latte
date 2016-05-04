@@ -3,7 +3,7 @@
 #include <gflags/gflags.h> /* Google's commandline parser */
 #include <glog/logging.h>  /* Google's logging module */
 
-#include "caffe.pb.h"
+#include "caffe/proto/caffe.pb.h"
 #include "tests.h"         /* Collection of tests */
 
 using namespace std;

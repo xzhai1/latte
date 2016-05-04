@@ -7,7 +7,7 @@
 #include <string>   /* string */
 #include <cstring>  /* c_str() */
 
-#include "caffe.pb.h"
+#include "caffe/proto/caffe.pb.h"
 #include "Halide.h"
 #include <google/protobuf/text_format.h>                /* Parse */
 #include <google/protobuf/io/coded_stream.h>            /* CodedInputStream */

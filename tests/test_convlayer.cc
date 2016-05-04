@@ -4,7 +4,7 @@
 
 #include <glog/logging.h>  /* Google's logging module */
 
-#include "caffe.pb.h"
+#include "caffe/proto/caffe.pb.h"
 #include "halide_image_io.h"
 
 #include "layers/layers.h"

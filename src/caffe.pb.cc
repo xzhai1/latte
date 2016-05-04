@@ -2,7 +2,7 @@
 // source: caffe.proto
 
 #define INTERNAL_SUPPRESS_PROTOBUF_FIELD_DEPRECATION
-#include "caffe.pb.h"
+#include "caffe/proto/caffe.pb.h"
 
 #include <algorithm>
 

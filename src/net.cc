@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include "caffe.pb.h"
+#include "caffe/proto/caffe.pb.h"
 #include "Halide.h"
 
 #include "CycleTimer.h"

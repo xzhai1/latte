@@ -4,7 +4,7 @@
 #include <string>
 
 #include "Halide.h"
-#include "caffe.pb.h"
+#include "caffe/proto/caffe.pb.h"
 
 namespace Latte {
 

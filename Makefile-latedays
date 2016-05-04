@@ -12,7 +12,7 @@
 CC = g++
 
 # define any compile-time flags
-CFLAGS = --std=c++11 -g -fopenmp -Wall #-nostdinc++
+CFLAGS = --std=c++11 -g -fopenmp -Wall 
 
 # define any directories containing header files other than /usr/include
 INCLUDES = -I./include \
@@ -20,31 +20,37 @@ INCLUDES = -I./include \
 					 -I/home/15-418/Halide/tools \
 					 -I/home/15-418/gflags-2.1.2/include \
 					 -I/home/15-418/glog-0.3.3/build/include \
-					 `pkg-config --cflags-only-I protobuf`
+					 -I/home/15-418/caffe-rc3/include \
+					 -I/home/15-418/protobuf-2.6.1/include \
+					 -I/usr/local/cuda-7.0/include
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
 LFLAGS = -L/home/15-418/Halide/bin \
 				 -L/home/15-418/gflags-2.1.2/lib \
-				 -L/home/15-418/glog-0.3.3/build/lib
+				 -L/home/15-418/glog-0.3.3/build/lib \
+				 -L/home/15-418/caffe-rc3/build/lib \
+				 -L/home/15-418/protobuf-2.6.1/lib \
+				 -L/home/15-418/boost_1_60_0/lib \
+				 -L/home/15-418/cblas/lib \
+				 -L/usr/local/cuda-7.0/lib64
 
 # define any libraries to link into executable:
 #   if I want to link in libraries (libx.so or libx.a) I use the -llibname 
 #   option, something like (this will link in libmylib.so and libm.so:
 # On Latedays can't link both gflags and glog because glog already statically
 # links gflags
-LIBS = -lHalide -ldl -lglog
+LIBS = -lHalide -lcaffe -ldl -lglog -lprotobuf \
+			 -lcudart -lcublas -lcurand -lcblas \
+			 -lboost_system -lboost_thread -lboost_python -lboost_filesystem
 
 # From Wikipedia:
 # 	"pkg-config is computer program that provides a unified interface for 
 # 	 querying installed libraries for the purpose of compiling software from 
 # 	 its source code. It allows programmers and installation scripts to work 
 # 	 without explicit knowledge of detailed library path information."
-# For example, the following command produces:
-# 	-pthread -I/usr/local/include  -pthread -L/usr/local/lib -lprotobuf
-# 	-lpthread	
-EXTRA_SCRIPTS = `pkg-config --libs protobuf libpng`
+EXTRA_SCRIPTS = `pkg-config --libs libpng`
  
 # define the C source files
 SRCS = $(wildcard ./src/*.cc) $(wildcard ./src/layers/*.cc) $(wildcard ./tests/*.cc)
