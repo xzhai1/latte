@@ -5,6 +5,7 @@
 
 #include "Halide.h"
 #include "caffe/proto/caffe.pb.h"
+#include "caffe_classifier.h"
 
 #define PIXEL_THRESHOLD 0.0001
 
@@ -13,7 +14,9 @@ bool test_LoadFromTextFile(std::string fpath, caffe::NetParameter *net_model);
 bool test_LoadFromBinaryFile(std::string fpath, caffe::NetParameter *net_model);
 
 /* test_convlayer.cc */
-bool test_convolution(std::string image_path, caffe::NetParameter *net_model);
+bool test_convolution(std::string image_path, 
+                      caffe::NetParameter *net_model, 
+                      Classifier *caffe_classifier);
 
 /* test_deconvlayer.cc */
 bool test_deconvolution(caffe::NetParameter *net_model);
