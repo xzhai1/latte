@@ -155,8 +155,8 @@ Net::Net(NetParameter *net_model)
 
     /* TODO we are ignoring a couple of types here */
     if (type == CONVOLUTION) {
-      //count++;
-      //if (count == 3) break;
+      count++;
+      if (count == 5) break;
       curr_layer = build_convlayer(&layer);
       hit = true;
     }

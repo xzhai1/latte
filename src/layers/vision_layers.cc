@@ -204,7 +204,6 @@ Convolution::run(
   storage.vectorize(i, vector_size);
   clamped.store_at(storage, jo).compute_at(storage, ji);
 
-
   //storage.print_loop_nest();
  
   return storage;
@@ -286,18 +285,27 @@ Halide::Func Pooling::run(
   RDom r(0, kernel_size, 0, kernel_size);
   storage(i, j, k, l) = maximum(input(i * stride + r.x, j * stride + r.y, k, l));
 
-  storage.parallel(k);
-  storage.vectorize(i, 16);
+  //storage.parallel(k);
+  //storage.vectorize(i, 16);
 
-  //storage.parallel(k).vectorize(i, 8);
 #if 0
+  storage.parallel(k);
+
+  int split_num = output_height > 15 ? output_height / 15 : 8;
+  int vector_size = (output_width >= 16) ? 16 : 8;
+  Var jo, ji;
+  storage.split(j, jo, ji, 32).parallel(jo);
+  storage.vectorize(i, 16);
+#endif
+
+  int tile_size = kernel_size * 8;
+  storage.parallel(k);
   /* CPU parallel */
   Var i_outer, j_outer, i_inner, j_inner, tile_index;
-  storage.tile(i, j, i_outer, j_outer, i_inner, j_inner, 8, 8)
+  storage.tile(i, j, i_outer, j_outer, i_inner, j_inner, tile_size, tile_size)
          .fuse(i_outer, j_outer, tile_index)
          .parallel(tile_index);
   storage.vectorize(i_inner, 8);
-#endif
 
   /* GPU parallel */
   // storage.gpu_tile(i, j, k, 4, 4, 32);
