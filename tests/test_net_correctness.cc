@@ -54,6 +54,5 @@ test_net(string image_path, NetParameter *net_model)
     }
     outfile.close();
   }
-
   return true;
 }

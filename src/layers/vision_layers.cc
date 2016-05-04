@@ -169,13 +169,14 @@ Convolution::run(
   RDom r(0, kernel_size, 0, kernel_size, 0, input_channels);
 
   storage(i, j, k, l) = sum(kernel(r.x, r.y, r.z, k) * 
-                     clamped(i * stride + r.x - pad, j * stride + r.y - pad, r.z, l));
-
+                     clamped(i * stride + r.x - pad, j * stride + r.y - pad, r.z, l))
+                     + bias(0, 0, 0, k);
   /* and add bias */
-  storage(i, j, k, l) += bias(0, 0, 0, k);
+  //storage(i, j, k, l) += bias(0, 0, 0, k);
 
   /* Schedule */
   /* CPU parallel */
+#if 0
   storage.parallel(k);
 
   Var i_outer, j_outer, i_inner, j_inner, tile_index;
@@ -186,14 +187,26 @@ Convolution::run(
   Var i_inner_outer, j_inner_outer, i_vectors, j_pairs;
   storage.tile(i_inner, j_inner, 
                i_inner_outer, j_inner_outer, 
-               i_vectors, j_pairs, 4, 2)
+               i_vectors, j_pairs, 8, 2)
              .vectorize(i_vectors)
              .unroll(j_pairs);
-
-
+#endif
   /* GPU parallel */
   // storage.gpu_tile(i, j, k, 4, 4, 32);
-  
+
+  /* Version 2 */
+  storage.parallel(k);
+
+  int split_num = output_height > 15 ? output_height / 15 : 8;
+  int vector_size = (output_width >= 16) ? 16 : 8;
+  Var jo, ji;
+  storage.split(j, jo, ji, split_num).parallel(jo);
+  storage.vectorize(i, vector_size);
+  clamped.store_at(storage, jo).compute_at(storage, ji);
+
+
+  //storage.print_loop_nest();
+ 
   return storage;
 }
 
@@ -273,18 +286,22 @@ Halide::Func Pooling::run(
   RDom r(0, kernel_size, 0, kernel_size);
   storage(i, j, k, l) = maximum(input(i * stride + r.x, j * stride + r.y, k, l));
 
+  storage.parallel(k);
+  storage.vectorize(i, 16);
 
+  //storage.parallel(k).vectorize(i, 8);
+#if 0
   /* CPU parallel */
   Var i_outer, j_outer, i_inner, j_inner, tile_index;
   storage.tile(i, j, i_outer, j_outer, i_inner, j_inner, 8, 8)
          .fuse(i_outer, j_outer, tile_index)
          .parallel(tile_index);
   storage.vectorize(i_inner, 8);
-
+#endif
 
   /* GPU parallel */
   // storage.gpu_tile(i, j, k, 4, 4, 32);
-  
+  //storage.print_loop_nest(); 
   return storage;
 }
 
@@ -356,6 +373,7 @@ Deconvolution::run(Image<float> input) {
 Image<float>
 Deconvolution::run(Image<float> input)
 {
+#if 0
   /* output first layer of kernel */
   cout << "number of kernels = " << kernel.extent(3) << endl;
   for (int k = 0; k < kernel.extent(2); k++) {
@@ -368,6 +386,7 @@ Deconvolution::run(Image<float> input)
     }
     outfile.close();
   }
+#endif
 
   int input_width    = input.extent(0);
   int input_height   = input.extent(1);
@@ -431,100 +450,13 @@ Deconvolution::run(Image<float> input)
     }
   }
 
-  #if 0
-  cout << "::: Compute channels [start] :::" << endl;
-  #pragma omp parallel for
-  for (int z = 0; z < num_output; z++) {
-    cout << "start computing channel " << z << flush << endl;
-    for (int j = 0; j < height; j++) {
-      for (int i = 0; i < width; i++) {
-        int x1L = (max(i - kernel_size + 1, 0) + stride - 1) / stride;
-        int y1L = (max(j - kernel_size + 1, 0) + stride - 1) / stride;
-        int x1R = i / stride;
-        int y1R = j / stride;
-        for (int y1 = y1L; y1 < y1R + 1; y1++) {
-          for (int x1 = x1L; x1 < x1R + 1; x1++) {
-            for (int z1 = 0; z1 < input_depth; z1++) {
-              int x2 = i - x1 * stride;
-              int y2 = j - y1 * stride;
-              output(i, j, z) += kernel(x2, y2, z1*num_output + z) * input(x1, y1, z1);
-            }
-          }
-        }
-      }
-    }
-    cout << "finish computing channel " << z << flush << endl;
-  }
-  cout << "::: Compute channels [end] :::" << endl;
-  #endif
-
-  #if 0
-  //int kernel_dim = kernel_size * kernel_size * num_output;
-  float curr_sum;
-  /* Recode */
-  cout << "::: Compute channels [start] :::" << endl;
-  for (int w = 0; w < output_num; w++) {
-    #pragma omp parallel for
-    for (int j = 0; j < input_height; j++) {
-      cout << "j = " << j << endl;
-      for (int i = 0; i < input_width; i++) {
-        for (int z_k = 0; z_k < output_channels; z_k++) {
-          for (int j_k = 0; j_k < kernel_size; j_k++) {
-            for (int i_k = 0; i_k < kernel_size; i_k++) {
-              /* Compute current sum */
-              curr_sum = 0.f;
-              for (int c = 0; c < input_channels; c++) {
-                curr_sum += input(i, j, c, w) * 
-                            kernel(i_k, j_k, c, z_k);
-              }
-              /* Accumulate sum */
-              int col = i*stride + i_k;
-              int row = j*stride + j_k;
-              output(col, row, z_k, w) += curr_sum;
-            }
-          }
-        }
-      }
-    }
-  }
-  #endif
-  
-
-  #if 0
-  for (int z = 0; z < num_output; z++) {
-    cout << "start computing channel " << z << flush << endl;
-    for (int j = 0; j < input_height; j++) {
-      for (int j_f = 0; j_f < stride; j_f++) {
-        for (int i = 0; i < input_width; i++) {
-          for (int i_f = 0; i_f < stride; i_f++) {
-            int j_out = j * stride + j_f;
-            int i_out = i * stride + i_f;
-            for (int j_k = 0; j_k < kernel_size; j_k++) {
-              for (int i_k = 0; i_k < kernel_size; i_k++) {
-                for (int z_k = 0; z_k < input_depth; z_k++) {
-                  output(i_out + i_k, j_out + j_k, z) += 
-                    input(i, j, z_k) * 
-                    kernel(i_k, j_k, z * num_output + z_k);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    cout << "finish computing channel " << z << endl;
-  }
-  cout << "::: Compute channels [end] :::" << endl;
-  #endif
-
-
   return output;
 }
 
 Func Deconvolution::run(Func input, int input_width, int input_height, int input_channels, int input_num) {
-  /* Compute output dimension */
-  int output_width     = input_width * stride; /* Assume stride == upsampling factor */
-  int output_height    = input_height * stride;
+  /* Output dimension */
+  int output_width     = kernel_size + (input_width - 1) * stride;
+  int output_height    = kernel_size + (input_height - 1) * stride;
   int output_channels  = num_output;
   int output_num       = input_num;
 
@@ -537,16 +469,28 @@ Func Deconvolution::run(Func input, int input_width, int input_height, int input
   /* Clamped at boundary */
   Func clamped = BoundaryConditions::constant_exterior(input, 0.f, 0, input_width, 0, input_height);
 
-  //Func clamped = BoundaryConditions::constant_exterior(input, 0.f);
+  /* Reduce over */
+  int kernel_step = kernel_size / stride;
+  RDom r(0, kernel_step, 0, kernel_step, 0, input_channels);
 
-  /* Reduce over kernel */
-  RDom r(0, kernel_size, 0, kernel_size, 0, input_channels);
-  storage(i, j, k, l) = sum(
-      kernel(r.x, r.y, r.z, k) * 
-      clamped(i / stride + r.x - kernel_size / 2 , j / stride + r.y - kernel_size / 2 , r.z, l));
+  storage(i, j, k, l) = sum(kernel(r.x * stride + i % stride,
+                                   r.y * stride + j % stride,
+                                   r.z, k) *
+                            input (i / stride - r.x,
+                                   j / stride - r.y,
+                                   r.z, l));
 
+
+  /* CPU parallel */
   storage.parallel(k);
+  int split_num = output_height > 15 ? output_height / 15 : 8;
+  int vector_size = (output_width >= 16) ? 16 : 8;
+  Var jo, ji;
+  storage.split(j, jo, ji, split_num).parallel(jo);
+  storage.vectorize(i, vector_size);
+  clamped.store_at(storage, jo).compute_at(storage, ji);
 
+#if 0
   Var i_outer, j_outer, i_inner, j_inner, tile_index;
   storage.tile(i, j, i_outer, j_outer, i_inner, j_inner, 8, 8)
              .fuse(i_outer, j_outer, tile_index)
@@ -556,7 +500,7 @@ Func Deconvolution::run(Func input, int input_width, int input_height, int input
   storage.tile(i_inner, j_inner, i_inner_outer, j_inner_outer, i_vectors, j_pairs, 4, 2)
              .vectorize(i_vectors)
              .unroll(j_pairs);
-
+#endif
   // storage.gpu_tile(i, j, k, 8, 8, 8);
 
   return storage;

@@ -137,6 +137,7 @@ build_softmaxlayer(LayerParameter *layer)
  */
 Net::Net(NetParameter *net_model)
 {
+  int count = 0;
   Layer *prev_layer = NULL;
   Layer *curr_layer = NULL;
   int num_layers = net_model->layer_size();
@@ -154,16 +155,19 @@ Net::Net(NetParameter *net_model)
 
     /* TODO we are ignoring a couple of types here */
     if (type == CONVOLUTION) {
+      //count++;
+      //if (count == 3) break;
       curr_layer = build_convlayer(&layer);
       hit = true;
-    } 
+    }
     else if (type == DECONVOLUTION) {
-      break;
       curr_layer = build_deconvlayer(&layer);
       hit = true;
     }
 
     else if (type == RELU) {
+      //count++;
+      //if (count == 14) break;
       curr_layer = build_relulayer(&layer);
       hit = true;
     } else if (type == POOLING) {
@@ -194,7 +198,8 @@ Net::Net(NetParameter *net_model)
         prev_layer->set_next(curr_layer);
       prev_layer = curr_layer;
 
-      // if (type == DECONVOLUTION) break;
+      // if (type == CONVOLUTION) break;
+      //if (count == 14) break;
     }
   }
 }
@@ -260,6 +265,8 @@ Net::run(Image<float> input)
     prev_output = curr_output;
   }
   
+  //curr_output.compile_jit();
+
   inferenceStartTime = CycleTimer::currentSeconds();
   Image<float> output = curr_output.realize(input_width, input_height, input_channels, input_num);
   inferenceEndTime = CycleTimer::currentSeconds();

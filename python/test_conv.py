@@ -16,14 +16,17 @@ import numpy as np
 # get_ipython().magic(u'matplotlib inline')
 import matplotlib.pyplot as plt
 from PIL import Image
-
+import time
 
 # In[68]:
 
 caffe.set_mode_cpu()
 
-model_def = model_root + 'voc-fcn8s/deploy.prototxt'
-model_weights = model_root + 'voc-fcn8s/fcn8s-heavy-pascal.caffemodel'
+#model_def = model_root + 'voc-fcn8s/deploy.prototxt'
+#model_weights = model_root + 'voc-fcn8s/fcn8s-heavy-pascal.caffemodel'
+
+model_def = model_root + 'voc-fcn32s/deploy.prototxt'
+model_weights = model_root + 'voc-fcn32s/fcn32s-heavy-pascal.caffemodel'
 
 net = caffe.Net(model_def,      # defines the structure of the model
                 model_weights,  # contains the trained weights
@@ -80,11 +83,16 @@ net.blobs['data'].data[...] = in_
 
 print list(net._layer_names)
 # just run till the conv1_1 layer, inclusive
-net.forward(start='input', end='conv1_1')
+#net.forward(start='input', end='conv1_1')
 
+start = time.time()
+net.forward()
+end = time.time()
+print end - start, "seconds"
 
 # In[169]:
 
+'''
 # result of the convolution, initialized to 0
 conv1_1_result = net.blobs['conv1_1']
 print conv1_1_result.data.shape
@@ -142,6 +150,6 @@ np.savetxt("caffe.csv", conv1_1_result.data[0, 0], delimiter=",")
 
 
 # In[ ]:
-
+'''
 
 

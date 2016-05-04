@@ -72,7 +72,6 @@ class Convolution : public Layer {
 class Pooling : public Layer {
     int kernel_size = 2;
     int stride      = 1;
-
   public:
     /**
      * @brief Pooling 
