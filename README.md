@@ -178,3 +178,5 @@ the visualization of scaled feature maps from deconv layer is
 ![alt text] (https://github.com/xzhai1/latte/blob/master/images/deconv_result.png)  
 segmentation result is  
 ![alt text] (https://github.com/xzhai1/latte/blob/master/images/seg_result.png)  
+
+For 500x500x3 input image, it currently takes Halide version 8.116 ms seconds to run through the pipeline on CPU. It takes Caffe version around 6 seconds to run through the net on CPU.
