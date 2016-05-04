@@ -1,8 +1,8 @@
 # latte
 CMU 15-418/618 Final Project: Implementing Fully Convolutional Network using Halide and evaluate against Caffe version
 
-## Build Procedure
-The following steps are necessary for a brand new machine; some might be unnecessary for you.
+## Dependencies on Local Machine
+The following steps are necessary for a brand new machine; some might be unnecessary for you. If You are building on CMU SCS's Lateday node, go straight to the next section.
 
 ### Utilities
 Make sure you have the build tool chain:
@@ -51,7 +51,7 @@ This is so that ``pkg-config`` will know where to find ``protobuf``.
 It is best that we don't reinvent the wheels and that is why we use the stuff smarter people built. [`gflags`](https://gflags.github.io/gflags/) is Google's command line module. [`glog`](https://github.com/google/glog) is Google's logging module. 
 
 	sudo apt-get instsall libgflags-dev libgoogle-glog-dev
-	
+
 ### Halide
 Check your ``g++`` version:
 
@@ -68,7 +68,7 @@ Clone the project:
 
     git clone https://github.com/xzhai1/latte.git
     
-Your directory structure should look like this:
+If you are doing this on your local machine, your directory structure should look like this:
 
     xd@xd-Standard-PC-i440FX-PIIX-1996:~/Documents$ ls
     halide  latte  protobuf-2.6.1
@@ -76,26 +76,30 @@ Your directory structure should look like this:
 Then go into the repo:
     
     cd latte
+   
+If you are building on local:
+
+    make -f Makefile-local -j8
+
+If you are buidling on Latedays:
+
+    make -f Makefile-latedays -j8
     
-You will need to download the whole CNN and the trained caffemodel:
+Then download the fcn repo:
 
-    mkdir model
-    cd model
-    wget http://dl.caffe.berkeleyvision.org/fcn-32s-pascalcontext.caffemodel
-    wget https://gist.githubusercontent.com/shelhamer/80667189b218ad570e82/raw/077494f215421b3d9383e1b1a3d75377344b1744/train_val.prototxt
-    wget https://gist.githubusercontent.com/shelhamer/80667189b218ad570e82/raw/077494f215421b3d9383e1b1a3d75377344b1744/deploy.prototxt
+    cd ..
+    git clone https://github.com/shelhamer/fcn.berkeleyvision.org.git
+    cd fcn.berkeleyvision.org
     
-You can now finally build the project:
+Now you can use any or the following model to test:
 
-    make
+    voc-fcn16s  voc-fcn32s  voc-fcn8s
     
-Faster make can be done by
+Because the trained caffe model is huge, they aren't in the folder. You need to download them; their url is in ``caffemodel-url``.
 
-    make -j8
+Set one last environmental vairable:
 
-and fingers crossed, it won't throw an error. Set one last environmental vairable:
-
-	export LD_LIBRARY_PATH=./halide/bin/:~/protobuf/lib/:${LD_LIBRARY_PATH}
+	export LD_LIBRARY_PATH=/path/to/halide/bin/:/path/to/protobuf/lib/:${LD_LIBRARY_PATH}
 
 Then you can run a test by invoking:
 
@@ -114,8 +118,51 @@ If you want to see what command line options are available to you:
 	        --test_deconv
 	        --test_net
 
-
 ## Install Caffe for Benchmarking
+### On CMU SCS's Latedays node
+Because we don't have privileged access on Latedays and we have only 2GB of disk quota, we can't install anything there. However, there is a class that uses Caffe on Latedays and they have it set up. Follow the instruction [here](https://docs.google.com/document/d/12HEbJd989Uo1zjknc9UygYGsfNn7zVq8qLxJYLjy8g8/edit). The gist is this:
+
+    wget http://ladoga.graphics.cs.cmu.edu/xiaolonw/assignment.tar.gz
+    untar -xvf assignment.tar.gz
+    rm assignment.tar.gz
+    
+Download caffe source and move two files from the assignment folder into caffe:
+
+    git clone https://github.com/BVLC/caffe.git
+    cd caffe
+    mv ../caffe/bashrc_class .
+    mv ../caffe/Makefile.config .
+    
+Nothing left but to make:
+
+    source bashrc_class
+    make
+    make pycaffe
+    
+Then we can run the benchmark:
+
+    cd ../latte/python
+    usage: caffebenchmark.py [-h] -c CAFFE_PYTHON -d DEPLOY_PROTOTXT -t
+                         TRAINED_CAFFEMODEL -b BATCH -i IMAGE
+    optional arguments:
+      -h, --help            show this help message and exit
+      -c CAFFE_PYTHON, --caffe_python CAFFE_PYTHON
+                            path/to/caffe/python
+      -d DEPLOY_PROTOTXT, --deploy_prototxt DEPLOY_PROTOTXT
+                            path to deploy.prototxt
+      -t TRAINED_CAFFEMODEL, --trained_caffemodel TRAINED_CAFFEMODEL
+                            path to model.caffemodel
+      -b BATCH, --batch BATCH
+                            batch size
+      -i IMAGE, --image IMAGE
+                            path to test image
+
+For example:
+
+    python caffebenchmark.py -c ../../caffe/python/ -d ../../fcn.berkeleyvision.org/voc-fcn32s/deploy.prototxt -t ../../fcn.berkeleyvision.org/voc-fcn32s/fcn32s-heavy-pascal.caffemodel -b 3 -i ../images/cat.png
+
+
+### On Your Own Damn Machine
 Installing caffe is not exactly a cup of caffe...
 
 First, dependencies:
