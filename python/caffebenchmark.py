@@ -2,11 +2,10 @@ import sys
 import argparse
 
 import numpy as np
-from PIL import Image
 import time
 
 def main(args):
-    caffe.set_mode_cpu()
+    caffe.set_mode_gpu()
 
     # Create the network
     net = caffe.Net(args.deploy_prototxt, args.trained_caffemodel, caffe.TEST)
@@ -29,9 +28,9 @@ def main(args):
         net.blobs['data'].data[i,:,:,:] = transformed_image
 
     start = time.time()
-    net.forward(start='input', end='conv1_1')
+    #net.forward(start='input', end='conv1_1')
 
-    #net.forward()
+    net.forward()
 
     end = time.time()
     print end - start, "seconds"
