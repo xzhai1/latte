@@ -42,13 +42,17 @@ Convolution::Convolution(string layer_name,
     bias = LoadBiasFromBlob(bias_blob, num_output);
   kernel = LoadKernelFromBlob(weights, kernel_size, num_output);
 
+  /* Input dimension */
+  int input_width = prev->get_width();
+  int input_height = prev->get_height();
+  int input_channels = prev->get_channels();
+  int input_num = prev->get_num();
+
   /* Output dimension */
-  int output_width     = 
-    (prev->get_width() - kernel_size + 2 * pad) / stride + 1;
-  int output_height    = 
-    (prev->get_height() - kernel_size + 2 * pad) / stride + 1;
-  int output_channels  = prev->get_channels();
-  int output_num       = prev->get_num();
+  int output_width     = (input_width  - kernel_size + 2 * pad) / stride + 1;
+  int output_height    = (input_height - kernel_size + 2 * pad) / stride + 1;
+  int output_channels  = num_output;
+  int output_num       = input_num;
 
   /* Set output dimension */
   set_width(output_width);
@@ -67,6 +71,9 @@ Convolution::Convolution(string layer_name,
                                 j*stride + r.y - pad, 
                                 r.z, l))
                         + bias(0, 0, 0, k);
+  
+  // #if 0
+  storage.compute_root();
   /* Version 2 */
   storage.parallel(k);
 
@@ -76,6 +83,7 @@ Convolution::Convolution(string layer_name,
   storage.split(j, jo, ji, split_num).parallel(jo);
   storage.vectorize(i, vector_size);
   clamped.store_at(storage, jo).compute_at(storage, ji);
+  // #endif
 }
 
 Func 
@@ -178,6 +186,12 @@ Pooling::Pooling(
   storage(i, j, k, l) = maximum(
       prev->storage(i*stride + r.x, j*stride + r.y, k, l));
 
+  /* CPU parallel */
+  storage.compute_root();
+  storage.parallel(k);
+  storage.vectorize(i, 16);
+
+#if 0
   int tile_size = kernel_size * 8;
   storage.parallel(k);
 
@@ -187,6 +201,7 @@ Pooling::Pooling(
          .fuse(i_outer, j_outer, tile_index)
          .parallel(tile_index);
   storage.vectorize(i_inner, 8);
+#endif
 }
 
 Halide::Func Pooling::run(
@@ -208,8 +223,9 @@ Halide::Func Pooling::run(
   RDom r(0, kernel_size, 0, kernel_size);
   storage(i, j, k, l) = maximum(input(i * stride + r.x, j * stride + r.y, k, l));
 
-  //storage.parallel(k);
-  //storage.vectorize(i, 16);
+  storage.compute_root();
+  storage.parallel(k);
+  storage.vectorize(i, 16);
 
 #if 0
   storage.parallel(k);

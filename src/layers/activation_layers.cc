@@ -43,7 +43,9 @@ ReLU::ReLU(string layer_name, Layer *prev, const ReLUParameter *param)
                         negative_slope * min(0, prev->storage(i, j, k, l));
 
   /* CPU parallel */
-  storage.parallel(k).vectorize(i, 16);
+  storage.compute_root();
+  storage.parallel(k);
+  storage.vectorize(i, 16);
 }
 
 Func ReLU::run(
