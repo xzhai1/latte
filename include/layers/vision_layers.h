@@ -28,6 +28,21 @@ class Convolution : public Layer {
                 const caffe::ConvolutionParameter *param, 
                 const caffe::BlobProto *weights, 
                 const caffe::BlobProto *bias_blob);
+
+    void SetOutputDim(const Layer *prev) {
+      /* Input dimension */
+      int input_width    = prev->get_width();
+      int input_height   = prev->get_height();
+      int batch_size     = prev->get_batchsize();
+
+      /* Output dimension */
+      int output_width    = (input_width  - kernel_size + 2*pad)/stride + 1;
+      int output_height   = (input_height - kernel_size + 2*pad)/stride + 1;
+      int output_channels = num_output;
+
+      /* Set output dimension */
+      set_output_dim(output_width, output_height, output_channels, batch_size);
+    }
 };
 
 /**
@@ -41,6 +56,22 @@ class Pooling : public Layer {
   public:
     Pooling(std::string layer_name, Layer *prev,
         const caffe::PoolingParameter *param);
+    
+    void SetOutputDim(const Layer *prev) {
+      /* Input dimension */
+      int input_width    = prev->get_width();
+      int input_height   = prev->get_height();
+      int input_channels = prev->get_channels();
+      int batch_size     = prev->get_batchsize();
+
+      /* Output dimension */
+      int output_width    = (input_width  - kernel_size)/stride + 1;
+      int output_height   = (input_height - kernel_size)/stride + 1;
+      int output_channels = input_channels;
+
+      /* Set output dimension */
+      set_output_dim(output_width, output_height, output_channels, batch_size);
+    }
 };
 
 /**
@@ -51,8 +82,7 @@ class Deconvolution : public Layer {
   int stride = 1;
   int kernel_size;
   int num_output;
-  Halide::Image<float> bias;
-  Halide::Image<float> kernel;
+  Halide::Image<float> bias, kernel;
 
   public:
     Deconvolution(std::string layer_name, 
@@ -60,6 +90,22 @@ class Deconvolution : public Layer {
                   const caffe::ConvolutionParameter *param,
                   const caffe::BlobProto *kernel_blob, 
                   const caffe::BlobProto *bias_blob);
+
+    void SetOutputDim(const Layer *prev) {
+      /* Input dimension */
+      int input_width    = prev->get_width();
+      int input_height   = prev->get_height();
+      int input_channels = prev->get_channels();
+      int batch_size     = prev->get_batchsize();
+
+      /* Output dimension */
+      int output_width    = kernel_size + (input_width  - 1)*stride;
+      int output_height   = kernel_size + (input_height - 1)*stride;
+      int output_channels = num_output;
+
+      /* Set output dimension */
+      set_output_dim(output_width, output_height, output_channels, batch_size);
+    }
 };
 
 } /* namespace latte */

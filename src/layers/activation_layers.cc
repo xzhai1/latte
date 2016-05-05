@@ -3,18 +3,15 @@
 #include <stdlib.h>
 
 #include "Halide.h"
-#include "halide_image_io.h"
 #include "caffe.pb.h"
 
 #include "layers/activation_layers.h"
-#include "proto2img_utils.h" /* LoadKernelFromBlob */
 
 namespace Latte {
 
 using namespace std;
 using namespace caffe;
 using namespace Halide;
-using namespace Halide::Tools;
 
 ReLU::ReLU(string layer_name, 
            const Layer *prev, 
@@ -23,7 +20,11 @@ ReLU::ReLU(string layer_name,
 {
   if (param->has_negative_slope())
     negative_slope = param->negative_slope();
+
+  /* Set output dimension */
   SetOutputDim(prev);
+
+  /* Define algorithm */
   storage(i, j, k, l) = max(0, prev->storage(i, j, k, l)) + 
                         negative_slope*min(0, prev->storage(i, j, k, l));
 

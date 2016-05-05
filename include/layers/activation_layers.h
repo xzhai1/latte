@@ -33,18 +33,10 @@ class ReLU : public Layer {
          const caffe::ReLUParameter *param);
 
     void SetOutputDim(const Layer *prev) {
-      int input_width = prev->get_width();
-      int input_height = prev->get_height();
-      int input_channels = prev->get_channels();
-      int batch_size = prev->get_batchsize();
-
-      /* Output dimension */
-      int output_width    = input_width;
-      int output_height   = input_height;
-      int output_channels = input_channels;
-
-      /* Set output dimension */
-      set_output_dim(output_width, output_height, output_channels, batch_size);
+      set_output_dim(prev->get_width(),
+                     prev->get_height(), 
+                     prev->get_channels(), 
+                     prev->get_batchsize());
     }
 };
 
