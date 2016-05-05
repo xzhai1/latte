@@ -124,6 +124,7 @@ Net::Net(NetParameter *net_model)
   /* First layer is DATA */
   /* TODO change hard code */
   Layer *curr_layer = new Data("Dummy", 500, 500, 3, 1);
+  data = (Data *)curr_layer;
   int num_layers = net_model->layer_size();
 
   for (int i = 0; i < num_layers; i++) {
@@ -205,7 +206,7 @@ Net::run(Image<float> input)
        << input.extent(2) << ", "
        << input.extent(3)
        << endl;
-  data->SetData(input);
+  ((Data *)data)->SetData(input);
 
   double inferenceStartTime, inferenceEndTime, startTime, endTime;
   inferenceStartTime = CycleTimer::currentSeconds();

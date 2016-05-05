@@ -8,12 +8,12 @@
 
 namespace Latte {
 
-class Data;
+//class Data;
 
 class Net {
     Layer *head = NULL;
     Layer *tail = NULL;
-    Data *data = NULL;
+    Layer *data = NULL;
 
   public:
     Net(caffe::NetParameter *net_model);
