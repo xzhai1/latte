@@ -23,14 +23,15 @@ using namespace Halide;
 
 class Data : public Layer {
   public:
-    Data(std::string name, int width, int height, int channels, int num)
+    Data(std::string name, int width, int height, int channels, int num, Image<float> tmp_img)
       :Layer(name, DATA) {
         set_width(width);
         set_height(height);
         set_channels(channels);
         set_num(num);
-        Image<float> dummy(width, height, channels, num);
-        storage = Func(dummy);
+        //Image<float> dummy(width, height, channels, num);
+        Var x, y, z, w;
+        storage = Func(tmp_img);
     }
 
     void SetData(Image<float> image) {
@@ -117,13 +118,13 @@ build_softmaxlayer(LayerParameter *layer)
 }
 #endif
 
-Net::Net(NetParameter *net_model)
+Net::Net(NetParameter *net_model, Image<float> temp_img)
 {
   int count = 0;
   Layer *prev_layer = NULL;
   /* First layer is DATA */
   /* TODO change hard code */
-  Layer *curr_layer = new Data("Dummy", 500, 500, 3, 1);
+  Layer *curr_layer = new Data("Dummy", 500, 500, 3, 1, temp_img);
   data = (Data *)curr_layer;
   int num_layers = net_model->layer_size();
 
@@ -137,7 +138,7 @@ Net::Net(NetParameter *net_model)
 
     if (type == CONVOLUTION) {
       count++;
-      if (count == 5) break;
+      //if (count == 5) break;
       curr_layer = build_convlayer(&layer, curr_layer);
       hit = true;
     }
@@ -176,7 +177,7 @@ Net::Net(NetParameter *net_model)
         prev_layer->set_next(curr_layer);
       prev_layer = curr_layer;
 
-      // if (type == CONVOLUTION) break;
+      if (type == CONVOLUTION) break;
       //if (count == 14) break;
     }
   }
@@ -206,7 +207,7 @@ Net::run(Image<float> input)
        << input.extent(2) << ", "
        << input.extent(3)
        << endl;
-  ((Data *)data)->SetData(input);
+  //((Data *)data)->SetData(input);
 
   double inferenceStartTime, inferenceEndTime, startTime, endTime;
   inferenceStartTime = CycleTimer::currentSeconds();

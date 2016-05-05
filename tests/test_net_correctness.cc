@@ -37,7 +37,7 @@ test_net(string image_path, NetParameter *net_model)
           input(x, y, z, w) = img(x, y, z);
 
   /* Build the net */
-  Net network(net_model);
+  Net network(net_model, input);
 
   network.print_net();
   Image<float> final_image = network.run(input);

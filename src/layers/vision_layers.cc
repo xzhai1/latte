@@ -25,8 +25,6 @@ Convolution::Convolution(string layer_name,
                          const BlobProto *bias_blob)
   :Layer(layer_name, CONVOLUTION) 
 {
-  //set_name(layer_name);
-  //set_type("Convolution");
   kernel_size = param->kernel_size(0);
   num_output = param->num_output();
   if (param->stride_size()) 
@@ -71,7 +69,7 @@ Convolution::Convolution(string layer_name,
                                 j*stride + r.y - pad, 
                                 r.z, l))
                         + bias(0, 0, 0, k);
-  
+  //storage.trace_store(); 
   // #if 0
   storage.compute_root();
   /* Version 2 */

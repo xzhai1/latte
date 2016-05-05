@@ -16,7 +16,8 @@ class Net {
     Layer *data = NULL;
 
   public:
-    Net(caffe::NetParameter *net_model);
+    Net(caffe::NetParameter *net_model,
+        Halide::Image<float> tmp_img);
     ~Net() {}
 
     /**
