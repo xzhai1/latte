@@ -44,8 +44,25 @@ ReLU::ReLU(string layer_name, Layer *prev, const ReLUParameter *param)
 
   /* CPU parallel */
   storage.compute_root();
-  storage.parallel(k);
-  storage.vectorize(i, 16);
+
+  int vector_size = (output_width >= 16) ? 16 : 8;
+  if (output_width * 2 <= output_channels) {
+    Var ko, ki, fused1, fused2;
+    storage.split(k, ko, ki, 4);
+    storage.parallel(ko);
+    storage.fuse(i, j, fused1).fuse(fused1, ki, fused2);
+    storage.vectorize(fused2, vector_size);
+  } else {
+    storage.parallel(k).vectorize(i, vector_size);
+  }
+
+  // int vector_size = (output_width >= 16) ? 16 : 8;
+  // storage.parallel(k);
+  // storage.vectorize(i, vector_size);
+
+  // storage.parallel(k);
+  // Var tile_index;
+  // storage.fuse(i, j, tile_index).vectorize(tile_index, 16);
 }
 
 Func ReLU::run(
@@ -67,7 +84,8 @@ Func ReLU::run(
                        negative_slope * min(0, input(i, j, k, l));
   /* CPU parallel */
   //storage.vectorize(i, 8);
-  storage.parallel(k).vectorize(i, 16);
+  int vector_size = (output_width >= 16) ? 16 : 8;
+  storage.parallel(k).vectorize(i, vector_size);
 #if 0
   Var i_outer, j_outer, i_inner, j_inner, tile_index;
   storage.tile(i, j, i_outer, j_outer, i_inner, j_inner, 8, 8)

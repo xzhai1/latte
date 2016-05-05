@@ -48,6 +48,12 @@ class Layer {
     Layer(std::string name,
           std::string type) 
       : name(name), type(type), next(NULL) {}
+    Layer(std::string name,
+          std::string type,
+          Halide::ImageParam img) 
+      : name(name), type(type), next(NULL) {}
+    
+
     ~Layer() {}
 
     /* Accessors do not modify the member variables */

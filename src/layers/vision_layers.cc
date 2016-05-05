@@ -74,13 +74,19 @@ Convolution::Convolution(string layer_name,
   storage.compute_root();
   /* Version 2 */
   storage.parallel(k);
-
   int split_num = output_height > 15 ? output_height / 15 : 8;
   int vector_size = (output_width >= 16) ? 16 : 8;
-  Var jo, ji;
-  storage.split(j, jo, ji, split_num).parallel(jo);
-  storage.vectorize(i, vector_size);
-  clamped.store_at(storage, jo).compute_at(storage, ji);
+
+  if (output_width * 2 <= output_channels) {
+    Var jo, ji;
+    storage.split(j, jo, ji, split_num).parallel(jo);
+    storage.vectorize(i, vector_size);
+    clamped.store_at(storage, jo).compute_at(storage, ji);
+  } else {
+    storage.vectorize(i, vector_size);
+  }
+
+  
   // #endif
 }
 
@@ -189,6 +195,18 @@ Pooling::Pooling(
   storage.parallel(k);
   storage.vectorize(i, 16);
 
+  #if 0
+  int vector_size = (output_width >= 16) ? 16 : 8;
+  if (output_width * 3 <= output_channels) {
+    Var ko, ki, fused1, fused2;
+    storage.split(k, ko, ki, 4);
+    storage.parallel(ko);
+    storage.fuse(i, j, fused1).fuse(fused1, ki, fused2);
+    storage.vectorize(fused2, vector_size);
+  } else {
+    storage.parallel(k).vectorize(i, vector_size);
+  }
+  #endif
 #if 0
   int tile_size = kernel_size * 8;
   storage.parallel(k);

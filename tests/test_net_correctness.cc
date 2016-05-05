@@ -42,9 +42,12 @@ test_net(string image_path, NetParameter *net_model)
   network.print_net();
   Image<float> final_image = network.run(input);
 
-  cout << "final_image.width = " << final_image.width() << endl;
-  cout << "final_image.height = " << final_image.height() << endl;
-  cout << "final_image.channels = " << final_image.channels() << endl;
+  cout << "final_image.width    = " << final_image.extent(0) << endl;
+  cout << "final_image.height   = " << final_image.extent(1) << endl;
+  cout << "final_image.channels = " << final_image.extent(2) << endl;
+  cout << "final_image.num      = " << final_image.extent(3) << endl;
+
+  #if 0
   /* Save all channels */
   for (int k = 0; k < final_image.channels(); k++) {
     ofstream outfile;
@@ -57,5 +60,6 @@ test_net(string image_path, NetParameter *net_model)
     }
     outfile.close();
   }
+  #endif
   return true;
 }

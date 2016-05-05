@@ -23,15 +23,16 @@ using namespace Halide;
 
 class Data : public Layer {
   public:
-    Data(std::string name, int width, int height, int channels, int num, Image<float> tmp_img)
-      :Layer(name, DATA) {
+    Data(std::string name, int width, int height, int channels, int num, ImageParam img)
+      :Layer(name, DATA, img) {
         set_width(width);
         set_height(height);
         set_channels(channels);
         set_num(num);
         //Image<float> dummy(width, height, channels, num);
-        Var x, y, z, w;
-        storage = Func(tmp_img);
+        //Var x, y, z, w;
+        //storage = Func(tmp_img);
+        storage(i, j, k, l) = img(i, j, k, l);
     }
 
     void SetData(Image<float> image) {
@@ -118,13 +119,15 @@ build_softmaxlayer(LayerParameter *layer)
 }
 #endif
 
-Net::Net(NetParameter *net_model, Image<float> temp_img)
+Net::Net(NetParameter *net_model, Image<float> img)
 {
   int count = 0;
   Layer *prev_layer = NULL;
   /* First layer is DATA */
   /* TODO change hard code */
-  Layer *curr_layer = new Data("Dummy", 500, 500, 3, 1, temp_img);
+  ImageParam input(type_of<float>(), 4);
+  input.set(img);
+  Layer *curr_layer = new Data("Dummy", 500, 500, 3, img.extent(3), input);
   data = (Data *)curr_layer;
   int num_layers = net_model->layer_size();
 
@@ -137,7 +140,7 @@ Net::Net(NetParameter *net_model, Image<float> temp_img)
     bool hit = false;
 
     if (type == CONVOLUTION) {
-      count++;
+      // count++;
       //if (count == 5) break;
       curr_layer = build_convlayer(&layer, curr_layer);
       hit = true;
@@ -147,11 +150,12 @@ Net::Net(NetParameter *net_model, Image<float> temp_img)
       hit = true;
     }
     else if (type == RELU) {
-      //count++;
+      // count++;
       //if (count == 14) break;
       curr_layer = build_relulayer(&layer, curr_layer);
       hit = true;
     } else if (type == POOLING) {
+      // count++;
       curr_layer = build_poollayer(&layer, curr_layer);
       hit = true;
     } 
@@ -166,7 +170,9 @@ Net::Net(NetParameter *net_model, Image<float> temp_img)
     }
     #endif
   
+
     if (hit) {
+      count++;
       //cout << name << "\t" << curr_layer << endl;
       /* On entry, update head */
       if (!head)
@@ -177,8 +183,8 @@ Net::Net(NetParameter *net_model, Image<float> temp_img)
         prev_layer->set_next(curr_layer);
       prev_layer = curr_layer;
 
-      if (type == CONVOLUTION) break;
-      //if (count == 14) break;
+      // if (type == CONVOLUTION) break;
+      if (count == 37) break;
     }
   }
   tail = curr_layer;
@@ -200,24 +206,38 @@ Net::print_net()
 Image<float>
 Net::run(Image<float> input)
 {
+  double inferenceStartTime, inferenceEndTime, startTime, endTime;
+  startTime = CycleTimer::currentSeconds();
   /* Display input image dimension */
-  cout << "Input dimension [W, H, C, N]:"
-       << input.extent(0) << ", "
-       << input.extent(1) << ", "
-       << input.extent(2) << ", "
+  cout << "Input dimension W x H x C x N : "
+       << input.extent(0) << " x "
+       << input.extent(1) << " x "
+       << input.extent(2) << " x "
        << input.extent(3)
        << endl;
   //((Data *)data)->SetData(input);
+  tail->storage.compile_jit();
 
-  double inferenceStartTime, inferenceEndTime, startTime, endTime;
-  inferenceStartTime = CycleTimer::currentSeconds();
-  Image<float> output = tail->storage.realize(tail->get_width(), 
-                                              tail->get_height(), 
-                                              tail->get_channels(), 
-                                              tail->get_num());
-  inferenceEndTime = CycleTimer::currentSeconds();
+  endTime = CycleTimer::currentSeconds();
+  cout << "Compile time: " 
+       << (endTime - startTime) * 1000 << " ms  " << endl;
+
+
+  /* Timing for inference */
+  Image<float> output;
+  double duration = 0.f;
+  int T = 1;
+  for (int t = 0; t < T; t++) {
+    inferenceStartTime = CycleTimer::currentSeconds();
+    output = tail->storage.realize(tail->get_width(), 
+                                                tail->get_height(), 
+                                                tail->get_channels(), 
+                                                tail->get_num());
+    inferenceEndTime = CycleTimer::currentSeconds();
+    duration += (inferenceEndTime - inferenceStartTime);
+  }
   cout << "Inference time: " 
-       << (inferenceEndTime - inferenceStartTime) * 1000 << " ms  " << endl;
+       << duration / T * 1000 << " ms  " << endl;
 
   return output;
 }
