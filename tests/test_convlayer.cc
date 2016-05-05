@@ -113,8 +113,11 @@ test_convolution(string image_path, NetParameter *net_model)
   BlobProto kernel_blob = layer.blobs(0);
   BlobProto bias_blob = layer.blobs(1);
   ConvolutionParameter conv_param = layer.convolution_param();
-  Convolution conv_layer = Convolution(layer.name(), &conv_param, 
-                                       &kernel_blob, &bias_blob);
+  Convolution conv_layer = Convolution(layer.name(), 
+                                       NULL, 
+                                       &conv_param, 
+                                       &kernel_blob, 
+                                       &bias_blob);
  
   /* IMPT: need to run it before we have an output dimension */
   Func storage = conv_layer.run(
@@ -125,10 +128,10 @@ test_convolution(string image_path, NetParameter *net_model)
   int height = conv_layer.get_height();
   int channels = conv_layer.get_channels();
   Image<float> halide_output = storage.realize(width, height, channels);
-  Image<float> serial_output = conv_layer.SerialConv(input);
+  //Image<float> serial_output = conv_layer.SerialConv(input);
   bool result = true;
   //bool result = check_output(halide_output, serial_output, &conv_layer);
-  save_data(halide_output, serial_output, &conv_layer);
+  //save_data(halide_output, serial_output, &conv_layer);
 
   /* Uncomment if you want to see the result */
 #if 0

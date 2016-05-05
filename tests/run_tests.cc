@@ -92,8 +92,8 @@ main(int argc, char *argv[])
   if (FLAGS_test_all || FLAGS_test_conv)
     test_convolution(image_path, &net_model);
 
-  if (FLAGS_test_all || FLAGS_test_deconv)
-    test_deconvolution(&net_model);
+  //if (FLAGS_test_all || FLAGS_test_deconv)
+  //  test_deconvolution(&net_model);
 
   if (FLAGS_test_all || FLAGS_test_net)
     test_net(image_path, &net_model);

@@ -36,7 +36,9 @@ class ReLU : public Layer {
      * @param layer_name Name given in the model
      * @param param      Parsed ReLUParameter from the caffemodel
      */
-    ReLU(std::string layer_name, const caffe::ReLUParameter *param);
+    ReLU(std::string layer_name, 
+         Layer *prev, 
+         const caffe::ReLUParameter *param);
 
     /**
      * @brief relu Performs linear rectification on the input
@@ -45,7 +47,6 @@ class ReLU : public Layer {
      *
      * @return Input for next stage
      */
-    // Halide::Image<float> run(Halide::Image<float> input);
     Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num);
 };
 

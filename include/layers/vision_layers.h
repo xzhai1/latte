@@ -40,6 +40,7 @@ class Convolution : public Layer {
      * @param bias_blob  Bias BlobProto
      */
     Convolution(std::string layer_name, 
+                Layer *prev,
                 const caffe::ConvolutionParameter *param, 
                 const caffe::BlobProto *weights, 
                 const caffe::BlobProto *bias_blob);
@@ -79,7 +80,8 @@ class Pooling : public Layer {
      * @param layer_name Name given in the model
      * @param param      Parsed PoolingParameter from the caffemodel
      */
-    Pooling(std::string layer_name, const caffe::PoolingParameter *param);
+    Pooling(std::string layer_name, Layer *prev,
+        const caffe::PoolingParameter *param);
 
     /**
      * @brief SerialPool performs plain vanilla pooling with for loops.
@@ -115,6 +117,7 @@ class Deconvolution : public Layer {
 
   public:
     Deconvolution(std::string layer_name, 
+                  Layer *prev,
                   const caffe::ConvolutionParameter *param,
                   const caffe::BlobProto *kernel_blob, 
                   const caffe::BlobProto *bias_blob);

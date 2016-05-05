@@ -8,6 +8,8 @@
 
 namespace Latte {
 
+const std::string DATA            = "Data";
+
 const std::string CONVOLUTION     = "Convolution";
 const std::string POOLING         = "Pooling";
 const std::string DECONVOLUTION   = "Deconvolution";
@@ -38,11 +40,14 @@ class Layer {
     void set_height   (int h) {height = h;}
     void set_channels (int c) {channels = c;}
     void set_num      (int n) {num = n;}
+
   public:
     Halide::Func storage;
     Halide::Var i, j, k, l;
 
-    Layer(): name(""), type(""), next(NULL) {}
+    Layer(std::string name,
+          std::string type) 
+      : name(name), type(type), next(NULL) {}
     ~Layer() {}
 
     /* Accessors do not modify the member variables */
@@ -70,9 +75,9 @@ class Layer {
      * @return 
      */
      
-    virtual Halide::Image<float> run(Halide::Image<float> input) {
-      return input;
-    }
+    //virtual Halide::Image<float> run(Halide::Image<float> input) {
+    //  return input;
+    //}
     
     virtual Halide::Func run(Halide::Func input, 
       int input_width, int input_height, int input_channels, int input_num) {
