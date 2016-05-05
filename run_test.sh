@@ -1,6 +1,8 @@
  ./test --image_path images/cat.png \
         --train_val_path ../fcn.berkeleyvision.org/voc-fcn32s/val.prototxt \
         --trained_model_path ../fcn.berkeleyvision.org/voc-fcn32s/fcn32s-heavy-pascal.caffemodel \
+        --iterations 1 \
+        --batch_size 1 \
         --test_net --stderrthreshold=0 
 
 #./test --image_path images/cat.png \

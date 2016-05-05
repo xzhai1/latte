@@ -19,7 +19,8 @@ bool test_convolution(std::string image_path, caffe::NetParameter *net_model);
 bool test_deconvolution(caffe::NetParameter *net_model);
 
 /* test_net.cc */
-bool test_net(std::string image_path, caffe::NetParameter *net_model);
+bool TestNet(std::string image_path, caffe::NetParameter *net_model, 
+             int batch_size, int iterations);
 
 /* test_img2col.cc */
 bool test_im2col(std::string fpath);

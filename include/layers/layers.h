@@ -30,12 +30,10 @@ class Layer {
     void set_width    (int w) {width = w;}
     void set_height   (int h) {height = h;}
     void set_channels (int c) {channels = c;}
-    //void set_num      (int n) {num = n;}
     void set_output_dim(int w, int h, int c, int n) {
       width    = w;
       height   = h;
       channels = c;
-      //num      = n;
       batchsize = n;
     }
 
@@ -62,7 +60,6 @@ class Layer {
     int get_width()     const {return width;}
     int get_height()    const {return height;}
     int get_channels()  const {return channels;}
-    //int get_num()       const {return num;}
     int get_batchsize() const {return batchsize;}
 
     Layer *get_next() {return next;}
@@ -76,7 +73,6 @@ class Layer {
     int width; 
     int height; 
     int channels; 
-    //int num;      /* Batch size */
     int batchsize;      /* Batch size */
   	Layer *next;
 };

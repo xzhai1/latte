@@ -95,7 +95,6 @@ class Deconvolution : public Layer {
       /* Input dimension */
       int input_width    = prev->get_width();
       int input_height   = prev->get_height();
-      int input_channels = prev->get_channels();
       int batch_size     = prev->get_batchsize();
 
       /* Output dimension */

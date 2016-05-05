@@ -1,12 +1,9 @@
-#include <iostream>
-#include <fstream>
 #include <string>
 
+#include "glog/logging.h"
+#include "CycleTimer.h"
 #include "caffe.pb.h"
 #include "halide_image_io.h"
-
-#include "io_utils.h"
-#include "CycleTimer.h"
 
 #include "layers/layers.h" 
 #include "layers/vision_layers.h"
@@ -14,6 +11,7 @@
 #include "layers/common_layers.h"
 #include "layers/loss_layers.h"
 
+#include "io_utils.h"
 #include "net.h"
 
 using namespace std;
@@ -23,11 +21,15 @@ using namespace Halide::Tools;
 using namespace Latte;
 
 bool
-test_net(string image_path, NetParameter *net_model) 
+TestNet(string image_path, 
+        NetParameter *net_model, 
+        int batch_size, 
+        int iterations) 
 {
   /* Loads the image */
   Image<float> img = load_image(image_path);
-  int batch_size = 1;
+  
+  /* Reshape the input image because we are dealing with one input image */
   Image<float> input(img.extent(0), img.extent(1), img.extent(2), batch_size);
 
   for (int w = 0; w < input.extent(3); w++)
@@ -38,14 +40,15 @@ test_net(string image_path, NetParameter *net_model)
 
   /* Build the net */
   Net network(net_model, input);
+  network.PrintNet();
 
-  network.print_net();
-  Image<float> final_image = network.run(input);
+  /* Run the network */
+  Image<float> final_image = network.Run(input, iterations);
 
-  cout << "final_image.width    = " << final_image.extent(0) << endl;
-  cout << "final_image.height   = " << final_image.extent(1) << endl;
-  cout << "final_image.channels = " << final_image.extent(2) << endl;
-  cout << "final_image.num      = " << final_image.extent(3) << endl;
+  LOG(INFO) << "final_image.width    = " << final_image.extent(0);
+  LOG(INFO) << "final_image.height   = " << final_image.extent(1);
+  LOG(INFO) << "final_image.channels = " << final_image.extent(2);
+  LOG(INFO) << "final_image.num      = " << final_image.extent(3);
 
   #if 0
   /* Save all channels */

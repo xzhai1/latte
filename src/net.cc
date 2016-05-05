@@ -1,8 +1,6 @@
-#include <iostream>
 #include <string>
 
 #include <glog/logging.h>
-
 #include "CycleTimer.h"
 #include "caffe.pb.h"
 #include "Halide.h"
@@ -21,26 +19,21 @@ using namespace std;
 using namespace caffe;
 using namespace Halide;
 
+/**
+ * @brief Data layer is just a dummy layer to hold the image that comes in so
+ * we can bootstrap the whole net
+ */
 class Data : public Layer {
   public:
-    Data(std::string name, int width, int height, int channels, int num, ImageParam img)
+    Data(std::string name, 
+         int width, 
+         int height, 
+         int channels, 
+         int num, 
+         ImageParam img)
       :Layer(name, DATA, img) {
-        //set_width(width);
-        //set_height(height);
-        //set_channels(channels);
-        //set_num(num);
         set_output_dim(width, height, channels, num);
         storage(i, j, k, l) = img(i, j, k, l);
-    }
-
-    void SetData(Image<float> image) {
-      if (get_width()     != image.extent(0) ||
-          get_height()    != image.extent(1) ||
-          get_channels()  != image.extent(2) ||
-          get_batchsize() != image.extent(3)) {
-        LOG(FATAL) << "Input dimension is not compatible";
-      }
-      storage = Func(image);
     }
 };
 
@@ -74,7 +67,6 @@ build_deconvlayer(LayerParameter *layer, Layer *prev)
   Deconvolution *deconv_layer;
 
   /* Not all convolution layers have bias term */
-  /* TODO deconv_param.has_bias_term() says true but blobs only has weights */
   deconv_layer = new Deconvolution(name, prev, 
       &deconv_param, &weight_blob, NULL);
   return deconv_layer;
@@ -98,37 +90,23 @@ build_poollayer(LayerParameter *layer, Layer *prev)
   return pool_layer;
 }
 
-#if 0
-static Layer *
-build_dropoutlayer(LayerParameter *layer)
-{
-  DropoutParameter drop_param = layer->dropout_param();
-  string name = layer->name();
-  Dropout *dropout_layer = new Dropout(name, &drop_param);
-  return dropout_layer;
-}
-
-static Layer *
-build_softmaxlayer(LayerParameter *layer)
-{
-  string name = layer->name();
-  Softmax *softmax_layer = new Softmax(name);
-  return softmax_layer;
-}
-#endif
-
 Net::Net(NetParameter *net_model, Image<float> img)
 {
   int count = 0;
   Layer *prev_layer = NULL;
+
   /* First layer is DATA */
-  /* TODO change hard code */
   ImageParam input(type_of<float>(), 4);
   input.set(img);
-  Layer *curr_layer = new Data("Dummy", 500, 500, 3, img.extent(3), input);
-  data = (Data *)curr_layer;
+  Layer *curr_layer = 
+    new Data("Data", 
+             img.extent(0), 
+             img.extent(1), 
+             img.extent(2), 
+             img.extent(3), 
+             input);
+  
   int num_layers = net_model->layer_size();
-
   for (int i = 0; i < num_layers; i++) {
     LayerParameter layer = net_model->layer(i);
     string name = layer.name();
@@ -157,21 +135,10 @@ Net::Net(NetParameter *net_model, Image<float> img)
       curr_layer = build_poollayer(&layer, curr_layer);
       hit = true;
     } 
-    #if 0
-    else if (type == DROPOUT) {
-      curr_layer = build_dropoutlayer(&layer);
-      hit = true;
-    } 
-    else if (type == SOFTMAX) {
-      curr_layer = build_softmaxlayer(&layer);
-      hit = true;
-    }
-    #endif
-  
 
     if (hit) {
       count++;
-      //cout << name << "\t" << curr_layer << endl;
+
       /* On entry, update head */
       if (!head)
         head = curr_layer;
@@ -181,7 +148,6 @@ Net::Net(NetParameter *net_model, Image<float> img)
         prev_layer->set_next(curr_layer);
       prev_layer = curr_layer;
 
-      // if (type == CONVOLUTION) break;
       if (count == 37) break;
     }
   }
@@ -189,43 +155,41 @@ Net::Net(NetParameter *net_model, Image<float> img)
 }
 
 void
-Net::print_net()
+Net::PrintNet()
 {
-  cout << "--------------------------------------------" << endl;
-  cout << "Network has the following layers" << endl;
-  cout << "--------------------------------------------" << endl;
-  cout << "name" << "\t\t\t" << "type" << endl;
+  LOG(INFO) << "--------------------------------------------";
+  LOG(INFO) << "|     Network has the following layers     |";
+  LOG(INFO) << "--------------------------------------------";
+  LOG(INFO) << "Name" << "\t\t\t" << "Type";
+  LOG(INFO) << "--------------------------------------------";
   for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
-    cout << ptr->get_name() << "\t\t\t" << ptr->get_type() << endl;
+    if (ptr->get_name().length() >= 8)
+      LOG(INFO) << ptr->get_name() << "\t\t" << ptr->get_type();
+    else
+      LOG(INFO) << ptr->get_name() << "\t\t\t" << ptr->get_type();
   }
-  cout << "--------------------------------------------" << endl;
+  LOG(INFO) << "--------------------------------------------";
 }
 
 Image<float>
-Net::run(Image<float> input)
+Net::Run(Image<float> input, int iterations)
 {
   double inferenceStartTime, inferenceEndTime, startTime, endTime;
   startTime = CycleTimer::currentSeconds();
   /* Display input image dimension */
-  cout << "Input dimension W x H x C x N : "
-       << input.extent(0) << " x "
-       << input.extent(1) << " x "
-       << input.extent(2) << " x "
-       << input.extent(3)
-       << endl;
-  //((Data *)data)->SetData(input);
+  LOG(INFO) << "Input dimension W x H x C x N : "
+            << input.extent(0) << " x "
+            << input.extent(1) << " x "
+            << input.extent(2) << " x "
+            << input.extent(3);
   tail->storage.compile_jit();
-
   endTime = CycleTimer::currentSeconds();
-  cout << "Compile time: " 
-       << (endTime - startTime) * 1000 << " ms  " << endl;
-
+  LOG(INFO) << "Compile time: " << (endTime - startTime)*1000 << " ms";
 
   /* Timing for inference */
   Image<float> output;
   double duration = 0.f;
-  int T = 1;
-  for (int t = 0; t < T; t++) {
+  for (int t = 0; t < iterations; t++) {
     inferenceStartTime = CycleTimer::currentSeconds();
     output = tail->storage.realize(tail->get_width(), 
                                    tail->get_height(), 
@@ -234,8 +198,7 @@ Net::run(Image<float> input)
     inferenceEndTime = CycleTimer::currentSeconds();
     duration += (inferenceEndTime - inferenceStartTime);
   }
-  cout << "Inference time: " 
-       << duration / T * 1000 << " ms  " << endl;
+  LOG(INFO) << "Inference time: " << duration/iterations*1000 << " ms";
 
   return output;
 }

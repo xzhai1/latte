@@ -16,6 +16,8 @@ string usage = "\n ./test "
                       "\t--image_path \t\timage.png\n" 
                       "\t--train_val_path \ttrain_val.prototxt\n"
                       "\t--trained_model_path \ttrained_model.caffemodel\n"
+                      "\t--iterations 1\n"
+                      "\t--batch_size 1\n"
                       "\t--test_all\n"
                       "\t--test_loadfromtest\n"
                       "\t--test_conv\n"
@@ -48,6 +50,11 @@ DEFINE_string(train_val_path, "",
 DEFINE_string(trained_model_path, "", 
               "Path of *.caffemodel, trained weights in binary format" 
               " serialized by protobuf");
+
+/* How many time we are going to run the net */
+DEFINE_uint64(iterations, 1, "Number of interations to run the network");
+DEFINE_uint64(batch_size, 1, "Number of image in the whole batch");
+
 
 /* Tests to perform */
 DEFINE_bool(test_all, false,
@@ -96,7 +103,7 @@ main(int argc, char *argv[])
   //  test_deconvolution(&net_model);
 
   if (FLAGS_test_all || FLAGS_test_net)
-    test_net(image_path, &net_model);
+    TestNet(image_path, &net_model, FLAGS_batch_size, FLAGS_iterations);
  
   /* legacy test */
   // test_im2col(image_path);
