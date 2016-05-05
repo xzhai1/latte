@@ -29,6 +29,7 @@ Crop::Crop(string layer_name, const CropParameter *param)
   }
 }
 
+#if 0
 Func 
 Crop::run(
   Func input, int input_width, int input_height, int input_channels, int input_num)
@@ -49,6 +50,7 @@ Crop::run(
 
   return storage;
 }
+#endif
 
 Dropout::Dropout(string layer_name, const DropoutParameter *param) 
   :Layer(layer_name, DROPOUT)
@@ -57,6 +59,7 @@ Dropout::Dropout(string layer_name, const DropoutParameter *param)
     dropout_ratio = param->dropout_ratio();
 }
 
+#if 0
 Func Dropout::run(
   Func input, int input_width, int input_height, int input_channels, int input_num, bool eval) 
 {
@@ -80,10 +83,12 @@ Func Dropout::run(
 
   return storage; 
 }
+#endif
 
 Split::Split(string layer_name)
   :Layer(layer_name, SPLIT) {}
 
+#if 0
 Func Split::run(
   Func input, int input_width, int input_height, int input_channels, int input_num, bool eval) 
 {
@@ -107,10 +112,12 @@ Func Split::run(
 
   return storage; 
 }
+#endif
 
 Silence::Silence(string layer_name)
   :Layer(layer_name, SILENCE) {}
 
+#if 0
 Func Silence::run(
   Func input, int input_width, int input_height, int input_channels, int input_num, bool eval) 
 {
@@ -134,5 +141,6 @@ Func Silence::run(
 
   return storage; 
 }
+#endif
 
 } /* namespace latte */

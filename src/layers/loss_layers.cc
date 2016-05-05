@@ -17,12 +17,9 @@ using namespace Halide;
 using namespace Halide::Tools;
 
 Softmax::Softmax(string layer_name)
-  :Layer(layer_name, SOFTMAX)
-{
-  //set_name(layer_name);
-  //set_type("Softmax");
-}
+  :Layer(layer_name, SOFTMAX) {}
 
+#if 0
 Func Softmax::run(
   Func input, int input_width, int input_height, int input_channels, int input_num)
 {
@@ -47,14 +44,12 @@ Func Softmax::run(
   /* TODO: define schedule */
   return storage;
 }
+#endif
 
 SoftmaxWithLoss::SoftmaxWithLoss(string layer_name) 
-  :Layer(layer_name, SOFTMAXWITHLOSS)
-{
-  //set_name(layer_name);
-  //set_type("SoftmaxWithLoss");
-}
+  :Layer(layer_name, SOFTMAXWITHLOSS) {}
 
+#if 0
 Func SoftmaxWithLoss::run(
   Func input, int input_width, int input_height, int input_channels, int input_num)
 {
@@ -82,5 +77,6 @@ Func SoftmaxWithLoss::run(
   /* TODO: define schedule */
   return storage;
 }
+#endif
 
 } /* namespace latte */

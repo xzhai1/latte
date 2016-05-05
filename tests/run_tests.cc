@@ -89,8 +89,8 @@ main(int argc, char *argv[])
   /* The model has to be loaded no matter what */
   test_LoadFromBinaryFile(trained_model_path, &net_model);
 
-  if (FLAGS_test_all || FLAGS_test_conv)
-    test_convolution(image_path, &net_model);
+  //if (FLAGS_test_all || FLAGS_test_conv)
+  //  test_convolution(image_path, &net_model);
 
   //if (FLAGS_test_all || FLAGS_test_deconv)
   //  test_deconvolution(&net_model);

@@ -20,26 +20,12 @@ class Softmax;
  * @brief Softmax layer
  *
  * Softmax regression (or multinomial logistic regression) is a generalization
- * of logistic regression to the case where we want to handle multiple classes. 
+ * of logistic regression to the case where we want to handle multiple 
+ * classes 
  */
 class Softmax : public Layer {
   public:
-    /**
-     * @brief Softmax 
-     *
-     * @param name
-     */
     Softmax(std::string name);
-
-    /**
-     * @brief softmax 
-     *
-     * @param input
-     *
-     * @return 
-     */
-    // Halide::Image<float> run(Halide::Image<float> input);
-    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num);
 };
 
 /**
@@ -53,22 +39,7 @@ class Softmax : public Layer {
 class SoftmaxWithLoss : public Layer {
     float loss = 0.f;
   public:
-    /**
-     * @brief SoftmaxWithLoss 
-     *
-     * @param name 
-     */
     SoftmaxWithLoss(std::string layer_name);
-    
-    /**
-     * @brief softmaxwithloss 
-     *
-     * @param input
-     *
-     * @return 
-     */
-    // Halide::Image<float> run(Halide::Image<float> input);
-    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num);
 };
 
 } /* namespace latte */

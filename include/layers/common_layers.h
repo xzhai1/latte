@@ -20,25 +20,8 @@ class Silence;
 class Crop : public Layer {
   int offset_i;
   int offset_j;
-
   public:
-    /**
-     * @brief Crop
-     *
-     * @param layer_name Name given in the model
-     * @param param      Parsed CropParameter from the caffemodel
-     */
     Crop(std::string name, const caffe::CropParameter *param);
-
-    /**
-     * @brief crop Performs cropping in x and y dimesion on both sides
-     *
-     * @param input Input from previous stage
-     *
-     * @return Input to next stage
-     */
-    // Halide::Image<float> run(Halide::Image<float> input);
-    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num);
 };
 
 /**
@@ -47,25 +30,8 @@ class Crop : public Layer {
  */
 class Dropout : public Layer {
     float dropout_ratio = 0.5f;
-
   public:
-    /**
-     * @brief Dropout
-     *
-     * @param layer_name Name given in the model
-     * @param param      Parsed DropoutParameter from the caffemodel
-     */
     Dropout(std::string layer_name, const caffe::DropoutParameter *param);
-
-    /**
-     * @brief dropout 
-     *
-     * @param input Input from previous stage
-     *
-     * @return Input to next stage
-     */
-    // Halide::Image<float> run(Halide::Image<float> input);
-    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num, bool eval = true);
 };
 
 /**
@@ -73,22 +39,7 @@ class Dropout : public Layer {
  */
 class Split : public Layer {
   public:
-    /**
-     * @brief Split 
-     *
-     * @param name
-     */
     Split(std::string name);
-
-    /**
-     * @brief split 
-     *
-     * @param input
-     *
-     * @return 
-     */
-    // Halide::Image<float> run(Halide::Image<float> input);
-     Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num, bool eval = true);
 };
 
 /**
@@ -97,22 +48,7 @@ class Split : public Layer {
  */
 class Silence : public Layer {
   public:
-    /**
-     * @brief Silence 
-     *
-     * @param layer_name
-     */
     Silence(std::string layer_name);
-
-    /**
-     * @brief silence NOOP
-     *
-     * @param input
-     *
-     * @return 
-     */
-    // Halide::Image<float> run(Halide::Image<float> input);
-     Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num, bool eval = true);
 };
 
 } /* namespace latte */

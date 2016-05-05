@@ -25,21 +25,19 @@ class Data : public Layer {
   public:
     Data(std::string name, int width, int height, int channels, int num, ImageParam img)
       :Layer(name, DATA, img) {
-        set_width(width);
-        set_height(height);
-        set_channels(channels);
-        set_num(num);
-        //Image<float> dummy(width, height, channels, num);
-        //Var x, y, z, w;
-        //storage = Func(tmp_img);
+        //set_width(width);
+        //set_height(height);
+        //set_channels(channels);
+        //set_num(num);
+        set_output_dim(width, height, channels, num);
         storage(i, j, k, l) = img(i, j, k, l);
     }
 
     void SetData(Image<float> image) {
-      if (get_width()    != image.extent(0) ||
-          get_height()   != image.extent(1) ||
-          get_channels() != image.extent(2) ||
-          get_num()      != image.extent(3)) {
+      if (get_width()     != image.extent(0) ||
+          get_height()    != image.extent(1) ||
+          get_channels()  != image.extent(2) ||
+          get_batchsize() != image.extent(3)) {
         LOG(FATAL) << "Input dimension is not compatible";
       }
       storage = Func(image);
@@ -230,9 +228,9 @@ Net::run(Image<float> input)
   for (int t = 0; t < T; t++) {
     inferenceStartTime = CycleTimer::currentSeconds();
     output = tail->storage.realize(tail->get_width(), 
-                                                tail->get_height(), 
-                                                tail->get_channels(), 
-                                                tail->get_num());
+                                   tail->get_height(), 
+                                   tail->get_channels(), 
+                                   tail->get_batchsize());
     inferenceEndTime = CycleTimer::currentSeconds();
     duration += (inferenceEndTime - inferenceStartTime);
   }
