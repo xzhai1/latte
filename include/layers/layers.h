@@ -57,10 +57,10 @@ class Layer {
     /* Accessors do not modify the member variables */
     std::string get_name() const {return name;}
     std::string get_type() const {return type;}
-    int get_width()     const {return width;}
-    int get_height()    const {return height;}
-    int get_channels()  const {return channels;}
-    int get_batchsize() const {return batchsize;}
+    int get_width()        const {return width;}
+    int get_height()       const {return height;}
+    int get_channels()     const {return channels;}
+    int get_batchsize()    const {return batchsize;}
 
     Layer *get_next() {return next;}
     void set_next(Layer *next_layer) {next = next_layer;}

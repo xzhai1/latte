@@ -13,6 +13,8 @@ class Net {
     Layer *tail = NULL;
 
   public:
+    int input_width;
+    int input_height;
     Net(caffe::NetParameter *net_model,
         Halide::Image<float> tmp_img);
     ~Net() {}

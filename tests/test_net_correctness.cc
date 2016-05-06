@@ -1,4 +1,5 @@
 #include <string>
+#include <fstream>
 
 #include "glog/logging.h"
 #include "CycleTimer.h"
@@ -44,13 +45,12 @@ TestNet(string image_path,
 
   /* Run the network */
   Image<float> final_image = network.Run(input, iterations);
-
+  
   LOG(INFO) << "final_image.width    = " << final_image.extent(0);
   LOG(INFO) << "final_image.height   = " << final_image.extent(1);
   LOG(INFO) << "final_image.channels = " << final_image.extent(2);
   LOG(INFO) << "final_image.num      = " << final_image.extent(3);
 
-  #if 0
   /* Save all channels */
   for (int k = 0; k < final_image.channels(); k++) {
     ofstream outfile;
@@ -63,6 +63,5 @@ TestNet(string image_path,
     }
     outfile.close();
   }
-  #endif
   return true;
 }

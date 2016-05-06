@@ -21,7 +21,21 @@ class Crop : public Layer {
   int offset_i;
   int offset_j;
   public:
-    Crop(std::string name, const caffe::CropParameter *param);
+    Crop(std::string name, 
+         Layer *prev,
+         const caffe::CropParameter *param, 
+         int input_width, int input_height);
+
+    void SetOutputDim(const Layer *prev) {
+      /* Output dimension */
+      int output_width    = prev->get_width() - 2*offset_i;
+      int output_height   = prev->get_height()- 2*offset_j;
+      int output_channels = prev->get_channels();
+      int batch_size      = prev->get_batchsize();
+
+      /* Set output dimension */
+      set_output_dim(output_width, output_height, output_channels, batch_size);
+    }
 };
 
 /**

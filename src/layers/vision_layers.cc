@@ -118,6 +118,7 @@ Deconvolution::Deconvolution(string layer_name,
         prev->storage(i/stride - r.x, j/stride - r.y, r.z, l));
 
   /* Scheduling */
+  storage.compute_root();
   storage.parallel(k);
   int split_num = get_height() > 15 ? get_height() / 15 : 8;
   int vector_size = (get_width() >= 16) ? 16 : 8;

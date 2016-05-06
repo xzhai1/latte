@@ -16,9 +16,14 @@ using namespace caffe;
 using namespace Halide;
 using namespace Halide::Tools;
 
-Crop::Crop(string layer_name, const CropParameter *param)
+Crop::Crop(
+    string layer_name,
+    Layer *prev,
+    const CropParameter *param, int input_width, int input_height)
   :Layer(layer_name, CROP)
 {
+#if 0
+  /* Set the member variables */
   if (param->offset_size() == 1) {
     offset_i = param->offset(0);
     offset_j = param->offset(0);
@@ -27,6 +32,11 @@ Crop::Crop(string layer_name, const CropParameter *param)
     offset_i = param->offset(1);
     offset_j = param->offset(0);
   }
+#endif 
+  offset_i = (prev->get_width() - input_width)/2;
+  offset_j = (prev->get_height() - input_height)/2;
+  SetOutputDim(prev);
+  storage(i, j, k, l) = prev->storage(i + offset_i, j + offset_j, k, l);
 }
 
 #if 0

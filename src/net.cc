@@ -90,6 +90,19 @@ build_poollayer(LayerParameter *layer, Layer *prev)
   return pool_layer;
 }
 
+static Layer *
+build_croplayer(LayerParameter *layer, 
+                Layer *prev, 
+                int input_width, 
+                int input_height)
+{
+  CropParameter crop_param = layer->crop_param();
+  string name = layer->name();
+  Crop *crop_layer = new Crop(name, prev, &crop_param, 
+      input_width, input_height);
+  return crop_layer;
+}
+
 Net::Net(NetParameter *net_model, Image<float> img)
 {
   int count = 0;
@@ -105,7 +118,11 @@ Net::Net(NetParameter *net_model, Image<float> img)
              img.extent(2), 
              img.extent(3), 
              input);
-  
+
+  /* remeber the input size */
+  input_width = img.extent(0);
+  input_height = img.extent(1);
+
   int num_layers = net_model->layer_size();
   for (int i = 0; i < num_layers; i++) {
     LayerParameter layer = net_model->layer(i);
@@ -134,7 +151,11 @@ Net::Net(NetParameter *net_model, Image<float> img)
       // count++;
       curr_layer = build_poollayer(&layer, curr_layer);
       hit = true;
-    } 
+    } else if (type == CROP) {
+      curr_layer = build_croplayer(
+          &layer, curr_layer, input_width, input_height);
+      hit = true;
+    }
 
     if (hit) {
       count++;
@@ -148,7 +169,7 @@ Net::Net(NetParameter *net_model, Image<float> img)
         prev_layer->set_next(curr_layer);
       prev_layer = curr_layer;
 
-      if (count == 37) break;
+      if (count == 38) break;
     }
   }
   tail = curr_layer;
