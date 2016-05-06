@@ -22,21 +22,31 @@ Crop::Crop(
     const CropParameter *param, int input_width, int input_height)
   :Layer(layer_name, CROP)
 {
-#if 0
-  /* Set the member variables */
-  if (param->offset_size() == 1) {
-    offset_i = param->offset(0);
-    offset_j = param->offset(0);
-  } else {
-    // axis in caffe: (N,C,H,W)
-    offset_i = param->offset(1);
-    offset_j = param->offset(0);
-  }
-#endif 
   offset_i = (prev->get_width() - input_width)/2;
   offset_j = (prev->get_height() - input_height)/2;
   SetOutputDim(prev);
   storage(i, j, k, l) = prev->storage(i + offset_i, j + offset_j, k, l);
+
+  /* Schedule */
+  /* v1 */
+  int vector_size = (get_width() >= 16) ? 16 : 8;
+  Var fused;
+  storage.compute_root();
+  storage.fuse(k, l, fused);
+  storage.parallel(fused);
+  storage.vectorize(i, vector_size);
+
+  #if 0
+  /* v2 */
+  storage.compute_root();
+  storage.parallel(k);
+  int split_num = get_height() > 15 ? get_height() / 15 : 8;
+  int vector_size = (get_width() >= 16) ? 16 : 8;
+  Var jo, ji;
+  storage.split(j, jo, ji, split_num).parallel(jo);
+  storage.vectorize(i, vector_size);
+  clamped.store_at(storage, jo).compute_at(storage, ji);
+  #endif
 }
 
 #if 0

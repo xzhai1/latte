@@ -40,11 +40,19 @@ TestNet(string image_path,
           input(x, y, z, w) = img(x, y, z);
 
   /* Build the net */
-  Net network(net_model, input);
-  network.PrintNet();
+  // Net network(net_model, input, l);
+  // network.PrintNet();
 
   /* Run the network */
-  Image<float> final_image = network.Run(input, iterations);
+  /* Experiment */
+  Image<float> final_image;
+  for (int l = 1; l < 39; l++) {
+    Net network(net_model, input, l);
+    // LOG(INFO) << "layer: " << l;
+    final_image = network.Run(input, iterations);
+  }
+  /* Eval */
+  // Image<float> final_image = network.Run(input, iterations);
   
   LOG(INFO) << "final_image.width    = " << final_image.extent(0);
   LOG(INFO) << "final_image.height   = " << final_image.extent(1);

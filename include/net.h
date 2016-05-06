@@ -16,7 +16,8 @@ class Net {
     int input_width;
     int input_height;
     Net(caffe::NetParameter *net_model,
-        Halide::Image<float> tmp_img);
+        Halide::Image<float> tmp_img,
+        int limit = 38);
     ~Net() {}
 
     /**

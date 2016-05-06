@@ -103,7 +103,7 @@ build_croplayer(LayerParameter *layer,
   return crop_layer;
 }
 
-Net::Net(NetParameter *net_model, Image<float> img)
+Net::Net(NetParameter *net_model, Image<float> img, int limit)
 {
   int count = 0;
   Layer *prev_layer = NULL;
@@ -169,7 +169,7 @@ Net::Net(NetParameter *net_model, Image<float> img)
         prev_layer->set_next(curr_layer);
       prev_layer = curr_layer;
 
-      if (count == 38) break;
+      if (count == limit) break;
     }
   }
   tail = curr_layer;
@@ -198,18 +198,23 @@ Net::Run(Image<float> input, int iterations)
   double inferenceStartTime, inferenceEndTime, startTime, endTime;
   startTime = CycleTimer::currentSeconds();
   /* Display input image dimension */
+  #if 0
   LOG(INFO) << "Input dimension W x H x C x N : "
             << input.extent(0) << " x "
             << input.extent(1) << " x "
             << input.extent(2) << " x "
             << input.extent(3);
+  #endif
   tail->storage.compile_jit();
   endTime = CycleTimer::currentSeconds();
+
+  #if 0
   LOG(INFO) << "Compile time: " << (endTime - startTime)*1000 << " ms";
+  #endif
 
   /* Timing for inference */
   Image<float> output;
-  double duration = 0.f;
+  double duration = 1.f*24*60*60;
   for (int t = 0; t < iterations; t++) {
     inferenceStartTime = CycleTimer::currentSeconds();
     output = tail->storage.realize(tail->get_width(), 
@@ -217,9 +222,12 @@ Net::Run(Image<float> input, int iterations)
                                    tail->get_channels(), 
                                    tail->get_batchsize());
     inferenceEndTime = CycleTimer::currentSeconds();
-    duration += (inferenceEndTime - inferenceStartTime);
+    double currentDuration = inferenceEndTime - inferenceStartTime;
+    if (currentDuration < duration)
+      duration = currentDuration;
   }
-  LOG(INFO) << "Inference time: " << duration/iterations*1000 << " ms";
+  // LOG(INFO) << "Inference time: " << duration/iterations*1000 << " ms";
+  cout << duration * 1000 << endl;
 
   return output;
 }

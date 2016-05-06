@@ -48,9 +48,22 @@ Convolution::Convolution(string layer_name,
         clamped(i*stride + r.x - pad, j*stride + r.y - pad, r.z, l)) 
     + bias(0, 0, 0, k);
 
+  #if 0
   /* Dynamic Scheduling */
   storage.compute_root();
+  Var 
   storage.parallel(k);
+  Var jo, ji;
+  storage.split(j, jo, ji, split_num).parallel(jo);
+  storage.vectorize(i, vector_size);
+  clamped.store_at(storage, jo).compute_at(storage, ji);
+  #endif
+
+  #if 0
+  Var fused;
+  storage.compute_root();
+  storage.fuse(k, l, fused);
+  storage.parallel(fused);
   int split_num = get_height() > 15 ? get_height() / 15 : 8;
   int vector_size = (get_width() >= 16) ? 16 : 8;
   if (get_width()*2 <= get_channels()) {
@@ -61,6 +74,27 @@ Convolution::Convolution(string layer_name,
   } else {
     storage.vectorize(i, vector_size);
   }
+  #endif
+
+  /* v1 */
+  int vector_size = (get_width() >= 16) ? 16 : 8;
+  Var fused;
+  storage.compute_root();
+  storage.fuse(k, l, fused);
+  storage.parallel(fused);
+  storage.vectorize(i, vector_size);
+
+  #if 0
+  /* v2 */
+  storage.compute_root();
+  storage.parallel(k);
+  int split_num = get_height() > 15 ? get_height() / 15 : 8;
+  int vector_size = (get_width() >= 16) ? 16 : 8;
+  Var jo, ji;
+  storage.split(j, jo, ji, split_num).parallel(jo);
+  storage.vectorize(i, vector_size);
+  clamped.store_at(storage, jo).compute_at(storage, ji);
+  #endif
 }
 
 Pooling::Pooling(string layer_name,
@@ -83,9 +117,25 @@ Pooling::Pooling(string layer_name,
     maximum(prev->storage(i*stride + r.x, j*stride + r.y, k, l));
 
   /* Schedule */
+  /* v1 */
+  int vector_size = (get_width() >= 16) ? 16 : 8;
+  Var fused;
+  storage.compute_root();
+  storage.fuse(k, l, fused);
+  storage.parallel(fused);
+  storage.vectorize(i, vector_size);
+
+  #if 0
+  /* v2 */
   storage.compute_root();
   storage.parallel(k);
-  storage.vectorize(i, 16);
+  int split_num = get_height() > 15 ? get_height() / 15 : 8;
+  int vector_size = (get_width() >= 16) ? 16 : 8;
+  Var jo, ji;
+  storage.split(j, jo, ji, split_num).parallel(jo);
+  storage.vectorize(i, vector_size);
+  clamped.store_at(storage, jo).compute_at(storage, ji);
+  #endif
 }
 
 Deconvolution::Deconvolution(string layer_name, 
@@ -118,6 +168,17 @@ Deconvolution::Deconvolution(string layer_name,
         prev->storage(i/stride - r.x, j/stride - r.y, r.z, l));
 
   /* Scheduling */
+
+  /* v1 */
+  int vector_size = (get_width() >= 16) ? 16 : 8;
+  Var fused;
+  storage.compute_root();
+  storage.fuse(k, l, fused);
+  storage.parallel(fused);
+  storage.vectorize(i, vector_size);
+
+  #if 0
+  /* v2 */
   storage.compute_root();
   storage.parallel(k);
   int split_num = get_height() > 15 ? get_height() / 15 : 8;
@@ -126,6 +187,7 @@ Deconvolution::Deconvolution(string layer_name,
   storage.split(j, jo, ji, split_num).parallel(jo);
   storage.vectorize(i, vector_size);
   clamped.store_at(storage, jo).compute_at(storage, ji);
+  #endif
 }
 
 } /* namespace latte */
