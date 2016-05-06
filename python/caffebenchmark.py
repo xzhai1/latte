@@ -45,7 +45,7 @@ def main(args):
         output = net.forward(start='input', end=layer)
         #output = net.forward()
         end = time.time()
-        print end - start, "seconds"
+        print layer, (end - start)*1000, "ms"
 
     print output[net.outputs[0]].shape
     pickle.dump(output[net.outputs[0]], open('caffe_result.pkl', 'wb'))
