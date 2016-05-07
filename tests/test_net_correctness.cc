@@ -59,6 +59,7 @@ TestNet(string image_path,
   LOG(INFO) << "final_image.channels = " << final_image.extent(2);
   LOG(INFO) << "final_image.num      = " << final_image.extent(3);
 
+#if 0
   /* Save all channels */
   for (int k = 0; k < final_image.channels(); k++) {
     ofstream outfile;
@@ -71,5 +72,6 @@ TestNet(string image_path,
     }
     outfile.close();
   }
+#endif
   return true;
 }

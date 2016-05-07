@@ -28,6 +28,7 @@ Crop::Crop(
   storage(i, j, k, l) = prev->storage(i + offset_i, j + offset_j, k, l);
 
   /* Schedule */
+#if 0
   /* v1 */
   int vector_size = (get_width() >= 16) ? 16 : 8;
   Var fused;
@@ -35,8 +36,8 @@ Crop::Crop(
   storage.fuse(k, l, fused);
   storage.parallel(fused);
   storage.vectorize(i, vector_size);
-
-  #if 0
+#endif
+#if 0
   /* v2 */
   storage.compute_root();
   storage.parallel(k);
@@ -45,8 +46,18 @@ Crop::Crop(
   Var jo, ji;
   storage.split(j, jo, ji, split_num).parallel(jo);
   storage.vectorize(i, vector_size);
-  clamped.store_at(storage, jo).compute_at(storage, ji);
-  #endif
+#endif
+
+  /* v3 */
+  int vector_size = (get_width() >= 16) ? 16 : 8;
+  Var fused;
+  storage.compute_root();
+  storage.fuse(k, l, fused);
+  storage.parallel(fused);
+  storage.vectorize(i, vector_size);
+
+
+
 }
 
 #if 0

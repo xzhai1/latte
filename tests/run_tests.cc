@@ -8,7 +8,7 @@
 
 using namespace std;
 using namespace google;
-using namespace gflags;
+//using namespace gflags;
 using namespace caffe;
 
 string usage = "\n ./test "
