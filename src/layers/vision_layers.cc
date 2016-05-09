@@ -48,56 +48,21 @@ Convolution::Convolution(string layer_name,
         clamped(i*stride + r.x - pad, j*stride + r.y - pad, r.z, l)) 
     + bias(0, 0, 0, k);
 
-  #if 0
-  /* Dynamic Scheduling */
-  storage.compute_root();
-  Var 
-  storage.parallel(k);
-  Var jo, ji;
-  storage.split(j, jo, ji, split_num).parallel(jo);
-  storage.vectorize(i, vector_size);
-  clamped.store_at(storage, jo).compute_at(storage, ji);
-  #endif
-
-  #if 0
-  /* v1 */
+  /* Halide v5 scheduling policy */
   int vector_size = (get_width() >= 16) ? 16 : 8;
   Var fused;
   storage.compute_root();
   storage.fuse(k, l, fused);
   storage.parallel(fused);
   storage.vectorize(i, vector_size);
-  #endif
+  clamped.store_root().compute_root();
 
+  /* GPU parallel */
 #if 0
-  /* v2 */
+  clamped.store_root().compute_root();
+  storage.gpu_tile(i, j, k, 8, 8, 16);
   storage.compute_root();
-  storage.parallel(k);
-  int split_num = get_height() > 15 ? get_height() / 15 : 8;
-  int vector_size = (get_width() >= 16) ? 16 : 8;
-  Var jo, ji;
-  storage.split(j, jo, ji, split_num).parallel(jo);
-  storage.vectorize(i, vector_size);
-  clamped.store_at(storage, jo).compute_at(storage, ji);
 #endif
-  /* v3 */
-  Var fused;
-  storage.compute_root();
-  storage.fuse(k, l, fused);
-  storage.parallel(fused);
-  int split_num = get_height() > 15 ? get_height() / 15 : 8;
-  int vector_size = (get_width() >= 16) ? 16 : 8;
-  if (get_width()*2 <= get_channels()) {
-    Var jo, ji;
-    storage.split(j, jo, ji, split_num).parallel(jo);
-    storage.vectorize(i, vector_size);
-    clamped.store_at(storage, jo).compute_at(storage, ji);
-  } else {
-    storage.vectorize(i, vector_size);
-    clamped.store_root().compute_root();
-  }
-
-
 }
 
 Pooling::Pooling(string layer_name,
@@ -120,27 +85,7 @@ Pooling::Pooling(string layer_name,
     maximum(prev->storage(i*stride + r.x, j*stride + r.y, k, l));
 
   /* Schedule */
-#if 0
-  /* v1 */
-  int vector_size = (get_width() >= 16) ? 16 : 8;
-  Var fused;
-  storage.compute_root();
-  storage.fuse(k, l, fused);
-  storage.parallel(fused);
-  storage.vectorize(i, vector_size);
-#endif
-#if 0
-  /* v2 */
-  storage.compute_root();
-  storage.parallel(k);
-  int split_num = get_height() > 15 ? get_height() / 15 : 8;
-  int vector_size = (get_width() >= 16) ? 16 : 8;
-  Var jo, ji;
-  storage.split(j, jo, ji, split_num).parallel(jo);
-  storage.vectorize(i, vector_size);
-#endif
-
-  /* v3 */
+  /* Halide v5 scheduling policy */
   int vector_size = (get_width() >= 16) ? 16 : 8;
   Var fused;
   storage.compute_root();
@@ -148,6 +93,11 @@ Pooling::Pooling(string layer_name,
   storage.parallel(fused);
   storage.vectorize(i, vector_size);
 
+  /* GPU parallel */
+#if 0
+  storage.compute_root();
+  storage.gpu_tile(i, j, k, 8, 8, 16); 
+#endif
 }
 
 Deconvolution::Deconvolution(string layer_name, 
@@ -180,36 +130,21 @@ Deconvolution::Deconvolution(string layer_name,
         prev->storage(i/stride - r.x, j/stride - r.y, r.z, l));
 
   /* Scheduling */
-  #if 0
-  /* v1 */
+  /* Halide v5 scheduling policy*/
   int vector_size = (get_width() >= 16) ? 16 : 8;
   Var fused;
   storage.compute_root();
   storage.fuse(k, l, fused);
   storage.parallel(fused);
   storage.vectorize(i, vector_size);
-  #endif
-#if 0
-  /* v2 */
-  storage.compute_root();
-  storage.parallel(k);
-  int split_num = get_height() > 15 ? get_height() / 15 : 8;
-  int vector_size = (get_width() >= 16) ? 16 : 8;
-  Var jo, ji;
-  storage.split(j, jo, ji, split_num).parallel(jo);
-  storage.vectorize(i, vector_size);
-  clamped.store_at(storage, jo).compute_at(storage, ji);
-#endif
+  clamped.store_root().compute_root();
 
-  /* v3 */
+  /* GPU parallel */
+#if 0
   storage.compute_root();
-  storage.parallel(k);
-  int split_num = get_height() > 15 ? get_height() / 15 : 8;
-  int vector_size = (get_width() >= 16) ? 16 : 8;
-  Var jo, ji;
-  storage.split(j, jo, ji, split_num).parallel(jo);
-  storage.vectorize(i, vector_size);
-  clamped.store_at(storage, jo).compute_at(storage, ji);
+  storage.gpu_tile(i, j, k, 8, 8, 16);
+#endif
 }
+
 
 } /* namespace latte */

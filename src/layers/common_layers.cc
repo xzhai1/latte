@@ -28,27 +28,7 @@ Crop::Crop(
   storage(i, j, k, l) = prev->storage(i + offset_i, j + offset_j, k, l);
 
   /* Schedule */
-#if 0
-  /* v1 */
-  int vector_size = (get_width() >= 16) ? 16 : 8;
-  Var fused;
-  storage.compute_root();
-  storage.fuse(k, l, fused);
-  storage.parallel(fused);
-  storage.vectorize(i, vector_size);
-#endif
-#if 0
-  /* v2 */
-  storage.compute_root();
-  storage.parallel(k);
-  int split_num = get_height() > 15 ? get_height() / 15 : 8;
-  int vector_size = (get_width() >= 16) ? 16 : 8;
-  Var jo, ji;
-  storage.split(j, jo, ji, split_num).parallel(jo);
-  storage.vectorize(i, vector_size);
-#endif
-
-  /* v3 */
+  /* Halide v5 scheduling policy */
   int vector_size = (get_width() >= 16) ? 16 : 8;
   Var fused;
   storage.compute_root();
@@ -56,8 +36,11 @@ Crop::Crop(
   storage.parallel(fused);
   storage.vectorize(i, vector_size);
 
-
-
+  /* GPU parallel */
+#if 0 
+  storage.compute_root();
+  storage.gpu_tile(i, j, k, 8, 8, 16);
+#endif
 }
 
 #if 0

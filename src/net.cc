@@ -103,7 +103,7 @@ build_croplayer(LayerParameter *layer,
   return crop_layer;
 }
 
-Net::Net(NetParameter *net_model, Image<float> img, int limit)
+Net::Net(NetParameter *net_model, Image<float> img)
 {
   int count = 0;
   Layer *prev_layer = NULL;
@@ -168,8 +168,6 @@ Net::Net(NetParameter *net_model, Image<float> img, int limit)
       if (prev_layer)
         prev_layer->set_next(curr_layer);
       prev_layer = curr_layer;
-
-      if (count == limit) break;
     }
   }
   tail = curr_layer;
@@ -198,22 +196,32 @@ Net::Run(Image<float> input, int iterations)
   double inferenceStartTime, inferenceEndTime, startTime, endTime;
   startTime = CycleTimer::currentSeconds();
   /* Display input image dimension */
-  #if 0
   LOG(INFO) << "Input dimension W x H x C x N : "
             << input.extent(0) << " x "
             << input.extent(1) << " x "
             << input.extent(2) << " x "
             << input.extent(3);
-  #endif
   tail->storage.compile_jit();
+#if 0
+  /* compile in GPU */
+  Target target = get_host_target();
+  target.set_feature(Target::CUDA);
+  tail->storage.compile_jit(target);
+#endif
   endTime = CycleTimer::currentSeconds();
 
-  #if 0
   LOG(INFO) << "Compile time: " << (endTime - startTime)*1000 << " ms";
-  #endif
 
   /* Timing for inference */
   Image<float> output;
+  /* Buffer for GPU timing */
+#if 0
+  Buffer output_buffer(Float(32), tail->get_width(),
+                                  tail->get_height(),
+                                  tail->get_channels(),
+                                  tail->get_batchsize());
+#endif
+
   double duration = 1.f*24*60*60;
   for (int t = 0; t < iterations; t++) {
     inferenceStartTime = CycleTimer::currentSeconds();
@@ -221,13 +229,18 @@ Net::Run(Image<float> input, int iterations)
                                    tail->get_height(), 
                                    tail->get_channels(), 
                                    tail->get_batchsize());
+
+#if 0
+    /* GPU realize */
+    tail->storage.realize(output_buffer);
+#endif
     inferenceEndTime = CycleTimer::currentSeconds();
     double currentDuration = inferenceEndTime - inferenceStartTime;
     if (currentDuration < duration)
       duration = currentDuration;
   }
-  // LOG(INFO) << "Inference time: " << duration/iterations*1000 << " ms";
-  cout << duration * 1000 << endl;
+  LOG(INFO) << "Inference time: " << duration/iterations*1000 << " ms";
+  //cout << duration * 1000 << endl;
 
   return output;
 }

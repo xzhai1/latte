@@ -15,11 +15,12 @@ using namespace Halide;
 using namespace Halide::Tools;
 using namespace Latte;
 
+#if 0
 static void
 SaveLoadedKernel(const NetParameter *net)
 {
   /* The first conv layer */
-  int layer_idx = 3;
+  //int layer_idx = 3;
   int input_channels = 3;
   //const LayerParameter layer = net->layer(layer_idx);
   const V1LayerParameter layer = net->layers(0);
@@ -51,6 +52,7 @@ SaveLoadedKernel(const NetParameter *net)
     save_image(filter, k_path);
   }
 }
+#endif
 
 static void 
 ListTxtLayer(const NetParameter *net) 

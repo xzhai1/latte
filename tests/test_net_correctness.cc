@@ -40,26 +40,17 @@ TestNet(string image_path,
           input(x, y, z, w) = img(x, y, z);
 
   /* Build the net */
-  // Net network(net_model, input, l);
-  // network.PrintNet();
+  Net network(net_model, input);
+  network.PrintNet();
 
-  /* Run the network */
-  /* Experiment */
-  Image<float> final_image;
-  for (int l = 1; l < 39; l++) {
-    Net network(net_model, input, l);
-    // LOG(INFO) << "layer: " << l;
-    final_image = network.Run(input, iterations);
-  }
   /* Eval */
-  // Image<float> final_image = network.Run(input, iterations);
+  Image<float> final_image = network.Run(input, iterations);
   
   LOG(INFO) << "final_image.width    = " << final_image.extent(0);
   LOG(INFO) << "final_image.height   = " << final_image.extent(1);
   LOG(INFO) << "final_image.channels = " << final_image.extent(2);
   LOG(INFO) << "final_image.num      = " << final_image.extent(3);
 
-#if 0
   /* Save all channels */
   for (int k = 0; k < final_image.channels(); k++) {
     ofstream outfile;
@@ -72,6 +63,5 @@ TestNet(string image_path,
     }
     outfile.close();
   }
-#endif
   return true;
 }
