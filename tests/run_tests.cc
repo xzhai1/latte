@@ -18,11 +18,7 @@ string usage = "\n ./test "
                       "\t--trained_model_path \ttrained_model.caffemodel\n"
                       "\t--iterations 1\n"
                       "\t--batch_size 1\n"
-                      "\t--test_all\n"
-                      "\t--test_loadfromtest\n"
-                      "\t--test_conv\n"
-                      "\t--test_deconv\n"
-                      "\t--test_net\n";
+                      "\t--test_loadfromtest";
 
 /**
  * @brief Try to read the file passed in at the command line
@@ -38,7 +34,7 @@ ValidatePath(const char *flagname, const string& path)
   struct stat buffer;   
   if (!stat(path.c_str(), &buffer))
     return true; 
-  LOG(INFO) << "Invalid path name for " << flagname;
+  LOG(INFO) << "Invalid path for " << flagname;
   return false;
 }
 
@@ -50,21 +46,12 @@ DEFINE_string(train_val_path, "",
 DEFINE_string(trained_model_path, "", 
               "Path of *.caffemodel, trained weights in binary format" 
               " serialized by protobuf");
-
-/* How many time we are going to run the net */
-DEFINE_uint64(iterations, 1, "Number of interations to run the network");
-DEFINE_uint64(batch_size, 1, "Number of image in the whole batch");
-
-
-/* Tests to perform */
-DEFINE_bool(test_all, false,
-              "Perform all tests");
+DEFINE_uint64(iterations, 1, 
+              "Number of interations to run the network");
+DEFINE_uint64(batch_size, 1, 
+              "Number of image in the whole batch");
 DEFINE_bool(test_loadfromtext, false,
               "Test loading network model from .prototxt");
-DEFINE_bool(test_conv, false,
-              "Test convolution layer using a random image");
-DEFINE_bool(test_deconv, false,
-              "Test deconvolution layer using a random image");
 DEFINE_bool(test_net, false,
               "Run the whole network using the image and weights supplied.");
 
@@ -88,25 +75,20 @@ main(int argc, char *argv[])
   string train_val_path     = FLAGS_train_val_path;
   string trained_model_path = FLAGS_trained_model_path;
 
+  /* Make room at compile time */
   NetParameter net_model;
 
-  if (FLAGS_test_all || FLAGS_test_loadfromtext)
-    test_LoadFromTextFile(train_val_path, &net_model);
+  /* the prototxt is really useless b/c it doesn't include the weights
+   * nor does it offer additional info over the .caffemodel file so we are
+   * overwriting the net_model variable */
+  if (FLAGS_test_loadfromtext)
+    TestLoadFromTextFile(train_val_path, &net_model);
   
-  /* The model has to be loaded no matter what */
-  test_LoadFromBinaryFile(trained_model_path, &net_model);
+  /* The model has to be loaded no matter what and  */
+  TestLoadFromBinaryFile(trained_model_path, &net_model);
 
-  //if (FLAGS_test_all || FLAGS_test_conv)
-  //  test_convolution(image_path, &net_model);
-
-  //if (FLAGS_test_all || FLAGS_test_deconv)
-  //  test_deconvolution(&net_model);
-
-  if (FLAGS_test_all || FLAGS_test_net)
-    TestNet(image_path, &net_model, FLAGS_batch_size, FLAGS_iterations);
- 
-  /* legacy test */
-  // test_im2col(image_path);
+  /* Run the whole net */
+  TestNet(image_path, &net_model, FLAGS_batch_size, FLAGS_iterations);
 
   return 0;
 }

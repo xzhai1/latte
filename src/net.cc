@@ -9,7 +9,7 @@
 #include "layers/vision_layers.h"
 #include "layers/activation_layers.h"
 #include "layers/common_layers.h"
-#include "layers/loss_layers.h"
+//#include "layers/loss_layers.h"
 
 #include "net.h"
 
@@ -19,6 +19,7 @@ using namespace std;
 using namespace caffe;
 using namespace Halide;
 
+#if 0
 /**
  * @brief Data layer is just a dummy layer to hold the image that comes in so
  * we can bootstrap the whole net
@@ -36,6 +37,7 @@ class Data : public Layer {
         storage(i, j, k, l) = img(i, j, k, l);
     }
 };
+#endif
 
 static Layer *
 build_convlayer(LayerParameter *layer, Layer *prev)

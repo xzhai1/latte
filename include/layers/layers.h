@@ -27,9 +27,6 @@ class Layer {
   protected:
   	void set_name(std::string layer_name) {name = layer_name;}
   	void set_type(std::string layer_type) {type = layer_type;}
-    void set_width    (int w) {width = w;}
-    void set_height   (int h) {height = h;}
-    void set_channels (int c) {channels = c;}
     void set_output_dim(int w, int h, int c, int n) {
       width    = w;
       height   = h;
@@ -69,11 +66,11 @@ class Layer {
   	std::string name;
   	std::string type;
     
-    /* Layer outout dimensions */
+    /* Layer output dimensions */
     int width; 
     int height; 
     int channels; 
-    int batchsize;      /* Batch size */
+    int batchsize;
   	Layer *next;
 };
 

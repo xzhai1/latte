@@ -10,7 +10,6 @@
 #include "layers/vision_layers.h"
 #include "layers/activation_layers.h"
 #include "layers/common_layers.h"
-#include "layers/loss_layers.h"
 
 #include "io_utils.h"
 #include "net.h"

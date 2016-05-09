@@ -8,14 +8,27 @@
 
 namespace Latte {
 
-class Crop;
-class Dropout;
-class Split;
-class Silence;
+/**
+ * @brief Data layer is just a dummy layer to hold the image that comes in so
+ * we can bootstrap the whole net
+ */
+class Data : public Layer {
+  public:
+    Data(std::string name,
+         int width,
+         int height,
+         int channels,
+         int num,
+         Halide::ImageParam img)
+      :Layer(name, DATA, img) {
+        set_output_dim(width, height, channels, num);
+        storage(i, j, k, l) = img(i, j, k, l);
+    }
+};
 
 /**
- * @brief Crop layer
- * TODO  spatial crop
+ * @brief Crop layer restores the result output deconv layer back to the same
+ * dimension as the input image
  */
 class Crop : public Layer {
   int offset_i;
@@ -38,32 +51,6 @@ class Crop : public Layer {
     }
 };
 
-/**
- * @brief Dropout layer
- * TODO explain what this does
- */
-class Dropout : public Layer {
-    float dropout_ratio = 0.5f;
-  public:
-    Dropout(std::string layer_name, const caffe::DropoutParameter *param);
-};
-
-/**
- * @brief NOOP
- */
-class Split : public Layer {
-  public:
-    Split(std::string name);
-};
-
-/**
- * @brief Silence layer
- * TODO NOPS
- */
-class Silence : public Layer {
-  public:
-    Silence(std::string layer_name);
-};
 
 } /* namespace latte */
 

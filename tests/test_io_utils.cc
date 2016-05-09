@@ -2,6 +2,8 @@
 #include <fstream>
 #include "caffe.pb.h"
 
+#include <glog/logging.h>  /* Google's logging module */
+
 #include "layers/layers.h"
 #include "tests.h"
 #include "io_utils.h"
@@ -15,85 +17,51 @@ using namespace Halide;
 using namespace Halide::Tools;
 using namespace Latte;
 
-#if 0
-static void
-SaveLoadedKernel(const NetParameter *net)
-{
-  /* The first conv layer */
-  //int layer_idx = 3;
-  int input_channels = 3;
-  //const LayerParameter layer = net->layer(layer_idx);
-  const V1LayerParameter layer = net->layers(0);
-  ConvolutionParameter conv_param = layer.convolution_param();
-  string layer_name = layer.name();
-
-  int kernel_size = conv_param.kernel_size(0);
-  int num_output = conv_param.num_output();
-  BlobProto weight_blob = layer.blobs(0);
-  Image<float> kernel = LoadKernelFromBlob(
-      &weight_blob, kernel_size, num_output);
-
-  int k_width = kernel.width();
-  int k_height = kernel.height();
- 
-  /* TODO we know kernel size and input depth */
-  Image<float> filter(kernel_size, kernel_size, input_channels);
-
-  /* Loop through the kernel and save filters */
-  for (int k = 0; k < num_output; k++) {
-    string k_path = "./outputs/" + layer_name + "_kernel" + to_string(k) + ".png";
-    for (int c = 0; c < input_channels; c++) {
-      for (int j = 0; j < k_height; j++) {
-        for (int i = 0; i < k_width; i++) {
-          filter(i, j, c) = kernel(i, j, k*input_channels + c);
-        }
-      }
-    }
-    save_image(filter, k_path);
-  }
-}
-#endif
-
+/**
+ * @brief ListTxtLayer Display layers loaded in from prototxt 
+ *
+ * @param net
+ */
 static void 
 ListTxtLayer(const NetParameter *net) 
 {
-  cout << "name" << "\t" << "type" << endl;
+  LOG(INFO) << "Name" << "\t" << "Type";
   for (int i = 0; i < net->layer_size(); i++) {
     const LayerParameter layer = net->layer(i);
-    cout << layer.name() << "\t" 
-         << layer.type() << endl;
-  }
-}
-
-static void 
-ListBinaryLayerLegacy(const NetParameter *net) 
-{
-  cout << "name" << "\t\t\t" << "type" << "\t" 
-       << "num_output" << "\t" << "pad" << "\t" << "kernel_size" 
-       << "\t" << "stride" << endl;
-  int layer_size = net->layers_size();
-
-  for (int i = 0; i < layer_size; i++) {
-    const V1LayerParameter layer = net->layers(i);
-    string name = layer.name();
-    cout << name << "\t" << endl;
+    LOG(INFO) << layer.name() << "\t" << layer.type();
   }
 }
 
 
+/**
+ * @brief ListBinaryLayer Display layers loaded in from .caffemodel
+ * It prints out number of outputs, pad, kernel size and stride for layers
+ * that have them
+ *
+ * @param net   the model loaded in from .caffemodel
+ * @param fpath the path from which it is loaded
+ */
 static void 
-ListBinaryLayer(const NetParameter *net) 
+ListBinaryLayer(const NetParameter *net, string fpath) 
 {
-  cout << "name" << "\t\t\t" << "type" << "\t" 
-       << "num_output" << "\t" << "pad" << "\t" << "kernel_size" 
-       << "\t" << "stride" << endl;
+  LOG(INFO) << "-------------------------------------------------------------"
+    "--------"; 
+  LOG(INFO) << "|" << fpath << "|";
+  LOG(INFO) << "| has these layers and parameters                            "
+    "       |";
+  LOG(INFO) << "-------------------------------------------------------------"
+    "--------"; 
+  LOG(INFO) << "Name" << "\t\t" << "Type" << "\t\t" 
+            << "num_output" << "\t" << "pad" << "\t" << "kernel_size" 
+            << "\t" << "stride";
+
   int layer_size = net->layer_size();
-
   for (int i = 0; i < layer_size; i++) {
     const LayerParameter layer = net->layer(i);
-
     string name = layer.name();
     string type = layer.type();
+
+    /* Some layers don't have the information we needed */
     if (type == CONVOLUTION || type == DECONVOLUTION) {
       ConvolutionParameter conv_param = layer.convolution_param();
       int kernel_size = conv_param.kernel_size(0);
@@ -106,9 +74,16 @@ ListBinaryLayer(const NetParameter *net)
       if (conv_param.stride_size()) {
         stride = conv_param.stride(0);
       }
-      cout << name << "\t\t\t" << type << "\t" 
-           << num_output << "\t" << pad << "\t" << kernel_size 
-           << "\t" << stride << endl;
+
+      if (name.length() > 5)
+        LOG(INFO) << name << "\t" << type << "\t" 
+                  << num_output << "\t\t" << pad << "\t" << kernel_size 
+                  << "\t\t" << stride << endl;
+      else
+        LOG(INFO) << name << "\t\t" << type << "\t" 
+                  << num_output << "\t\t" << pad << "\t" << kernel_size 
+                  << "\t\t" << stride << endl;
+
     } else if (type == POOLING) {
       PoolingParameter pool_param = layer.pooling_param();
       int kernel_size = 1;
@@ -123,22 +98,25 @@ ListBinaryLayer(const NetParameter *net)
       if (pool_param.has_stride()) {
         stride = pool_param.stride();
       }
-      cout << name << "\t\t\t" << type << "\t" 
-           << "---" << "\t" << pad << "\t" << kernel_size 
-           << "\t" << stride << endl;
+      LOG(INFO) << name << "\t\t" << type << "\t\t" 
+                << "---" << "\t\t" << pad << "\t" << kernel_size 
+                << "\t\t" << stride << endl;
 
-    } else {
-      cout << name << "\t\t\t" << type << endl;
+    } else if (type != SPLIT) {
+      if (name.length() > 5)
+        LOG(INFO) << name << "\t" << type << endl;
+      else
+        LOG(INFO) << name << "\t\t" << type << endl;
     }
   }
 }
 
 bool
-test_LoadFromTextFile(string fpath, NetParameter *net_model) 
+TestLoadFromTextFile(string fpath, NetParameter *net_model) 
 {
-  cout << "Loading prototxt from " << fpath << endl;
+  LOG(INFO) << "Loading prototxt from " << fpath;
   if (!LoadFromTextFile(fpath, net_model)) {
-    cerr << "test_LoadFromTextFile failed" << endl;
+    LOG(FATAL )<< "test_LoadFromTextFile failed";
     return false;
   }
   ListTxtLayer(net_model);
@@ -146,18 +124,13 @@ test_LoadFromTextFile(string fpath, NetParameter *net_model)
 }
 
 bool
-test_LoadFromBinaryFile(string fpath, NetParameter *net_model) 
+TestLoadFromBinaryFile(string fpath, NetParameter *net_model) 
 {
-  cout << "Loading trained binary file from " << fpath << endl;
+  LOG(INFO) << "Loading trained binary file from " << fpath;
   if (!LoadFromBinaryFile(fpath, net_model)) {
-    cerr << "test_LoadFromBinaryFile failed" << endl;
+    LOG(FATAL) << "test_LoadFromBinaryFile failed" << endl;
     return false;
   }
-  if (net_model->layer_size() == 0) {
-    ListBinaryLayerLegacy(net_model);
-  } else {
-    ListBinaryLayer(net_model);
-  }
-  //SaveLoadedKernel(net_model);
+  ListBinaryLayer(net_model, fpath);
   return true;
 }
