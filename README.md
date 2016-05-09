@@ -211,14 +211,15 @@ You also need to let the system know where your ``libcaffe.so`` is:
 
 And then you can run the same test upstairs.
 
-### First convolved result
-For RGB image  
-![alt text] (https://github.com/xzhai1/latte/blob/master/images/rgb.png)  
-the visualization of scaled feature maps from last conv layer is  
-![alt text] (https://github.com/xzhai1/latte/blob/master/images/conv_result.png)  
+### Deconvolution and segmentation result
+For cute ``cat.png``   
+![alt text] (https://raw.githubusercontent.com/xzhai1/latte/master/images/cat.png)  
 the visualization of scaled feature maps from deconv layer is  
-![alt text] (https://github.com/xzhai1/latte/blob/master/images/deconv_result.png)  
+![alt text] (https://github.com/xzhai1/latte/blob/master/images/cat_deconv_result.png)  
 segmentation result is  
-![alt text] (https://github.com/xzhai1/latte/blob/master/images/seg_result.png)  
+![alt text] (https://github.com/xzhai1/latte/blob/master/images/cat_seg_result.png)  
 
-For 500x500x3 input image, it currently takes Halide version 8.116 ms seconds to run through the pipeline on CPU. It takes Caffe version around 6 seconds to run through the net on CPU.
+|   |Halide   |Caffe   |
+|:---:|:---:|:---:|
+|Best inference time (s)   | 2.849 | 4.201 |
+|Peak memory usage (GB) | 1.472 | 4.8 |
