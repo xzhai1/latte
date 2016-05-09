@@ -215,7 +215,7 @@ And then you can run the same test upstairs.
 For cute ``cat.png``   
 ![alt text] (https://raw.githubusercontent.com/xzhai1/latte/master/images/cat.png)  
 the visualization of scaled feature maps from deconv layer is  
-![alt text] (https://github.com/xzhai1/latte/blob/master/images/cat_deconv_result.png)  
+![alt text] (https://github.com/xzhai1/latte/blob/master/images/cat_deconv_results.png)  
 segmentation result is  
 ![alt text] (https://github.com/xzhai1/latte/blob/master/images/cat_seg_result.png)  
 
