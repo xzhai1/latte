@@ -8,112 +8,49 @@
 
 namespace Latte {
 
-class Crop;
-class Dropout;
-class Split;
-class Silence;
+/**
+ * @brief Data layer is just a dummy layer to hold the image that comes in so
+ * we can bootstrap the whole net
+ */
+class Data : public Layer {
+  public:
+    Data(std::string name,
+         int width,
+         int height,
+         int channels,
+         int num,
+         Halide::ImageParam img)
+      :Layer(name, DATA, img) {
+        set_output_dim(width, height, channels, num);
+        storage(i, j, k, l) = img(i, j, k, l);
+    }
+};
 
 /**
- * @brief Crop layer
- * TODO  spatial crop
+ * @brief Crop layer restores the result output deconv layer back to the same
+ * dimension as the input image
  */
 class Crop : public Layer {
   int offset_i;
   int offset_j;
-
   public:
-    /**
-     * @brief Crop
-     *
-     * @param layer_name Name given in the model
-     * @param param      Parsed CropParameter from the caffemodel
-     */
-    Crop(std::string name, const caffe::CropParameter *param);
+    Crop(std::string name, 
+         Layer *prev,
+         const caffe::CropParameter *param, 
+         int input_width, int input_height);
 
-    /**
-     * @brief crop Performs cropping in x and y dimesion on both sides
-     *
-     * @param input Input from previous stage
-     *
-     * @return Input to next stage
-     */
-    // Halide::Image<float> run(Halide::Image<float> input);
-    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num);
+    void SetOutputDim(const Layer *prev) {
+      /* Output dimension */
+      int output_width    = prev->get_width() - 2*offset_i;
+      int output_height   = prev->get_height()- 2*offset_j;
+      int output_channels = prev->get_channels();
+      int batch_size      = prev->get_batchsize();
+
+      /* Set output dimension */
+      set_output_dim(output_width, output_height, output_channels, batch_size);
+    }
 };
 
-/**
- * @brief Dropout layer
- * TODO explain what this does
- */
-class Dropout : public Layer {
-    float dropout_ratio = 0.5f;
-
-  public:
-    /**
-     * @brief Dropout
-     *
-     * @param layer_name Name given in the model
-     * @param param      Parsed DropoutParameter from the caffemodel
-     */
-    Dropout(std::string layer_name, const caffe::DropoutParameter *param);
-
-    /**
-     * @brief dropout 
-     *
-     * @param input Input from previous stage
-     *
-     * @return Input to next stage
-     */
-    // Halide::Image<float> run(Halide::Image<float> input);
-    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num, bool eval = true);
-};
-
-/**
- * @brief NOOP
- */
-class Split : public Layer {
-  public:
-    /**
-     * @brief Split 
-     *
-     * @param name
-     */
-    Split(std::string name);
-
-    /**
-     * @brief split 
-     *
-     * @param input
-     *
-     * @return 
-     */
-    // Halide::Image<float> run(Halide::Image<float> input);
-     Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num, bool eval = true);
-};
-
-/**
- * @brief Silence layer
- * TODO NOPS
- */
-class Silence : public Layer {
-  public:
-    /**
-     * @brief Silence 
-     *
-     * @param layer_name
-     */
-    Silence(std::string layer_name);
-
-    /**
-     * @brief silence NOOP
-     *
-     * @param input
-     *
-     * @return 
-     */
-    // Halide::Image<float> run(Halide::Image<float> input);
-     Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num, bool eval = true);
-};
 
 } /* namespace latte */
 

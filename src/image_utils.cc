@@ -60,11 +60,13 @@ col2im(Image<float> output, int kernel_size, int pad, int stride,
   int input_height  = (height + 2 * pad - kernel_size) / stride + 1;
   int input_channels = channels;
 
+#if 0
   int x_steps = (input_width  + 2*pad - kernel_size)/stride + 1;
   int y_steps = (input_height + 2*pad - kernel_size)/stride + 1;
 
   int output_width = output.width();
   int output_height = output.height();
+#endif
 
   /* Initialize output */
   Image<float> input(input_width, input_height, input_channels);

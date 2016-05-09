@@ -10,21 +10,25 @@ namespace Latte {
 
 class Net {
     Layer *head = NULL;
+    Layer *tail = NULL;
 
   public:
-    Net(caffe::NetParameter *net_model);
+    int input_width;
+    int input_height;
+    Net(caffe::NetParameter *net_model,
+        Halide::Image<float> img);
     ~Net() {}
 
     /**
      * @brief print_net Prints the network for debugging
      */
-    void print_net();
+    void PrintNet();
 
     /**
      * @brief run Triggers the cascade of operations that
      * produce the final image
      */
-    Halide::Image<float> run(Halide::Image<float> input);
+    Halide::Image<float> Run(Halide::Image<float> input, int iterations);
 };
 
 } /* namespace Latte */

@@ -13,93 +13,65 @@ class Pooling;
 class Deconvolution;
 
 /**
- * @brief Convolution Layer
+ * @brief Convolution Layer reduces the area under the kernel by doing the dot
+ * product.
  */
 class Convolution : public Layer {
-  /* Default values */
-  int  pad    = 0;
-  int  stride = 1;
-
-  /* Filled in values */
+  int pad    = 0;
+  int stride = 1;
   int num_output, kernel_size;
   Halide::Image<float> kernel, bias;
 
-  Halide::Func kernel_func, bias_func;
-
   public:
-    /**
-     * @brief Convolution Constructor for convolution layer.
-     *
-     * Parse the relevant information from protobuf parameter and construct 
-     * the convolution kernel and bias. The weights and bias data is a single 
-     * array stored in row major order. 
-     *
-     * @param layer_name Name given in the model
-     * @param param      Parsed ConvolutionParameter
-     * @param weights    Weight BlobProto
-     * @param bias_blob  Bias BlobProto
-     */
     Convolution(std::string layer_name, 
+                Layer *prev,
                 const caffe::ConvolutionParameter *param, 
                 const caffe::BlobProto *weights, 
                 const caffe::BlobProto *bias_blob);
-   
-    /**
-     * @brief SerialConv performs plain vanilla convolution with for loops.
-     *
-     * This serves as a correctness check for the Halide version
-     *
-     * @param input
-     *
-     * @return 
-     */
-    Halide::Image<float> SerialConv(Halide::Image<float> input);
 
-    /**
-     * @brief run Perform convolution on image
-     *
-     * @param input Input image
-     *
-     * @return post convolution result
-     */
-    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num);
+    void SetOutputDim(const Layer *prev) {
+      /* Input dimension */
+      int input_width    = prev->get_width();
+      int input_height   = prev->get_height();
+      int batch_size     = prev->get_batchsize();
+
+      /* Output dimension */
+      int output_width    = (input_width  - kernel_size + 2*pad)/stride + 1;
+      int output_height   = (input_height - kernel_size + 2*pad)/stride + 1;
+      int output_channels = num_output;
+
+      /* Set output dimension */
+      set_output_dim(output_width, output_height, output_channels, batch_size);
+    }
 };
 
 /**
- * @brief Pooling layer reduces the image over a kernel using a function. In
- * this case, max is taken over the kernel with zero padding.
+ * @brief Pooling layer reduces the image over a kernel using a function. 
+ * In this case, max is taken over the kernel with zero padding.
  */
 class Pooling : public Layer {
-    int kernel_size = 2;
-    int stride      = 1;
+  int stride = 1;
+  int kernel_size;
+
   public:
-    /**
-     * @brief Pooling 
-     *
-     * @param layer_name Name given in the model
-     * @param param      Parsed PoolingParameter from the caffemodel
-     */
-    Pooling(std::string layer_name, const caffe::PoolingParameter *param);
+    Pooling(std::string layer_name, Layer *prev,
+        const caffe::PoolingParameter *param);
+    
+    void SetOutputDim(const Layer *prev) {
+      /* Input dimension */
+      int input_width    = prev->get_width();
+      int input_height   = prev->get_height();
+      int input_channels = prev->get_channels();
+      int batch_size     = prev->get_batchsize();
 
-    /**
-     * @brief SerialPool performs plain vanilla pooling with for loops.
-     *
-     * This serves as a correctness check for the Halide version
-     *
-     * @param input
-     *
-     * @return 
-     */
-    Halide::Image<float> SerialPool(Halide::Image<float> input);
+      /* Output dimension */
+      int output_width    = (input_width  - kernel_size)/stride + 1;
+      int output_height   = (input_height - kernel_size)/stride + 1;
+      int output_channels = input_channels;
 
-    /**
-     * @brief pool Perform max pooling over kernel for each channel
-     *
-     * @param input Input from previous stage
-     *
-     * @return Input for next stage
-     */
-    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num);
+      /* Set output dimension */
+      set_output_dim(output_width, output_height, output_channels, batch_size);
+    }
 };
 
 /**
@@ -107,19 +79,32 @@ class Pooling : public Layer {
  * TODO explain
  */
 class Deconvolution : public Layer {
+  int stride = 1;
   int kernel_size;
-  int stride;
   int num_output;
-  Halide::Image<float> bias;
-  Halide::Image<float> kernel;
+  Halide::Image<float> bias, kernel;
 
   public:
     Deconvolution(std::string layer_name, 
+                  Layer *prev,
                   const caffe::ConvolutionParameter *param,
                   const caffe::BlobProto *kernel_blob, 
                   const caffe::BlobProto *bias_blob);
-    Halide::Image<float> run(Halide::Image<float> input);
-    Halide::Func run(Halide::Func input, int input_width, int input_height, int input_channels, int input_num);
+
+    void SetOutputDim(const Layer *prev) {
+      /* Input dimension */
+      int input_width    = prev->get_width();
+      int input_height   = prev->get_height();
+      int batch_size     = prev->get_batchsize();
+
+      /* Output dimension */
+      int output_width    = kernel_size + (input_width  - 1)*stride;
+      int output_height   = kernel_size + (input_height - 1)*stride;
+      int output_channels = num_output;
+
+      /* Set output dimension */
+      set_output_dim(output_width, output_height, output_channels, batch_size);
+    }
 };
 
 } /* namespace latte */

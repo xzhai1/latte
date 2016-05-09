@@ -1,16 +1,15 @@
-#include <iostream>
 #include <string>
 
+#include <glog/logging.h>
+#include "CycleTimer.h"
 #include "caffe.pb.h"
 #include "Halide.h"
-
-#include "CycleTimer.h"
 
 #include "layers/layers.h"
 #include "layers/vision_layers.h"
 #include "layers/activation_layers.h"
 #include "layers/common_layers.h"
-#include "layers/loss_layers.h"
+//#include "layers/loss_layers.h"
 
 #include "net.h"
 
@@ -20,15 +19,28 @@ using namespace std;
 using namespace caffe;
 using namespace Halide;
 
+#if 0
 /**
- * @brief build_convlayer 
- *
- * @param layer
- *
- * @return 
+ * @brief Data layer is just a dummy layer to hold the image that comes in so
+ * we can bootstrap the whole net
  */
+class Data : public Layer {
+  public:
+    Data(std::string name, 
+         int width, 
+         int height, 
+         int channels, 
+         int num, 
+         ImageParam img)
+      :Layer(name, DATA, img) {
+        set_output_dim(width, height, channels, num);
+        storage(i, j, k, l) = img(i, j, k, l);
+    }
+};
+#endif
+
 static Layer *
-build_convlayer(LayerParameter *layer)
+build_convlayer(LayerParameter *layer, Layer *prev)
 {
   ConvolutionParameter conv_param = layer->convolution_param();
   BlobProto weight_blob = layer->blobs(0);
@@ -38,23 +50,18 @@ build_convlayer(LayerParameter *layer)
   /* Not all convolution layers have bias term */
   if (conv_param.has_bias_term()) {
     BlobProto bias_blob = layer->blobs(1);
-    conv_layer = new Convolution(name, &conv_param, &weight_blob, &bias_blob);
+    conv_layer = new Convolution(name, prev, 
+        &conv_param, &weight_blob, &bias_blob);
   } else {
-    conv_layer = new Convolution(name, &conv_param, &weight_blob, NULL);
+    conv_layer = new Convolution(name, prev, 
+        &conv_param, &weight_blob, NULL);
   }
 
   return conv_layer;
 }
 
-/**
- * @brief build_deconvlayer 
- *
- * @param layer
- *
- * @return 
- */
 static Layer *
-build_deconvlayer(LayerParameter *layer)
+build_deconvlayer(LayerParameter *layer, Layer *prev)
 {
   ConvolutionParameter deconv_param = layer->convolution_param();
   BlobProto weight_blob = layer->blobs(0);
@@ -62,89 +69,63 @@ build_deconvlayer(LayerParameter *layer)
   Deconvolution *deconv_layer;
 
   /* Not all convolution layers have bias term */
-  /* TODO deconv_param.has_bias_term() says true but blobs only has weights */
-  deconv_layer = new Deconvolution(name, &deconv_param, &weight_blob, NULL);
+  deconv_layer = new Deconvolution(name, prev, 
+      &deconv_param, &weight_blob, NULL);
   return deconv_layer;
 }
 
-/**
- * @brief build_relulayer 
- *
- * @param layer
- *
- * @return 
- */
 static Layer *
-build_relulayer(LayerParameter *layer)
+build_relulayer(LayerParameter *layer, Layer *prev)
 {
   ReLUParameter relu_param = layer->relu_param();
   string name = layer->name();
-  ReLU *relu_layer = new ReLU(name, &relu_param);
+  ReLU *relu_layer = new ReLU(name, prev, &relu_param);
   return relu_layer;
 }
 
-/**
- * @brief build_poollayer 
- *
- * @param layer
- *
- * @return 
- */
 static Layer *
-build_poollayer(LayerParameter *layer)
+build_poollayer(LayerParameter *layer, Layer *prev)
 {
   PoolingParameter pool_param = layer->pooling_param();
   string name = layer->name();
-  Pooling *pool_layer = new Pooling(name, &pool_param);
+  Pooling *pool_layer = new Pooling(name, prev, &pool_param);
   return pool_layer;
 }
 
-/**
- * @brief build_dropoutlayer 
- *
- * @param layer
- *
- * @return 
- */
 static Layer *
-build_dropoutlayer(LayerParameter *layer)
+build_croplayer(LayerParameter *layer, 
+                Layer *prev, 
+                int input_width, 
+                int input_height)
 {
-  DropoutParameter drop_param = layer->dropout_param();
+  CropParameter crop_param = layer->crop_param();
   string name = layer->name();
-  Dropout *dropout_layer = new Dropout(name, &drop_param);
-  return dropout_layer;
+  Crop *crop_layer = new Crop(name, prev, &crop_param, 
+      input_width, input_height);
+  return crop_layer;
 }
 
-/**
- * @brief build_softmaxlayer 
- *
- * @param layer
- *
- * @return 
- */
-static Layer *
-build_softmaxlayer(LayerParameter *layer)
-{
-  string name = layer->name();
-  Softmax *softmax_layer = new Softmax(name);
-  return softmax_layer;
-}
-
-/**
- * @brief Net 
- *
- * @param net_model
- */
-Net::Net(NetParameter *net_model)
+Net::Net(NetParameter *net_model, Image<float> img)
 {
   int count = 0;
   Layer *prev_layer = NULL;
-  Layer *curr_layer = NULL;
+
+  /* First layer is DATA */
+  ImageParam input(type_of<float>(), 4);
+  input.set(img);
+  Layer *curr_layer = 
+    new Data("Data", 
+             img.extent(0), 
+             img.extent(1), 
+             img.extent(2), 
+             img.extent(3), 
+             input);
+
+  /* remeber the input size */
+  input_width = img.extent(0);
+  input_height = img.extent(1);
+
   int num_layers = net_model->layer_size();
-
-  //cout << "name \taddr" << endl;
-
-  /* TODO we are cheating here */
   for (int i = 0; i < num_layers; i++) {
     LayerParameter layer = net_model->layer(i);
     string name = layer.name();
@@ -153,42 +134,34 @@ Net::Net(NetParameter *net_model)
     /* TODO hack to indicate we only care about the following layers */
     bool hit = false;
 
-    /* TODO we are ignoring a couple of types here */
     if (type == CONVOLUTION) {
-      //count++;
-      //if (count == 3) break;
-      curr_layer = build_convlayer(&layer);
+      // count++;
+      //if (count == 5) break;
+      curr_layer = build_convlayer(&layer, curr_layer);
       hit = true;
     }
     else if (type == DECONVOLUTION) {
-      curr_layer = build_deconvlayer(&layer);
+      curr_layer = build_deconvlayer(&layer, curr_layer);
+      hit = true;
+    }
+    else if (type == RELU) {
+      // count++;
+      //if (count == 14) break;
+      curr_layer = build_relulayer(&layer, curr_layer);
+      hit = true;
+    } else if (type == POOLING) {
+      // count++;
+      curr_layer = build_poollayer(&layer, curr_layer);
+      hit = true;
+    } else if (type == CROP) {
+      curr_layer = build_croplayer(
+          &layer, curr_layer, input_width, input_height);
       hit = true;
     }
 
-    else if (type == RELU) {
-      //count++;
-      //if (count == 14) break;
-      curr_layer = build_relulayer(&layer);
-      hit = true;
-    } else if (type == POOLING) {
-      curr_layer = build_poollayer(&layer);
-      hit = true;
-    } 
-    #if 0
-    else if (type == DROPOUT) {
-      curr_layer = build_dropoutlayer(&layer);
-      hit = true;
-    } 
-    #endif
-    #if 0
-    else if (type == SOFTMAX) {
-      curr_layer = build_softmaxlayer(&layer);
-      hit = true;
-    }
-    #endif
-  
     if (hit) {
-      //cout << name << "\t" << curr_layer << endl;
+      count++;
+
       /* On entry, update head */
       if (!head)
         head = curr_layer;
@@ -197,81 +170,79 @@ Net::Net(NetParameter *net_model)
       if (prev_layer)
         prev_layer->set_next(curr_layer);
       prev_layer = curr_layer;
-
-      // if (type == CONVOLUTION) break;
-      //if (count == 14) break;
     }
   }
+  tail = curr_layer;
 }
 
 void
-Net::print_net()
+Net::PrintNet()
 {
-  cout << "--------------------------------------------" << endl;
-  cout << "Network has the following layers" << endl;
-  cout << "--------------------------------------------" << endl;
-  cout << "name" << "\t\t\t" << "type" << endl;
+  LOG(INFO) << "--------------------------------------------";
+  LOG(INFO) << "|     Network has the following layers     |";
+  LOG(INFO) << "--------------------------------------------";
+  LOG(INFO) << "Name" << "\t\t\t" << "Type";
+  LOG(INFO) << "--------------------------------------------";
   for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
-    cout << ptr->get_name() << "\t\t\t" << ptr->get_type() << endl;
+    if (ptr->get_name().length() >= 8)
+      LOG(INFO) << ptr->get_name() << "\t\t" << ptr->get_type();
+    else
+      LOG(INFO) << ptr->get_name() << "\t\t\t" << ptr->get_type();
   }
-  cout << "--------------------------------------------" << endl;
+  LOG(INFO) << "--------------------------------------------";
 }
 
 Image<float>
-Net::run(Image<float> input)
+Net::Run(Image<float> input, int iterations)
 {
-  /* Display input image dimension */
-  cout << "Input dimension [W, H, C, N]:"
-       << input.extent(0) << ", "
-       << input.extent(1) << ", "
-       << input.extent(2) << ", "
-       << input.extent(3)
-       << endl;
-
-  /* TODO each layer is supposed to call the next layer's run */
   double inferenceStartTime, inferenceEndTime, startTime, endTime;
-  Func prev_output(input);
-  Func curr_output;
-  int input_width     = input.extent(0); 
-  int input_height    = input.extent(1);
-  int input_channels  = input.extent(2);
-  int input_num       = input.extent(3);
-  //allStartTime = CycleTimer::currentSeconds();
-  for (Layer *ptr = head; ptr != NULL; ptr = ptr->get_next()) {
-    startTime = CycleTimer::currentSeconds();
-    cout << "Compiling ["
-      << ptr->get_name() << "," << ptr->get_type() << "]  " << endl;
+  startTime = CycleTimer::currentSeconds();
+  /* Display input image dimension */
+  LOG(INFO) << "Input dimension W x H x C x N : "
+            << input.extent(0) << " x "
+            << input.extent(1) << " x "
+            << input.extent(2) << " x "
+            << input.extent(3);
+  tail->storage.compile_jit();
+#if 0
+  /* compile in GPU */
+  Target target = get_host_target();
+  target.set_feature(Target::CUDA);
+  tail->storage.compile_jit(target);
+#endif
+  endTime = CycleTimer::currentSeconds();
 
-    curr_output = ptr->run(prev_output, input_width, input_height, input_channels, input_num);
-    curr_output.compile_jit();
+  LOG(INFO) << "Compile time: " << (endTime - startTime)*1000 << " ms";
 
-    /*
-    Target target = get_host_target();
-    target.set_feature(Target::OpenCL);
-    curr_output.compile_jit(target);
-    */
-    
+  /* Timing for inference */
+  Image<float> output;
+  /* Buffer for GPU timing */
+#if 0
+  Buffer output_buffer(Float(32), tail->get_width(),
+                                  tail->get_height(),
+                                  tail->get_channels(),
+                                  tail->get_batchsize());
+#endif
 
-    /* Get input dimension for next layer */
-    input_width     = ptr->get_width();
-    input_height    = ptr->get_height();
-    input_channels  = ptr->get_channels();
-    input_num       = ptr->get_num();
+  double duration = 1.f*24*60*60;
+  for (int t = 0; t < iterations; t++) {
+    inferenceStartTime = CycleTimer::currentSeconds();
+    output = tail->storage.realize(tail->get_width(), 
+                                   tail->get_height(), 
+                                   tail->get_channels(), 
+                                   tail->get_batchsize());
 
-    cout << "Dim(curr_output) = " << input_width << ", " << input_height << ", " << input_channels << endl;
-
-    endTime = CycleTimer::currentSeconds();
-    cout << "Compiling time: " << (endTime - startTime) * 1000 << " ms  " << endl;
-    prev_output = curr_output;
+#if 0
+    /* GPU realize */
+    tail->storage.realize(output_buffer);
+#endif
+    inferenceEndTime = CycleTimer::currentSeconds();
+    double currentDuration = inferenceEndTime - inferenceStartTime;
+    if (currentDuration < duration)
+      duration = currentDuration;
   }
-  
-  //curr_output.compile_jit();
-
-  inferenceStartTime = CycleTimer::currentSeconds();
-  Image<float> output = curr_output.realize(input_width, input_height, input_channels, input_num);
-  inferenceEndTime = CycleTimer::currentSeconds();
-  cout << "Inference time: " 
-       << (inferenceEndTime - inferenceStartTime) * 1000 << " ms  " << endl;
+  LOG(INFO) << "Inference time: " << duration*1000 << " ms";
+  //cout << duration * 1000 << endl;
 
   return output;
 }
