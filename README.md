@@ -130,7 +130,7 @@ Download caffe source and move two files from the assignment folder into caffe:
     mv ../caffe/bashrc_class .
     mv ../caffe/Makefile.config .
     
-Nothing left but to make:
+A word of warning: ``bashrc_class`` changes the paths to a lot of the libraries in the TA's home directory. He had an MKL license which is currently expired (at time of writing, 5/9/2016). You need to figure out a way to get that license or build it with atlas which won't spawn multiple threads to do matrix multiplication and therefore, you won't be able to reproduce our results. Nothing left but to make:
 
     source bashrc_class
     make
