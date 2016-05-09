@@ -239,7 +239,7 @@ Net::Run(Image<float> input, int iterations)
     if (currentDuration < duration)
       duration = currentDuration;
   }
-  LOG(INFO) << "Inference time: " << duration/iterations*1000 << " ms";
+  LOG(INFO) << "Inference time: " << duration*1000 << " ms";
   //cout << duration * 1000 << endl;
 
   return output;
