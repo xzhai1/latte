@@ -2,7 +2,7 @@
 CMU 15-418/618 Final Project: Implementing Fully Convolutional Network using Halide and evaluate against Caffe version
 
 ## Dependencies on Local Machine
-The following steps are necessary for a brand new machine; some might be unnecessary for you. If You are building on CMU SCS's Lateday node, go straight to the next section.
+The following steps are necessary for a brand new machine(tested on Ubuntu); some might be unnecessary for you. If you are building on CMU SCS's Lateday node, go straight to the Build section.
 
 ### Utilities
 Make sure you have the build tool chain:
@@ -18,7 +18,7 @@ You are going to need ``autoreconf`` for protobuf later:
     sudo apt-get install dh-autoreconf
     
 ### ``protobuf``
-Download ``protobuf``:
+Download it. It is a Google serialization library. Think type JSON. You need it to read in the caffe model and trained weights:
 
     wget https://github.com/google/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz
     tar -xvf protobuf-2.6.1.tar.gz
@@ -34,14 +34,14 @@ To compile and install it, you can follow the instruction [here](https://github.
 	sudo make install
 	sudo ldconfig
 
-Now, if you are doing this on a mahine with no root access, we will want to do the following:
+Now, if you are doing this on a mahine with no root access, you will want to do the following:
 
 	./configure --prefix=$HOME/protobuf
 	make
 	make check
 	make install
 
-If you installed it with the ``--prefix`` flag, you want to set the following environmental variable:
+If you installed it with the ``--prefix`` flag, you want to set the following environmental variable in your ``bashrc``:
 
 	export PKG_CONFIG_PATH=$HOME/protobuf/lib/pkgconfig
 	
@@ -81,7 +81,7 @@ If you are building on local:
 
     make -f Makefile-local -j8
 
-If you are buidling on Latedays:
+If you are buidling on ``latedays``. A word of warning for ``latedays`` node: the ``Makefile-latedays`` is a lot less flexible than ``Makefile-local`` in the sense that we have to hardcode in the path to the library that we are linking to, i.e. ``/home/15-418/``. All of those library are built from source without root access and they aren't "installed", i.e. they aren't under system path and we can't use ``pkg-config`` to find it and link them. One of these days, one of those folders might get cleaned up and deleted, and as a result, you might not be able to successfully make it.
 
     make -f Makefile-latedays -j8
     
@@ -95,13 +95,13 @@ Now you can use any or the following model to test:
 
     voc-fcn16s  voc-fcn32s  voc-fcn8s
     
-Because the trained caffe model is huge, they aren't in the folder. You need to download them; their url is in ``caffemodel-url``.
+Because the trained caffe model is huge, they aren't in the folder. You need to download them; their url is in ``caffemodel-url`` and you can just ``wget`` them.
 
-Set one last environmental vairable:
+Set one last environmental vairable in your ``bashrc``:
 
-	export LD_LIBRARY_PATH=/path/to/halide/bin/:/path/to/protobuf/lib/:${LD_LIBRARY_PATH}
+	export LD_LIBRARY_PATH=/opt/gcc/4.9.2/lib64:/path/to/halide/bin/:/path/to/protobuf/lib/:${LD_LIBRARY_PATH}
 
-Then you can run a test by invoking:
+and you can run a test by invoking:
 
 	./run_test.sh
 
@@ -112,10 +112,7 @@ If you want to see what command line options are available to you:
 	 ./test --image_path            image.png
 	        --train_val_path        train_val.prototxt
 	        --trained_model_path    trained_model.caffemodel
-	        --test_all
-	        --test_loadfromtest
-	        --test_conv
-	        --test_deconv
+	        --test_loadfromtext
 	        --test_net
 
 ## Install Caffe for Benchmarking
@@ -212,9 +209,7 @@ You also need to let the system know where your ``libcaffe.so`` is:
 
     export LD_LIBRARY_PATH=/path/to/build/libcaffe.so:$LD_LIBRARY_PATH
 
-Now, you can clone the FCN repo:
-
-    git clone https://github.com/shelhamer/fcn.berkeleyvision.org.git
+And then you can run the same test upstairs.
 
 ### First convolved result
 For RGB image  
