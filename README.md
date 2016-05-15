@@ -223,3 +223,5 @@ segmentation result is
 |:---:|:---:|:---:|
 |Best inference time (s)   | 2.849 | 4.201 |
 |Peak memory usage (GB) | 1.472 | 4.8 |
+
+[Project report website](http://haboric-hu.github.io/)
